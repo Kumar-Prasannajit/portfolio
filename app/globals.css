@@ -120,7 +120,7 @@ body {
 /* Boxes the whole page in a bordered frame; the diagonal hatch on <body>
    only shows through in the gutters outside it. */
 .site-frame {
-  max-width: 1320px;
+  max-width: 64rem; /* Tailwind's max-w-5xl (1024px) — matches the reference layout */
   min-height: 100vh;
   margin: 0 auto;
   background: var(--bg);
@@ -146,9 +146,11 @@ img {
 }
 
 .wrap {
-  max-width: 1180px;
+  /* No narrower cap than .site-frame — one shared container, like the
+     reference's single max-w-5xl class; padding alone gives the gutter. */
+  max-width: 64rem;
   margin: 0 auto;
-  padding: 0 clamp(20px, 4vw, 48px);
+  padding: 0 clamp(20px, 4vw, 40px);
 }
 .mono {
   font-family: var(--font-mono);
@@ -306,7 +308,7 @@ header.site-nav {
 
 /* ============ HERO ============ */
 .hero {
-  padding: clamp(56px, 9vw, 108px) 0 clamp(40px, 6vw, 64px);
+  padding: clamp(44px, 7vw, 84px) 0 clamp(32px, 5vw, 48px);
   overflow: hidden;
   position: relative;
 }
@@ -375,19 +377,19 @@ header.site-nav {
   text-transform: uppercase;
   line-height: 0.86;
   letter-spacing: -0.01em;
-  font-size: clamp(3rem, 10.6vw, 7.6rem);
-  margin: 0 0 28px;
+  font-size: clamp(2.4rem, 7.4vw, 5.4rem);
+  margin: 0 0 24px;
 }
 .hero h1 .l2 {
   color: var(--red);
 }
 
 .hero-sub {
-  font-size: clamp(1.02rem, 1.6vw, 1.24rem);
+  font-size: clamp(0.96rem, 1.2vw, 1.08rem);
   line-height: 1.6;
   color: var(--ink-dim);
   max-width: 46ch;
-  margin: 0 0 30px;
+  margin: 0 0 26px;
 }
 .hero-sub strong {
   color: var(--ink);
@@ -402,10 +404,10 @@ header.site-nav {
 }
 .meta-chip {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   border: 1px solid var(--border-2);
   border-radius: 999px;
-  padding: 7px 14px;
+  padding: 6px 12px;
   color: var(--ink-dim);
   background: var(--panel);
 }
@@ -421,11 +423,11 @@ header.site-nav {
   align-items: center;
   gap: 8px;
   font-family: var(--font-mono);
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   font-weight: 500;
   text-decoration: none;
-  padding: 13px 22px;
-  border-radius: 10px;
+  padding: 11px 18px;
+  border-radius: 9px;
   border: 1px solid transparent;
   cursor: pointer;
   transition:
@@ -452,8 +454,8 @@ header.site-nav {
   border-color: var(--red);
 }
 .btn-icon {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   padding: 0;
   justify-content: center;
   border: 1px solid var(--border-2);
@@ -465,8 +467,8 @@ header.site-nav {
   color: var(--ink);
 }
 .btn-icon svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 /* ============ MARQUEE ============ */
@@ -516,15 +518,15 @@ header.site-nav {
 
 /* ============ SECTION HEADINGS ============ */
 .section {
-  padding: clamp(56px, 8vw, 96px) 0;
+  padding: clamp(44px, 6vw, 72px) 0;
 }
 .h2 {
   font-family: var(--font-display);
   text-transform: uppercase;
-  font-size: clamp(1.9rem, 3.6vw, 2.9rem);
-  line-height: 1.02;
+  font-size: clamp(1.5rem, 2.6vw, 2.15rem);
+  line-height: 1.05;
   letter-spacing: -0.01em;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 /* ============ ABOUT ============ */
@@ -540,8 +542,8 @@ header.site-nav {
   }
 }
 .about-copy p {
-  font-size: 1.05rem;
-  line-height: 1.75;
+  font-size: 0.96rem;
+  line-height: 1.7;
   color: var(--ink-dim);
   max-width: 60ch;
   margin: 0 0 16px;
@@ -631,10 +633,10 @@ header.site-nav {
 }
 .pill {
   font-family: var(--font-mono);
-  font-size: 0.86rem;
+  font-size: 0.8rem;
   border: 1px solid var(--border-2);
-  border-radius: 9px;
-  padding: 9px 15px;
+  border-radius: 8px;
+  padding: 8px 13px;
   background: var(--panel);
   transition:
     border-color 0.15s ease,
@@ -688,7 +690,7 @@ header.site-nav {
   margin-bottom: 10px;
 }
 .tl-role {
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 700;
 }
 .tl-date {
@@ -757,7 +759,7 @@ header.site-nav {
   margin-bottom: 12px;
 }
 .card h3 {
-  font-size: 1.18rem;
+  font-size: 1.05rem;
   font-weight: 700;
 }
 .card p {
@@ -835,7 +837,7 @@ header.site-nav {
   margin-bottom: 22px;
 }
 .gh-total {
-  font-size: 1.3rem;
+  font-size: 1.15rem;
   font-weight: 700;
 }
 .gh-total span {
@@ -949,16 +951,16 @@ header.site-nav {
 .contact-h {
   font-family: var(--font-display);
   text-transform: uppercase;
-  font-size: clamp(2.4rem, 7vw, 5.2rem);
-  line-height: 0.94;
+  font-size: clamp(1.9rem, 5vw, 3.7rem);
+  line-height: 0.96;
   letter-spacing: -0.01em;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 .contact-sub {
-  font-size: 1.08rem;
+  font-size: 1rem;
   max-width: 52ch;
   opacity: 0.92;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
   line-height: 1.6;
 }
 .contact-band .btn-primary {
