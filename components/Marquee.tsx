@@ -5,10 +5,12 @@ export default function Marquee() {
   const items = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
   return (
     <div className="marquee-band" aria-hidden="true">
-      <div className="marquee-track mono">
-        {items.map((item, i) => (
-          <span key={i}>{item}</span>
-        ))}
+      <div className="marquee-clip">
+        <div className="marquee-track mono">
+          {items.map((item, i) => (
+            <span key={i}>{item}</span>
+          ))}
+        </div>
       </div>
     </div>
   );

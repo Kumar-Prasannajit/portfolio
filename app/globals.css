@@ -92,6 +92,9 @@
 }
 html {
   scroll-behavior: smooth;
+  /* The full-bleed divider lines below use width:100vw, which can be a
+     hair wider than the viewport when a scrollbar is present. */
+  overflow-x: hidden;
 }
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -174,11 +177,38 @@ img {
 section {
   position: relative;
 }
-.band {
-  border-top: 1px solid var(--border);
-}
 .band.alt {
   background: var(--panel);
+}
+
+/* ============ FULL-BLEED SECTION DIVIDERS ============ */
+/* Horizontal rules that span the full viewport width, escaping the
+   .site-frame's max-width via a pseudo-element positioned off its
+   section's own box — the section's background stays frame-width. */
+.band::before,
+.contact-band::before,
+.marquee-band::before,
+.marquee-band::after,
+header.site-nav::after,
+footer::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 100vw;
+  height: 2px;
+  transform: translateX(-50%);
+  background: var(--border);
+  pointer-events: none;
+}
+.band::before,
+.contact-band::before,
+.marquee-band::before,
+footer::before {
+  top: 0;
+}
+.marquee-band::after,
+header.site-nav::after {
+  bottom: 0;
 }
 
 /* ============ NAV ============ */
@@ -188,7 +218,6 @@ header.site-nav {
   z-index: 50;
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
 }
 .nav-inner {
   display: flex;
@@ -442,12 +471,13 @@ header.site-nav {
 
 /* ============ MARQUEE ============ */
 .marquee-band {
+  position: relative;
   background: var(--red);
   color: var(--red-ink);
+}
+.marquee-clip {
   overflow: hidden;
   white-space: nowrap;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
 }
 .marquee-track {
   display: inline-flex;
@@ -903,7 +933,6 @@ header.site-nav {
 
 /* ============ CONTACT ============ */
 .contact-band {
-  border-top: 1px solid var(--border);
   background: var(--red);
   color: var(--red-ink);
 }
@@ -967,8 +996,8 @@ header.site-nav {
 
 /* ============ FOOTER ============ */
 footer {
+  position: relative;
   padding: 26px 0;
-  border-top: 1px solid var(--border);
 }
 .foot-inner {
   display: flex;
