@@ -100,11 +100,29 @@ html {
 }
 body {
   margin: 0;
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--border) 0,
+    var(--border) 1px,
+    transparent 1px,
+    transparent 13px
+  );
   color: var(--ink);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   text-wrap: pretty;
+}
+
+/* Boxes the whole page in a bordered frame; the diagonal hatch on <body>
+   only shows through in the gutters outside it. */
+.site-frame {
+  max-width: 1320px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
 }
 h1,
 h2,
@@ -885,6 +903,7 @@ header.site-nav {
 
 /* ============ CONTACT ============ */
 .contact-band {
+  border-top: 1px solid var(--border);
   background: var(--red);
   color: var(--red-ink);
 }
