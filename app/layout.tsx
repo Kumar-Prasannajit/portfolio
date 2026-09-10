@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import { Archivo_Black, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
+import { SOCIAL_LINKS } from "@/lib/data";
+
+const SITE_URL = "https://kumarp.in";
+
+const SITE_NAME = "Kumar Prasannajit Sahu";
+const SITE_TITLE = "Kumar Prasannajit Sahu | Full-Stack Software Engineer";
+const SITE_DESCRIPTION =
+  "Portfolio of Kumar Prasannajit Sahu, a Full-Stack Software Engineer specializing in Python, Node.js, and Generative AI Applications (RAG Chatbots).";
 
 const archivoBlack = Archivo_Black({
   subsets: ["latin"],
@@ -24,9 +32,74 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Kumar Prasannajit",
-  description:
-    "Backend-leaning full-stack developer on the MERN stack — I ship REST APIs, booking platforms and the interfaces that sit on top of them, out of Odisha, India.",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  keywords: [
+    "Kumar Prasannajit Sahu",
+    "Kumar Prasannajit",
+    "Full Stack Developer Hyderabad",
+    "AIdeas Tech Solutions",
+    "RAG Chatbot developer",
+    "Python Engineer",
+  ],
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  creator: SITE_NAME,
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: SITE_URL,
+  },
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+};
+
+// Person schema: ties this domain to Kumar's real identity, job title and
+// location so Google can surface a rich result for searches on his name.
+const PERSON_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: SITE_NAME,
+  url: SITE_URL,
+  jobTitle: "Junior Software Engineer",
+  description: SITE_DESCRIPTION,
+  worksFor: {
+    "@type": "Organization",
+    name: "Aideas Tech Solutions Pvt. Ltd.",
+  },
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Hyderabad",
+    addressRegion: "Telangana",
+    addressCountry: "IN",
+  },
+  alumniOf: {
+    "@type": "CollegeOrUniversity",
+    name: "GIET University",
+  },
+  knowsAbout: [
+    "Python",
+    "Node.js",
+    "React",
+    "Next.js",
+    "Generative AI",
+    "RAG Chatbots",
+    "REST APIs",
+  ],
+  sameAs: [SOCIAL_LINKS.github, SOCIAL_LINKS.linkedin],
 };
 
 // Runs before paint to stamp the saved theme, avoiding a flash of the wrong palette.
@@ -53,6 +126,12 @@ export default function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(PERSON_JSON_LD).replace(/</g, "\\u003c"),
+          }}
+        />
       </head>
       <body>{children}</body>
     </html>

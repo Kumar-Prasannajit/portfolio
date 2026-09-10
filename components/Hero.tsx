@@ -70,10 +70,9 @@ export default function Hero() {
           </a>
           <a
             className="btn btn-ghost"
-            href="about:blank"
+            href="/Kumar_Prasannajit_Sahu.pdf"
             target="_blank"
             rel="noopener"
-            title="Resume — coming soon"
           >
             Resume
           </a>
