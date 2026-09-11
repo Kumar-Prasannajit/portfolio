@@ -1,4 +1,3 @@
-import { IconGithub, IconLinkedin } from "./icons";
 import { HERO_BINARY, SOCIAL_LINKS } from "@/lib/data";
 
 export default function Hero() {
@@ -61,38 +60,16 @@ export default function Hero() {
         </p>
         <div className="meta-row">
           <span className="meta-chip">[ ODISHA, IN ]</span>
-          <span className="meta-chip">[ AIDEAS TECH SOLUTIONS ]</span>
-          <span className="meta-chip">[ B.TECH ECE — GIET UNIVERSITY ]</span>
-        </div>
-        <div className="cta-row">
           <a className="btn btn-primary" href={`mailto:${SOCIAL_LINKS.email}`}>
             Get in touch
           </a>
           <a
             className="btn btn-ghost"
-            href="/Kumar_Prasannajit_Sahu.pdf"
+            href={SOCIAL_LINKS.resume}
             target="_blank"
             rel="noopener"
           >
             Resume
-          </a>
-          <a
-            className="btn btn-icon"
-            href={SOCIAL_LINKS.github}
-            target="_blank"
-            rel="noopener"
-            aria-label="GitHub"
-          >
-            <IconGithub />
-          </a>
-          <a
-            className="btn btn-icon"
-            href={SOCIAL_LINKS.linkedin}
-            target="_blank"
-            rel="noopener"
-            aria-label="LinkedIn"
-          >
-            <IconLinkedin />
           </a>
         </div>
       </div>

@@ -62,3 +62,97 @@ export function IconMoon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function IconGrid(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <rect x="4" y="4" width="6.5" height="6.5" rx="1.3" />
+      <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.3" />
+      <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.3" />
+      <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.3" />
+    </svg>
+  );
+}
+
+export function IconInstagram(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <rect x="2.5" y="2.5" width="19" height="19" rx="5" />
+      <circle cx="12" cy="12" r="4.3" />
+      <path d="M17.3 6.7h.01" />
+    </svg>
+  );
+}
+
+export function IconResume(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+      <path d="M14 2v6h6" />
+      <path d="M9 13h6M9 17h6" />
+    </svg>
+  );
+}
+
+export function IconMail(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <rect x="2.5" y="5" width="19" height="14" rx="2" />
+      <path d="m3 6.5 9 6.5 9-6.5" />
+    </svg>
+  );
+}
+
+// Half-filled circle used for the nav theme toggle, matching the wireframe's
+// plain split-circle glyph rather than a sun/moon pictogram.
+export function IconThemeCircle(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" {...props}>
+      {/* Solid half is always brand red — the button's `color` (currentColor)
+          only drives the outline, so this reads as an accent at rest, not
+          just on hover. */}
+      <path d="M12 2a10 10 0 0 0 0 20V2Z" fill="var(--red)" />
+      <circle cx="12" cy="12" r="9.25" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+export function IconCheck(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="m4 12 6 6L20 6" />
+    </svg>
+  );
+}

@@ -1,9 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { IconMoon, IconSun } from "./icons";
-import { NAV_LINKS } from "@/lib/data";
+import Image from "next/image";
+import {
+  IconCheck,
+  IconGithub,
+  IconInstagram,
+  IconLinkedin,
+  IconMail,
+  IconMoon,
+  IconResume,
+  IconSun,
+  IconThemeCircle,
+} from "./icons";
+import TaglineCycler from "./TaglineCycler";
+import { NAV_LINKS, NAV_LOGO_MARK, SOCIAL_LINKS } from "@/lib/data";
 
 type ViewTransitionDocument = Document & {
   startViewTransition?: (callback: () => void) => {
@@ -39,7 +51,9 @@ function effectiveTheme(): "light" | "dark" {
 export default function Nav() {
   // Base design is dark-first by default, matching the original site behavior.
   const [isDark, setIsDark] = useState(true);
-  const [clockText, setClockText] = useState("--:-- IST");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Syncs React state from the theme actually in effect — an explicit
@@ -50,22 +64,34 @@ export default function Nav() {
   }, []);
 
   useEffect(() => {
-    function updateClock() {
-      try {
-        const fmt = new Intl.DateTimeFormat("en-US", {
-          timeZone: "Asia/Kolkata",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        });
-        setClockText(fmt.format(new Date()) + " IST");
-      } catch {
-        setClockText("— IST");
+    if (!menuOpen) return;
+    function onPointerDown(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
       }
     }
-    updateClock();
-    const id = setInterval(updateClock, 30000);
-    return () => clearInterval(id);
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menuOpen]);
+
+  // The ⌘K / Ctrl+K hint on the command cell is a real shortcut, not just
+  // decoration — it opens the same menu as clicking the grid icon.
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setMenuOpen((open) => !open);
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
   function toggleTheme(event: React.MouseEvent<HTMLButtonElement>) {
@@ -86,9 +112,11 @@ export default function Nav() {
     }
 
     // Wave/reveal animation: the incoming theme expands out from the
-    // clicked button as a growing circle until it covers the screen.
-    const x = event.clientX;
-    const y = event.clientY;
+    // toggle button's own center as a growing circle until it covers the
+    // screen — anchored to the button, not wherever inside it was clicked.
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
     const endRadius = Math.hypot(
       Math.max(x, window.innerWidth - x),
       Math.max(y, window.innerHeight - y)
@@ -115,32 +143,156 @@ export default function Nav() {
     });
   }
 
+  async function copyEmail() {
+    try {
+      await navigator.clipboard.writeText(SOCIAL_LINKS.email);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {}
+  }
+
   return (
     <header className="site-nav">
-      <div className="wrap nav-inner">
-        <a href="#top" className="brand">
-          kumar<span className="slash">://</span>dev
-        </a>
-        <ul className="nav-links">
-          {NAV_LINKS.map((link) => (
-            <li key={link.href}>
-              <a href={link.href}>{link.label}</a>
-            </li>
-          ))}
-        </ul>
-        <div className="nav-right">
-          <div className="clock mono">
-            <span className="dot"></span>
-            <span>{clockText}</span>
+      <div className="nav-inner">
+        <div className="nav-grid">
+          <a href="#top" className="nav-cell nav-cell-logo" aria-label={NAV_LOGO_MARK}>
+            <Image
+              src={isDark ? "/darkmode.png" : "/lightmode.png"}
+              alt={NAV_LOGO_MARK}
+              width={140}
+              height={70}
+              priority
+              className="nav-logo-img"
+            />
+          </a>
+
+          <div className="nav-cell nav-cell-top nav-cell-main">
+            <TaglineCycler />
           </div>
-          <button
-            className="icon-btn"
-            aria-label="Toggle color theme"
-            title="Toggle color theme"
-            onClick={toggleTheme}
-          >
-            {isDark ? <IconMoon /> : <IconSun />}
-          </button>
+          <div className="nav-cell nav-cell-bottom nav-cell-main">
+            <ul className="nav-links">
+              {NAV_LINKS.map((link) => (
+                <li key={link.href}>
+                  <a href={link.href}>{link.label}</a>
+                </li>
+              ))}
+            </ul>
+
+            <div className="nav-command" ref={menuRef}>
+              <button
+                type="button"
+                className="nav-cmd-trigger"
+                aria-label="Open command menu"
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                title="Command menu (⌘K)"
+                onClick={() => setMenuOpen((open) => !open)}
+              >
+                <span className="nav-cmd-kbd mono">⌘</span>
+              </button>
+              {menuOpen && (
+                <div className="nav-command-menu" role="menu">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      copyEmail();
+                    }}
+                  >
+                    {copied ? <IconCheck /> : <IconMail />}
+                    {copied ? "Copied!" : "Copy email"}
+                  </button>
+                  <a
+                    role="menuitem"
+                    href={SOCIAL_LINKS.resume}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <IconResume />
+                    Download resume
+                  </a>
+                  <a
+                    role="menuitem"
+                    href={SOCIAL_LINKS.github}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <IconGithub />
+                    GitHub
+                  </a>
+                  <a
+                    role="menuitem"
+                    href={SOCIAL_LINKS.linkedin}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <IconLinkedin />
+                    LinkedIn
+                  </a>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={(event) => {
+                      toggleTheme(event);
+                      setMenuOpen(false);
+                    }}
+                  >
+                    {isDark ? <IconSun /> : <IconMoon />}
+                    {isDark ? "Light mode" : "Dark mode"}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="nav-cell nav-cell-theme">
+            <button
+              className="theme-toggle-btn"
+              aria-label="Toggle color theme"
+              title="Toggle color theme"
+              onClick={toggleTheme}
+            >
+              <IconThemeCircle />
+            </button>
+          </div>
+
+          <div className="nav-cell nav-cell-top nav-cell-social">
+            <a
+              href={SOCIAL_LINKS.github}
+              target="_blank"
+              rel="noopener"
+              aria-label="GitHub"
+            >
+              <IconGithub />
+            </a>
+            <a
+              href={SOCIAL_LINKS.linkedin}
+              target="_blank"
+              rel="noopener"
+              aria-label="LinkedIn"
+            >
+              <IconLinkedin />
+            </a>
+            <a
+              href={SOCIAL_LINKS.instagram}
+              target="_blank"
+              rel="noopener"
+              aria-label="Instagram"
+            >
+              <IconInstagram />
+            </a>
+            <a
+              href={SOCIAL_LINKS.resume}
+              target="_blank"
+              rel="noopener"
+              aria-label="Resume"
+            >
+              <IconResume />
+            </a>
+          </div>
+          <div className="nav-cell nav-cell-bottom nav-cell-social">
+            <div className="nav-hatch" aria-hidden="true"></div>
+          </div>
         </div>
       </div>
     </header>

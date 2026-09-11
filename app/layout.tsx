@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { Archivo_Black, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import {
+  Archivo_Black,
+  Bytesized,
+  IBM_Plex_Mono,
+  IBM_Plex_Sans,
+} from "next/font/google";
 import "./globals.css";
 import { SOCIAL_LINKS } from "@/lib/data";
 
@@ -28,6 +33,13 @@ const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-ibm-plex-mono",
+  display: "swap",
+});
+
+const bytesized = Bytesized({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-bytesized",
   display: "swap",
 });
 
@@ -122,7 +134,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${archivoBlack.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
+      className={`${archivoBlack.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable} ${bytesized.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
