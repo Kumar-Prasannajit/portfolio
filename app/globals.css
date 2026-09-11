@@ -118,6 +118,78 @@ body {
   text-wrap: pretty;
 }
 
+/* ============ CUSTOM CURSOR ============ */
+/* Replaces the system pointer everywhere (fine-pointer devices only —
+   see CustomCursor.tsx, which skips touch and prefers-reduced-motion)
+   with the same pixel-block, color-cycling caret used by the nav's
+   typewriter effect. Shares its cursor-cycle-dark/light keyframes,
+   declared alongside .typewriter-cursor further down. */
+html.custom-cursor-active,
+html.custom-cursor-active * {
+  cursor: none;
+}
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--border-2);
+  border-radius: 2px;
+  background: var(--ink);
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%) scale(1);
+  transition:
+    transform 150ms ease,
+    opacity 150ms ease;
+  animation: cursor-cycle-dark 900ms steps(1, end) infinite;
+}
+.custom-cursor.is-hovering {
+  transform: translate(-50%, -50%) scale(1.8);
+}
+.custom-cursor.is-hidden {
+  opacity: 0;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .custom-cursor {
+    animation-name: cursor-cycle-light;
+  }
+}
+:root[data-theme="light"] .custom-cursor {
+  animation-name: cursor-cycle-light;
+}
+:root[data-theme="dark"] .custom-cursor {
+  animation-name: cursor-cycle-dark;
+}
+
+/* Nav sections: the cursor snaps onto the hovered section's own rect
+   (left/top/width/height set from JS) and clip-reveals it — a plain
+   white fill under mix-blend-mode: difference inverts whatever's under
+   it, so the icon/text stays fully legible (contrast is preserved by
+   the invert) instead of being covered up. Against this site's near-
+   black/near-white/red palette that mostly resolves back to black or
+   white; only landing squarely on a red pixel drifts off-palette, and
+   even then it's a small patch, not the whole cursor. */
+.custom-cursor.is-morphed {
+  border: none;
+  border-radius: 3px;
+  background: #ffffff;
+  mix-blend-mode: difference;
+  animation: none;
+  transform: none;
+  transition:
+    left 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    top 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    width 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    height 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 220ms ease,
+    opacity 150ms ease;
+}
+.custom-cursor.is-morphed.is-circle {
+  border-radius: 50%;
+}
+
 /* Boxes the whole page in a bordered frame; the diagonal hatch on <body>
    only shows through in the gutters outside it. */
 .site-frame {
@@ -404,6 +476,15 @@ header.site-nav {
   font-size: 0.95rem;
   color: var(--red);
 }
+/* See CustomCursor.tsx: while the morphed cursor sits over an element,
+   any red content inside it is neutralized to ink so the difference
+   blend can't drift off the black/white/red palette. */
+.cursor-invert-target .nav-cmd-kbd {
+  color: var(--ink);
+}
+.theme-toggle-btn.cursor-invert-target svg path {
+  fill: var(--ink);
+}
 
 .nav-command-menu {
   position: absolute;
@@ -472,6 +553,12 @@ header.site-nav {
 .theme-toggle-btn:hover {
   color: var(--red);
 }
+/* Wins over :hover above by source order — the ring's stroke is
+   currentColor, and it needs to stay off red for the same reason the
+   path's fill does (see .cursor-invert-target near .nav-cmd-kbd). */
+.theme-toggle-btn.cursor-invert-target {
+  color: var(--ink);
+}
 .theme-toggle-btn svg {
   width: 26px;
   height: 26px;
@@ -506,6 +593,11 @@ header.site-nav {
 .nav-cell-top.nav-cell-social a:hover {
   background: var(--panel-2);
   color: var(--red);
+}
+/* Wins over :hover above by source order — same reasoning as the theme
+   toggle's override near it. */
+.nav-cell-top.nav-cell-social a.cursor-invert-target {
+  color: var(--ink);
 }
 .nav-cell-top.nav-cell-social svg {
   width: 20px;

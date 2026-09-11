@@ -7,6 +7,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { SOCIAL_LINKS } from "@/lib/data";
+import CustomCursor from "@/components/CustomCursor";
 
 const SITE_URL = "https://kumarp.in";
 
@@ -145,7 +146,10 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <CustomCursor />
+      </body>
     </html>
   );
 }
