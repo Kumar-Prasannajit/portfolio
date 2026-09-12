@@ -156,14 +156,29 @@ export default function Nav() {
       <div className="nav-inner">
         <div className="nav-grid">
           <a href="#top" className="nav-cell nav-cell-logo" aria-label={NAV_LOGO_MARK}>
-            <Image
-              src={isDark ? "/darkmode.png" : "/lightmode.png"}
-              alt={NAV_LOGO_MARK}
-              width={140}
-              height={70}
-              priority
-              className="nav-logo-img"
-            />
+            <span className="nav-logo-swap">
+              <Image
+                src={isDark ? "/darkmode.png" : "/lightmode.png"}
+                alt={NAV_LOGO_MARK}
+                width={140}
+                height={70}
+                priority
+                className="nav-logo-img nav-logo-img-default"
+              />
+              {/* On hover: dark mode reveals the red favicon mark (the
+                  cursor's diff-blend box goes white behind it); light
+                  mode instead swaps to the dark-theme logo asset, since
+                  that section goes red-backed with white content instead
+                  — see the .cursor-invert-target light-mode rules. */}
+              <Image
+                src={isDark ? "/favicon.png" : "/darkmode.png"}
+                alt=""
+                aria-hidden="true"
+                width={140}
+                height={70}
+                className="nav-logo-img nav-logo-img-hover"
+              />
+            </span>
           </a>
 
           <div className="nav-cell nav-cell-top nav-cell-main">
