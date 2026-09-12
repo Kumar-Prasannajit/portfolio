@@ -188,7 +188,10 @@ export default function Nav() {
             <ul className="nav-links">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
-                  <a href={link.href}>{link.label}</a>
+                  <a href={link.href}>
+                    <span className="nav-link-idx mono">{link.idx}</span>
+                    {link.label}
+                  </a>
                 </li>
               ))}
             </ul>

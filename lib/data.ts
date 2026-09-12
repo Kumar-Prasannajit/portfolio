@@ -1,9 +1,11 @@
+// idx mirrors each target section's own eyebrow index (see About.tsx,
+// Stack.tsx, etc.) — 05 (Activity) has no nav link, hence the jump.
 export const NAV_LINKS = [
-  { href: "#about", label: "About" },
-  { href: "#stack", label: "Stack" },
-  { href: "#experience", label: "Experience" },
-  { href: "#work", label: "Work" },
-  { href: "#contact", label: "Contact" },
+  { href: "#about", label: "About", idx: "01" },
+  { href: "#stack", label: "Stack", idx: "02" },
+  { href: "#experience", label: "Experience", idx: "03" },
+  { href: "#work", label: "Work", idx: "04" },
+  { href: "#contact", label: "Contact", idx: "06" },
 ] as const;
 
 // Rotates in the nav's tagline slot via a GSAP letter-scatter transition

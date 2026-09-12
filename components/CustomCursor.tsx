@@ -65,6 +65,14 @@ export default function CustomCursor() {
 
     function enterMorph(el: HTMLElement, originX: number, originY: number) {
       if (!dot) return;
+      // mouseover bubbles for every element boundary crossed, including
+      // ones entirely inside the same target (e.g. from its <svg> onto
+      // its <path>) — each of those re-fires onOver with the same
+      // closest(MORPH_SELECTOR) match. Without this guard, every such
+      // micro-move inside an already-morphed element replayed the whole
+      // reset-to-0-then-grow animation, flickering the reveal for any
+      // hover longer than an instant.
+      if (morphed && morphedEl === el) return;
       // Moving straight from one morph target to an adjacent one (still
       // inside .nav-grid) never fires exitMorph — onOut deliberately skips
       // it so the handoff doesn't blip — so the previous target's class
