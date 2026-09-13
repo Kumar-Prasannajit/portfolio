@@ -10,19 +10,15 @@ export const NAV_LINKS = [
 
 // Rotates in the nav's tagline slot via a GSAP letter-scatter transition
 // (see components/TaglineCycler.tsx). Case is intentional per-line — most
-// are all-caps but "sudo make it happen" reads as an actual terminal
-// command, so it stays lowercase.
+// are all-caps but "console.log" reads as an actual code identifier, so
+// it stays lowercase.
 export const NAV_TAGLINES = [
-  "CODING GLOBALLY FROM HYDERABAD",
-  "BUILDING WHAT DIDN'T EXIST YESTERDAY",
-  "AGENTS ARE THE NEW APPS",
-  "CREATE BEFORE YOU CONSUME",
-  "sudo make it happen",
-  "CURRENTLY COOKING",
-  "HUMAN × AI × POSSIBILITY",
-  "BUILD. BREAK. REBUILD.",
-  "SYSTEM STATUS: ONLINE",
-  "DEPLOYING DREAMS DAILY",
+  "STILL SINGLE, BUT MY LOCALHOST IS ATTACHED TO ME.",
+  "MY BACK PAIN IS 80% BAD CHAIR AND 20% CARRYING UNPRODUCTIVE REPOS.",
+  "console.log IS MY THERAPIST.",
+  "NO SPEC, NO BRIEF, JUST BUILDING COOL SHIT.",
+  "OFFICIALLY EMPLOYED, UNOFFICIALLY BUILDING THE NEXT THING.",
+  "9 TO 5 PAYS THE BILLS, 5 TO 9 BUILDS THE FUTURE.",
 ] as const;
 
 export const NAV_LOGO_MARK = "KP.";

@@ -26,6 +26,8 @@
      may diverge again later, not because the face itself differs today. */
   --font-accent: var(--font-ibm-plex-mono), "SFMono-Regular", Consolas,
     monospace;
+  /* The nav's typewriter tagline — diverged from --font-accent on purpose. */
+  --font-tagline: var(--font-geo), "SFMono-Regular", Consolas, monospace;
 }
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
@@ -389,11 +391,12 @@ header.site-nav {
 .nav-tagline {
   margin: 0;
   padding: 0 14px;
-  font-family: var(--font-accent);
-  font-size: 1.2rem;
+  font-family: var(--font-tagline);
+  font-size: 1.05rem;
   line-height: 1;
-  font-weight: 400;
-  letter-spacing: 0.02em;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  word-spacing: 0.1em;
   /* No text-transform — case is authored per line (see NAV_TAGLINES),
      since "sudo make it happen" is deliberately lowercase. */
   color: var(--ink-dim);
@@ -661,13 +664,9 @@ header.site-nav {
 .nav-hatch {
   height: 100%;
   min-height: 26px;
-  background-image: repeating-linear-gradient(
-    -45deg,
-    var(--border-2) 0,
-    var(--border-2) 1px,
-    transparent 1px,
-    transparent 7px
-  );
+  background-image: url("/test1.gif");
+  background-size: cover;
+  background-position: center;
 }
 
 /* Light mode: red-on-hover nav sections. The difference blend above
