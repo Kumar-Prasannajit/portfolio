@@ -141,6 +141,39 @@ export function IconThemeCircle(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+// Mobile nav trigger — plain three-bar hamburger, matching the site's
+// bare-stroke icon style (IconSun/IconMoon etc.) rather than a filled glyph.
+export function IconMenu(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      {...props}
+    >
+      <path d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  );
+}
+
+// Swapped in for IconMenu once the mobile drawer is open.
+export function IconClose(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      {...props}
+    >
+      <path d="M5 5l14 14M19 5 5 19" />
+    </svg>
+  );
+}
+
 export function IconCheck(props: SVGProps<SVGSVGElement>) {
   return (
     <svg

@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { flushSync } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import Image from "next/image";
 import {
   IconCheck,
+  IconClose,
   IconGithub,
   IconInstagram,
   IconLinkedin,
   IconMail,
+  IconMenu,
   IconMoon,
   IconResume,
   IconSun,
@@ -53,6 +55,7 @@ export default function Nav() {
   const [isDark, setIsDark] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -80,6 +83,28 @@ export default function Nav() {
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [menuOpen]);
+
+  // Mobile drawer: Escape closes it, and — since it's a fixed-position
+  // overlay rather than a normal document flow element — resizing past
+  // the breakpoint that hides the hamburger trigger has to close it too,
+  // or it's left stranded open with no way to reach the button again.
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setMobileMenuOpen(false);
+    }
+    function onResize() {
+      if (window.innerWidth > 640) setMobileMenuOpen(false);
+    }
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", onKeyDown);
+    window.addEventListener("resize", onResize);
+    return () => {
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [mobileMenuOpen]);
 
   // The ⌘K / Ctrl+K hint on the command cell is a real shortcut, not just
   // decoration — it opens the same menu as clicking the grid icon.
@@ -312,6 +337,77 @@ export default function Nav() {
             <div className="nav-hatch" aria-hidden="true"></div>
           </div>
         </div>
+
+        {/* Mobile-only replacement for .nav-grid above (see the ≤640px
+            media query, which hides one and shows the other): logo, then
+            a gap, then the theme toggle and hamburger grouped on the
+            right. The hamburger opens .nav-mobile-drawer below instead of
+            trying to squeeze the full link list into the grid. */}
+        <div className="nav-mobile-bar">
+          <a href="#top" className="nav-mobile-logo" aria-label={NAV_LOGO_MARK}>
+            <Image
+              src={isDark ? "/darkmode.png" : "/lightmode.png"}
+              alt={NAV_LOGO_MARK}
+              width={140}
+              height={70}
+              priority
+              className="nav-logo-img"
+            />
+          </a>
+          <div className="nav-mobile-actions">
+            <button
+              className="theme-toggle-btn"
+              aria-label="Toggle color theme"
+              title="Toggle color theme"
+              onClick={toggleTheme}
+            >
+              <IconThemeCircle />
+            </button>
+            <button
+              type="button"
+              className="nav-hamburger-btn"
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-haspopup="true"
+              aria-expanded={mobileMenuOpen}
+              onClick={() => setMobileMenuOpen((open) => !open)}
+            >
+              {mobileMenuOpen ? <IconClose /> : <IconMenu />}
+            </button>
+          </div>
+        </div>
+
+        {mobileMenuOpen &&
+          // Portaled to <body> instead of rendered in place: header.site-nav
+          // has backdrop-filter (for the sticky blur), which — per spec —
+          // makes it a containing block for its position:fixed descendants,
+          // the same as position:relative would. Left in place, the drawer
+          // sized and positioned itself against the ~40px nav bar instead
+          // of the viewport. Rendering outside that subtree sidesteps it.
+          createPortal(
+            <>
+              <div
+                className="nav-mobile-overlay"
+                aria-hidden="true"
+                onClick={() => setMobileMenuOpen(false)}
+              />
+              <div className="nav-mobile-drawer" role="dialog" aria-label="Site navigation">
+                <div className="nav-mobile-links">
+                  <ul>
+                    {NAV_LINKS.map((link) => (
+                      <li key={link.href}>
+                        <a href={link.href} onClick={() => setMobileMenuOpen(false)}>
+                          <span className="nav-link-idx mono">{link.idx}</span>
+                          {link.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="nav-mobile-gif" aria-hidden="true" />
+              </div>
+            </>,
+            document.body
+          )}
       </div>
     </header>
   );
