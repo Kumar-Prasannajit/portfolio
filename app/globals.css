@@ -365,7 +365,10 @@ header.site-nav {
   display: inline-flex;
 }
 .nav-logo-img {
-  height: 29px;
+  /* One class shared by every state — default, hover-swap, dark, and
+     light (see Nav.tsx's src swaps) — so bumping it here covers all of
+     them at once. */
+  height: 30.6px;
   width: auto;
 }
 .nav-logo-img-hover {
@@ -457,7 +460,8 @@ header.site-nav {
     background: var(--red);
   }
 }
-/* Light theme: cycles black (--ink resolves near-black here) ↔ white. */
+/* Light theme: cycles black (--ink resolves near-black here) ↔ red —
+   mirrors the dark theme's ink/red pairing instead of black/white. */
 @keyframes cursor-cycle-light {
   0%,
   49.9% {
@@ -465,7 +469,7 @@ header.site-nav {
   }
   50%,
   100% {
-    background: #ffffff;
+    background: var(--red);
   }
 }
 /* Links row shares its cell with the command trigger, pinned to the
@@ -1698,6 +1702,17 @@ footer {
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
+}
+/* Phone-only: hints the browser to promote this layer to the compositor
+   before Nav.tsx's toggleTheme starts animating its clip-path, instead of
+   doing that promotion — a real one-time cost for a full-screen layer —
+   in the middle of the animation, which is what read as a stall/pause on
+   real phones. Same clip-path keyframes as always; this changes nothing
+   about how the reveal looks, on any device. */
+@media (pointer: coarse) {
+  ::view-transition-new(root) {
+    will-change: clip-path;
+  }
 }
 ::view-transition-old(root) {
   z-index: 1;
