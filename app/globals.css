@@ -1097,8 +1097,8 @@ header.site-nav {
   border-color: var(--red);
 }
 .btn-icon {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   justify-content: center;
   border: 1px solid var(--border-2);
@@ -1442,7 +1442,12 @@ header.site-nav {
   text-decoration: none;
   color: var(--ink);
   border-bottom: 1px solid var(--border-2);
-  padding-bottom: 2px;
+  /* Vertical padding instead of just padding-bottom for the underline
+     offset — a plain inline text link like this otherwise has a tap
+     target no taller than its own line-height (~20px), well under the
+     ~44px mobile-usability guideline. Padding grows the tap area without
+     changing the visible text size or the gap between links. */
+  padding: 8px 0 4px;
 }
 .card-links a:hover {
   color: var(--red);
@@ -1495,7 +1500,8 @@ header.site-nav {
   align-items: center;
   gap: 6px;
   border-bottom: 1px solid var(--border-2);
-  padding-bottom: 2px;
+  /* See .card-links a's comment — same tap-target fix. */
+  padding: 8px 0 4px;
 }
 .gh-link:hover {
   color: var(--red);
@@ -1656,6 +1662,11 @@ footer {
 .foot-inner a {
   text-decoration: none;
   color: var(--ink-faint);
+  /* Same tap-target fix as .card-links a — otherwise this is a ~15px-tall
+     target (just the text's own line-height). */
+  display: inline-block;
+  padding: 8px 0;
+  margin: -8px 0;
 }
 .foot-inner a:hover {
   color: var(--red);
@@ -1703,15 +1714,27 @@ footer {
   animation: none;
   mix-blend-mode: normal;
 }
-/* Phone-only: hints the browser to promote this layer to the compositor
-   before Nav.tsx's toggleTheme starts animating its clip-path, instead of
-   doing that promotion — a real one-time cost for a full-screen layer —
-   in the middle of the animation, which is what read as a stall/pause on
-   real phones. Same clip-path keyframes as always; this changes nothing
-   about how the reveal looks, on any device. */
+/* Touch/coarse-pointer devices (phones) skip the fluid circle wipe
+   entirely (see the `coarsePointer` branch in Nav.tsx's toggleTheme) and
+   get a plain opacity crossfade instead — opacity is the one property
+   that's cheap to animate on literally any GPU, so this doesn't depend
+   on the device's hardware the way the clip-path wave does. */
 @media (pointer: coarse) {
+  ::view-transition-old(root) {
+    animation: theme-fade-out 220ms ease both;
+  }
   ::view-transition-new(root) {
-    will-change: clip-path;
+    animation: theme-fade-in 220ms ease both;
+  }
+}
+@keyframes theme-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes theme-fade-in {
+  from {
+    opacity: 0;
   }
 }
 ::view-transition-old(root) {

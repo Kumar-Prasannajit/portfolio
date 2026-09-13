@@ -136,6 +136,21 @@ export default function Nav() {
       return;
     }
 
+    // Touch/coarse-pointer devices (phones) skip the clip-path wave —
+    // animating clip-path repaints the mask on every frame, which is
+    // cheap enough on desktop GPUs to look smooth but not guaranteed on
+    // phone-class hardware. A plain opacity crossfade instead (see the
+    // `(pointer: coarse)` block in globals.css) is compositor-only, so
+    // it stays smooth regardless of the device underneath it.
+    const coarsePointer =
+      window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    if (coarsePointer) {
+      doc.startViewTransition(() => {
+        flushSync(applyTheme);
+      });
+      return;
+    }
+
     // Wave/reveal animation: the incoming theme expands out from the
     // toggle button's own center as a growing circle until it covers the
     // screen — anchored to the button, not wherever inside it was clicked.
