@@ -26,8 +26,8 @@
      may diverge again later, not because the face itself differs today. */
   --font-accent: var(--font-ibm-plex-mono), "SFMono-Regular", Consolas,
     monospace;
-  /* The nav's typewriter tagline — diverged from --font-accent on purpose. */
-  --font-tagline: var(--font-geo), "SFMono-Regular", Consolas, monospace;
+  /* The nav's typewriter tagline — same plain face as nav links now. */
+  --font-tagline: var(--font-body);
 }
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
@@ -409,11 +409,11 @@ header.site-nav {
   margin: 0;
   padding: 0 14px;
   font-family: var(--font-tagline);
-  font-size: 1.05rem;
+  font-size: 0.85rem;
   line-height: 1;
   font-weight: 600;
-  letter-spacing: 0.05em;
-  word-spacing: 0.1em;
+  letter-spacing: 0.03em;
+  word-spacing: 0.08em;
   /* No text-transform — case is authored per line (see NAV_TAGLINES),
      since "sudo make it happen" is deliberately lowercase. */
   color: var(--ink-dim);
@@ -502,8 +502,7 @@ header.site-nav {
   padding: 4px 8px;
   text-decoration: none;
   color: var(--ink-dim);
-  font-family: var(--font-accent);
-  text-transform: uppercase;
+  font-family: var(--font-body);
   font-size: 0.88rem;
   font-weight: 500;
   transition: color 0.15s ease;
@@ -800,8 +799,7 @@ header.site-nav {
   padding: 16px 22px;
   text-decoration: none;
   color: var(--ink-dim);
-  font-family: var(--font-accent);
-  text-transform: uppercase;
+  font-family: var(--font-body);
   font-size: 0.92rem;
   font-weight: 500;
   transition:

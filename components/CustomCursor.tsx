@@ -19,7 +19,19 @@ const HOVER_SELECTOR = 'a, button, [role="button"], input, textarea, summary';
 // (see the "Light mode: red-on-hover nav sections" block in globals.css),
 // so it uses a different, non-blended reveal there — but driven by the
 // exact same --morph-x/-y/-r geometry computed once in enterMorph below.
-const MORPH_SELECTOR = ".nav-grid a, .nav-grid button";
+//
+// :not(.nav-command-menu *) excludes the ⌘K dropdown's own menu items.
+// They're technically inside .nav-grid too (the dropdown mounts inside
+// the command nav-cell), so without this they'd match here by accident —
+// but .cursor-invert-target has no `position: relative` entry for them
+// (see globals.css), so the ::before reveal layer's `inset: 0` has
+// nothing to anchor to on the row itself and bubbles up to
+// .nav-command-menu's own positioned box instead, stretching the
+// row-sized circle across the whole dropdown panel. The dropdown already
+// has its own plain hover (.nav-command-menu a:hover/button:hover) that
+// this would otherwise fight with.
+const MORPH_SELECTOR =
+  ".nav-grid a:not(.nav-command-menu *), .nav-grid button:not(.nav-command-menu *)";
 
 export default function CustomCursor() {
   const dotRef = useRef<HTMLDivElement>(null);
@@ -50,6 +62,17 @@ export default function CustomCursor() {
     function onMove(event: MouseEvent) {
       pendingX = event.clientX;
       pendingY = event.clientY;
+      // Belt-and-suspenders alongside onEnterWindow: Chromium synthesizes a
+      // mousemove/hover-sync event right after load when the pointer is
+      // already over the page, which incidentally fires `mouseenter` too —
+      // Firefox-family browsers (Zen included) don't, and stay silent
+      // until the pointer actually moves. Since `mouseenter` on `document`
+      // only fires crossing the viewport boundary from outside (rare once
+      // a tab has already loaded), relying on it alone left the dot stuck
+      // at opacity 0 indefinitely in Firefox/Zen. Any real mousemove means
+      // the pointer is inside the document, so it's always safe to reveal
+      // here too.
+      dot?.classList.remove("is-hidden");
       // While morphed onto a nav section, position is pinned to that
       // section's own rect, not the mouse — a magnetic snap, not a follow.
       if (morphed) return;
