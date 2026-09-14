@@ -1,0 +1,42 @@
+---
+title: "What actually breaks when a payment isn't idempotent"
+date: "2026-08-10"
+tags: ["backend", "payments"]
+excerpt: "Notes from wiring Razorpay/UPI into a real booking flow — the double-charge bugs you don't see until someone double-taps a button."
+---
+
+Building the payment flow for [Manima Online](/#work) was the first time I had to take
+"idempotent" seriously instead of just nodding along in an interview answer. Real money,
+real users, real double-taps on a slow mobile connection — the failure modes show up
+fast.
+
+## The bug that taught me this
+
+Early version: client hits `POST /bookings/:id/pay`, server creates a Razorpay order,
+redirects to checkout. Simple. Then:
+
+1. User taps "Pay"
+2. Network hiccups, the button doesn't visibly respond
+3. User taps "Pay" again
+4. Two Razorpay orders exist for the same booking
+
+Nothing crashed. Nothing errored. It just quietly created a second order that, if both
+happened to succeed, meant a client paying twice for the same slot.
+
+## The fix, roughly
+
+- An idempotency key derived from the booking ID + a short time window, checked
+  server-side before creating a new order — a retry within that window reuses the
+  existing order instead of minting a new one.
+- Payment state lives in the booking record itself, not inferred from "did the redirect
+  come back" — so a webhook confirming payment is the source of truth, not the client
+  round-trip.
+- Server-side validation on the webhook payload (signature check, amount match against
+  the booking) before touching anything — trusting a client-reported "payment succeeded"
+  is how you get bookings marked paid that never actually were.
+
+## What I'd tell past-me
+
+The double-tap isn't the edge case. It's closer to the default case, once you factor in
+flaky mobile networks and people who don't trust a button that doesn't visibly react.
+Idempotency isn't a nice-to-have on a payment endpoint — it's the actual spec.

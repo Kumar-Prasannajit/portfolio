@@ -1,0 +1,76 @@
+/* Deliberately its own small set of rules rather than reusing the
+   global .card class (see globals.css) — that class is built for a
+   <div> with independent inner <a> links (Projects.tsx); this card is
+   itself a single <Link>, and nesting an anchor inside an anchor is
+   invalid HTML. Values below intentionally mirror .card's look. */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 26px;
+  border: 1px solid var(--border-2);
+  background: var(--panel);
+  border-radius: 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+  border-color: var(--red);
+  box-shadow: var(--shadow);
+  transform: translateY(-4px);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  color: var(--ink-faint);
+  font-size: 0.74rem;
+  margin-bottom: 12px;
+}
+.meta span + span::before {
+  content: "·";
+  margin-right: 10px;
+  color: var(--border-2);
+}
+
+.title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 12px;
+}
+
+.excerpt {
+  color: var(--ink-dim);
+  font-size: 0.94rem;
+  line-height: 1.65;
+  flex: 1;
+  margin: 0 0 18px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 18px;
+}
+
+.readMore {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink);
+  border-bottom: 1px solid var(--border-2);
+  padding: 8px 0 4px;
+  margin-top: auto;
+  align-self: flex-start;
+  transition: color 0.15s, border-color 0.15s;
+}
+.card:hover .readMore {
+  color: var(--red);
+  border-color: var(--red);
+}

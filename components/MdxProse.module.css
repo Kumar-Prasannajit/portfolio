@@ -1,0 +1,110 @@
+/* Typography for rendered MDX bodies (blog posts, weekly entries) —
+   reuses the site's existing design tokens (see app/globals.css :root)
+   rather than introducing new colors, so a post reads as part of the
+   same system as the hand-authored sections. */
+
+.prose {
+  color: var(--ink-dim);
+  font-size: 0.98rem;
+  line-height: 1.75;
+  max-width: 68ch;
+}
+
+.h1,
+.h2,
+.h3 {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  line-height: 1.1;
+  margin: 2.2em 0 0.6em;
+}
+.h1:first-child,
+.h2:first-child,
+.h3:first-child {
+  margin-top: 0;
+}
+.h1 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+}
+.h2 {
+  font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+}
+.h3 {
+  font-size: 1.1rem;
+}
+
+.p {
+  margin: 0 0 1.2em;
+}
+
+.strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.ul,
+.ol {
+  margin: 0 0 1.2em;
+  padding-left: 1.4em;
+}
+.li {
+  margin-bottom: 0.5em;
+}
+.li::marker {
+  color: var(--red);
+}
+
+.blockquote {
+  border-left: 2px solid var(--red);
+  color: var(--ink);
+  margin: 1.4em 0;
+  padding: 0.2em 0 0.2em 1.2em;
+  font-style: italic;
+}
+
+.hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2.4em 0;
+}
+
+.link {
+  color: var(--ink);
+  border-bottom: 1px solid var(--border-2);
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s;
+}
+.link:hover {
+  color: var(--red);
+  border-color: var(--red);
+}
+
+.code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+}
+
+.pre {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  background: var(--panel);
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin: 0 0 1.4em;
+  overflow-x: auto;
+}
+/* The <code> inside a <pre> block shouldn't get the inline-code chip
+   styling above — reset it back to plain text on the pre's own background. */
+.pre .code {
+  background: none;
+  border: none;
+  padding: 0;
+}

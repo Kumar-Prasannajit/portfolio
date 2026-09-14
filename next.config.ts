@@ -9,6 +9,13 @@ const nextConfig: NextConfig = {
   // `false`) default.
   trailingSlash: false,
 
+  // next-mdx-remote's own README calls this out explicitly for Turbopack
+  // (which `next dev`/`next build` use by default here): without it,
+  // Turbopack doesn't reliably tell the package's server-only code apart
+  // from its client-bundle code, which is exactly the split RSC MDX
+  // rendering depends on.
+  transpilePackages: ["next-mdx-remote"],
+
   // No `redirects()`/`rewrites()` here and no proxy.ts (Next 16's
   // renamed middleware) in the project — nothing in the app is
   // redirecting the root route. If the 308 loop persists after a
