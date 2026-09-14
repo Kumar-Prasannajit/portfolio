@@ -221,6 +221,7 @@ export function getAllWeeklySlugs(): string[] {
 // props from the root layout to the client CommandPalette component.
 export type CommandIndexItem = {
   title: string;
+  description: string;
   href: string;
   group: "blog" | "weekly";
   keywords: string[];
@@ -229,12 +230,14 @@ export type CommandIndexItem = {
 export function getCommandIndex(): CommandIndexItem[] {
   const posts = getAllBlogPosts().map((post) => ({
     title: post.frontmatter.title,
+    description: post.frontmatter.excerpt,
     href: `/blog/${post.slug}`,
     group: "blog" as const,
     keywords: post.frontmatter.tags ?? [],
   }));
   const weekly = getAllWeeklyEntries().map((entry) => ({
     title: `#${String(entry.number).padStart(3, "0")} — ${entry.frontmatter.title}`,
+    description: entry.frontmatter.summary,
     href: `/weekly/${entry.slug}`,
     group: "weekly" as const,
     keywords: [] as string[],

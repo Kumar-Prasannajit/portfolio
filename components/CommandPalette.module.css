@@ -33,7 +33,7 @@
   top: 14vh;
   left: 50%;
   transform: translateX(-50%);
-  width: min(560px, calc(100vw - 32px));
+  width: min(620px, calc(100vw - 32px));
   max-height: 70vh;
   display: flex;
   flex-direction: column;
@@ -56,6 +56,27 @@
   }
 }
 
+/* cmdk's <Command.Dialog> inserts its own unstyled [cmdk-root] div
+   between .content and everything we actually render (.inputRow,
+   .hints, Command.List) — it isn't targetable via a prop, only via
+   this global selector. Without turning IT into the flex column,
+   .content's flex/max-height rules stop at this wrapper: .list's
+   flex:1 has no effect (its parent isn't a flex container), so the
+   list renders at its full natural height instead of the available
+   space, gets silently clipped by .content's overflow:hidden, and
+   mouse-wheel scrolling over the (now unreachable) overflow falls
+   through to the page behind instead of the results list — which
+   looked like "the search bar and instructions scroll away". Making
+   this wrapper `flex: 1; min-height: 0;` inside .content (and a flex
+   column itself) is what lets .list actually claim the remaining
+   height below .inputRow/.hints and scroll on its own. */
+.content :global([cmdk-root]) {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .inputRow {
   display: flex;
   align-items: center;
@@ -63,10 +84,14 @@
   padding: 4px 16px;
   border-bottom: 1px solid var(--border);
 }
-.inputHint {
-  font-family: var(--font-mono);
-  color: var(--red);
-  font-size: 0.9rem;
+.inputIcon {
+  display: flex;
+  flex: none;
+  color: var(--ink-faint);
+}
+.inputIcon svg {
+  width: 16px;
+  height: 16px;
 }
 .input {
   flex: 1;
@@ -84,20 +109,51 @@
 .input:focus {
   outline: none;
 }
-.escHint {
-  font-family: var(--font-mono);
+
+/* Footer-style hint bar: ↑↓ Navigate · ↵ Open · esc Close. Each key is
+   its own small chip so the row reads as key-caps, not plain text. */
+.hints {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
   color: var(--ink-faint);
-  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+.hint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
   border: 1px solid var(--border-2);
   border-radius: 5px;
-  padding: 2px 6px;
-  flex: none;
+  background: var(--panel-2);
+  color: var(--ink-dim);
+}
+.key svg {
+  width: 11px;
+  height: 11px;
+}
+.keyText {
+  font-size: 0.65rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .list {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 8px;
 }
 
@@ -109,58 +165,77 @@
   text-align: center;
 }
 
-.group {
-  margin-bottom: 4px;
-}
-
-/* cmdk's <Command.Group heading="…"> renders the heading as its own
-   internal element ([cmdk-group-heading]) that doesn't accept a
-   className prop — has to be targeted through the group wrapper's own
-   class instead. See cmdk's source: the heading div only ever gets
-   `ref`/`cmdk-group-heading`/`aria-hidden`/`id`, never `...props`. */
-.group :global([cmdk-group-heading]) {
-  font-family: var(--font-mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  font-size: 0.68rem;
-  padding: 10px 10px 6px;
-}
-
+/* Each result is a 3-column row: icon | title + description | type
+   badge. The highlight on the active row (data-selected, driven by
+   arrow-key navigation) is plain var(--panel-2)/var(--red) — both
+   already swap per-theme in globals.css, so the selection reads
+   correctly in light and dark without any extra rules here. */
 .item {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 10px;
-  padding: 10px 10px;
+  gap: 12px;
+  padding: 9px 10px;
   border-radius: 8px;
-  color: var(--ink-dim);
-  font-size: 0.88rem;
   cursor: pointer;
   scroll-margin: 8px;
 }
-.item svg {
+.itemIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: var(--panel-2);
+  color: var(--ink-faint);
+}
+.itemIcon svg {
   width: 15px;
   height: 15px;
-  color: var(--ink-faint);
 }
+.itemBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.itemTitle {
+  color: var(--ink);
+  font-size: 0.88rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.itemDesc {
+  color: var(--ink-faint);
+  font-size: 0.76rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.itemType {
+  flex: none;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-size: 0.66rem;
+  border: 1px solid var(--border-2);
+  border-radius: 5px;
+  padding: 3px 7px;
+}
+
 .item[data-selected="true"] {
   background: var(--panel-2);
-  color: var(--ink);
 }
-.item[data-selected="true"] svg {
+.item[data-selected="true"] .itemIcon {
+  background: var(--red);
+  color: var(--red-ink);
+}
+.item[data-selected="true"] .itemType {
+  border-color: var(--red-dim);
   color: var(--red);
-}
-
-.itemMeta {
-  margin-left: auto;
-  font-family: var(--font-mono);
-  color: var(--ink-faint);
-  font-size: 0.72rem;
-}
-
-.separator {
-  height: 1px;
-  background: var(--border);
-  margin: 6px 4px;
 }

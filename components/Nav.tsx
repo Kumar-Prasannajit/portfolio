@@ -151,14 +151,9 @@ export default function Nav() {
             >
               <IconInstagram />
             </a>
-            <a
-              href={SOCIAL_LINKS.resume}
-              target="_blank"
-              rel="noopener"
-              aria-label="Resume"
-            >
+            <Link href="/resume" aria-label="Resume">
               <IconResume />
-            </a>
+            </Link>
           </div>
           <div className="nav-cell nav-cell-bottom nav-cell-social">
             <div className="nav-hatch" aria-hidden="true"></div>
