@@ -3,6 +3,8 @@ import { Archivo_Black, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 import { SOCIAL_LINKS } from "@/lib/data";
 import CustomCursor from "@/components/CustomCursor";
+import Nav from "@/components/Nav";
+import Footer from "@/components/Footer";
 
 const SITE_URL = "https://kumarp.in";
 
@@ -135,7 +137,11 @@ export default function RootLayout({
         />
       </head>
       <body>
-        {children}
+        <div className="site-frame" id="top">
+          <Nav />
+          {children}
+          <Footer />
+        </div>
         <CustomCursor />
       </body>
     </html>

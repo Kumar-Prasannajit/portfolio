@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal, flushSync } from "react-dom";
 import Image from "next/image";
+import Link from "next/link";
 import {
   IconCheck,
   IconClose,
@@ -195,7 +196,7 @@ export default function Nav() {
     <header className="site-nav">
       <div className="nav-inner">
         <div className="nav-grid">
-          <a href="#top" className="nav-cell nav-cell-logo" aria-label={NAV_LOGO_MARK}>
+          <Link href="/" className="nav-cell nav-cell-logo" aria-label={NAV_LOGO_MARK}>
             <span className="nav-logo-swap">
               <Image
                 src={isDark ? "/darkmode.png" : "/lightmode.png"}
@@ -219,7 +220,7 @@ export default function Nav() {
                 className="nav-logo-img nav-logo-img-hover"
               />
             </span>
-          </a>
+          </Link>
 
           <div className="nav-cell nav-cell-top nav-cell-main">
             <TaglineCycler />
@@ -359,7 +360,7 @@ export default function Nav() {
             right. The hamburger opens .nav-mobile-drawer below instead of
             trying to squeeze the full link list into the grid. */}
         <div className="nav-mobile-bar">
-          <a href="#top" className="nav-mobile-logo" aria-label={NAV_LOGO_MARK}>
+          <Link href="/" className="nav-mobile-logo" aria-label={NAV_LOGO_MARK}>
             <Image
               src={isDark ? "/darkmode.png" : "/lightmode.png"}
               alt={NAV_LOGO_MARK}
@@ -368,7 +369,7 @@ export default function Nav() {
               priority
               className="nav-logo-img"
             />
-          </a>
+          </Link>
           <div className="nav-mobile-actions">
             <button
               className="theme-toggle-btn"

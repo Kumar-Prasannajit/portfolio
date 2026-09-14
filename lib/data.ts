@@ -1,11 +1,23 @@
-// idx mirrors each target section's own eyebrow index (see About.tsx,
-// Stack.tsx, etc.) — 05 (Activity) has no nav link, hence the jump.
+// idx mostly mirrors each target section's own eyebrow index (see
+// About.tsx, Projects.tsx, Contact.tsx) — 05 (Activity) has no nav link,
+// hence the jump from 04 to 06. Stack (idx 02 on-page) and Experience
+// (idx 03 on-page) were deliberately dropped from the navbar in favor of
+// Blogs/Weekly at those nav slots — both sections are still live on the
+// homepage (reachable by scroll or via "/#stack" / "/#experience", and
+// still listed in the command palette), they just no longer have a top
+// nav link, so idx 02/03 here point at different content than the
+// same-numbered eyebrows on the page itself. This is an intentional,
+// explicitly-confirmed exception to "idx mirrors the target's own idx".
+//
+// Home-section links are root-relative ("/#about") rather than bare
+// hashes so they still work when Nav is rendered on a non-home route
+// (e.g. clicking "About" from /blog navigates to / and jumps there).
 export const NAV_LINKS = [
-  { href: "#about", label: "About", idx: "01" },
-  { href: "#stack", label: "Stack", idx: "02" },
-  { href: "#experience", label: "Experience", idx: "03" },
-  { href: "#work", label: "Work", idx: "04" },
-  { href: "#contact", label: "Contact", idx: "06" },
+  { href: "/#about", label: "About", idx: "01" },
+  { href: "/blog", label: "Blogs", idx: "02" },
+  { href: "/weekly", label: "Weekly", idx: "03" },
+  { href: "/#work", label: "Work", idx: "04" },
+  { href: "/#contact", label: "Contact", idx: "06" },
 ] as const;
 
 // Rotates in the nav's tagline slot via a GSAP letter-scatter transition
