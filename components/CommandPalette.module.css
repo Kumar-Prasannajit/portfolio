@@ -1,0 +1,166 @@
+/* cmdk ships unstyled — every rule below is this project's own, reusing
+   the same tokens/patterns as the rest of the site (panel/border colors,
+   mono font, red accent) rather than cmdk's own default look. */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  backdrop-filter: blur(4px);
+  animation: overlay-in 0.15s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    animation: none;
+  }
+}
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.content {
+  position: fixed;
+  /* Both .overlay and .content are direct positioned siblings from
+     Radix's Portal — without an explicit z-index here, .content stacks
+     at the implicit z-index:0 while .overlay sits at 100, so the dimmed
+     blur backdrop painted OVER the palette panel instead of behind it
+     (the whole reason it looked like "the screen blurs and the list
+     never shows"). Has to be strictly above .overlay's z-index. */
+  z-index: 101;
+  top: 14vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - 32px));
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--border-2);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  animation: content-in 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .content {
+    animation: none;
+  }
+}
+@keyframes content-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-6px) scale(0.98);
+  }
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.inputHint {
+  font-family: var(--font-mono);
+  color: var(--red);
+  font-size: 0.9rem;
+}
+.input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  padding: 14px 0;
+}
+.input::placeholder {
+  color: var(--ink-faint);
+}
+.input:focus {
+  outline: none;
+}
+.escHint {
+  font-family: var(--font-mono);
+  color: var(--ink-faint);
+  font-size: 0.7rem;
+  border: 1px solid var(--border-2);
+  border-radius: 5px;
+  padding: 2px 6px;
+  flex: none;
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.empty {
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 28px 16px;
+  text-align: center;
+}
+
+.group {
+  margin-bottom: 4px;
+}
+
+/* cmdk's <Command.Group heading="…"> renders the heading as its own
+   internal element ([cmdk-group-heading]) that doesn't accept a
+   className prop — has to be targeted through the group wrapper's own
+   class instead. See cmdk's source: the heading div only ever gets
+   `ref`/`cmdk-group-heading`/`aria-hidden`/`id`, never `...props`. */
+.group :global([cmdk-group-heading]) {
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-size: 0.68rem;
+  padding: 10px 10px 6px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: 8px;
+  color: var(--ink-dim);
+  font-size: 0.88rem;
+  cursor: pointer;
+  scroll-margin: 8px;
+}
+.item svg {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  color: var(--ink-faint);
+}
+.item[data-selected="true"] {
+  background: var(--panel-2);
+  color: var(--ink);
+}
+.item[data-selected="true"] svg {
+  color: var(--red);
+}
+
+.itemMeta {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  color: var(--ink-faint);
+  font-size: 0.72rem;
+}
+
+.separator {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 4px;
+}

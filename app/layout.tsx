@@ -5,6 +5,9 @@ import { SOCIAL_LINKS } from "@/lib/data";
 import CustomCursor from "@/components/CustomCursor";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import CommandPalette from "@/components/CommandPalette";
+import { CommandPaletteProvider } from "@/components/CommandPaletteContext";
+import { getCommandIndex } from "@/lib/content";
 
 const SITE_URL = "https://kumarp.in";
 
@@ -122,6 +125,11 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Server-only (lib/content.ts reads the filesystem) — built once here
+  // and passed down as plain serializable props to the client
+  // CommandPalette, which otherwise has no way to enumerate posts.
+  const commandIndex = getCommandIndex();
+
   return (
     <html
       lang="en"
@@ -137,11 +145,14 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <div className="site-frame" id="top">
-          <Nav />
-          {children}
-          <Footer />
-        </div>
+        <CommandPaletteProvider>
+          <div className="site-frame" id="top">
+            <Nav />
+            {children}
+            <Footer />
+          </div>
+          <CommandPalette index={commandIndex} />
+        </CommandPaletteProvider>
         <CustomCursor />
       </body>
     </html>

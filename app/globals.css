@@ -556,52 +556,6 @@ header.site-nav {
   filter: invert(1);
 }
 
-.nav-command-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  z-index: 60;
-  min-width: 190px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 6px;
-  background: var(--panel);
-  border: 1px solid var(--border-2);
-  border-radius: 10px;
-  box-shadow: var(--shadow);
-}
-.nav-command-menu a,
-.nav-command-menu button {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 8px 10px;
-  border: none;
-  border-radius: 6px;
-  background: none;
-  color: var(--ink-dim);
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  text-align: left;
-  text-decoration: none;
-  cursor: pointer;
-  transition:
-    background 0.15s ease,
-    color 0.15s ease;
-}
-.nav-command-menu a:hover,
-.nav-command-menu button:hover {
-  background: var(--panel-2);
-  color: var(--ink);
-}
-.nav-command-menu svg {
-  width: 15px;
-  height: 15px;
-  flex: none;
-}
-
 /* Half-filled circle, spanning both rows like a single stamped icon. */
 .nav-cell-theme {
   grid-column: 3;

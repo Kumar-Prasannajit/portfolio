@@ -1,89 +1,27 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { createPortal, flushSync } from "react-dom";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  IconCheck,
   IconClose,
   IconGithub,
   IconInstagram,
   IconLinkedin,
-  IconMail,
   IconMenu,
-  IconMoon,
   IconResume,
-  IconSun,
   IconThemeCircle,
 } from "./icons";
 import TaglineCycler from "./TaglineCycler";
 import { NAV_LINKS, NAV_LOGO_MARK, SOCIAL_LINKS } from "@/lib/data";
-
-type ViewTransitionDocument = Document & {
-  startViewTransition?: (callback: () => void) => {
-    ready: Promise<void>;
-  };
-};
-
-function systemPrefersDark() {
-  return (
-    typeof window !== "undefined" &&
-    window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-  );
-}
-
-function prefersReducedMotion() {
-  return (
-    typeof window !== "undefined" &&
-    window.matchMedia &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
-}
-
-// The theme actually being rendered right now: an explicit data-theme
-// stamp wins, otherwise it's whatever the prefers-color-scheme media
-// query is currently resolving the CSS variables to.
-function effectiveTheme(): "light" | "dark" {
-  const stamped = document.documentElement.getAttribute("data-theme");
-  if (stamped === "light" || stamped === "dark") return stamped;
-  return systemPrefersDark() ? "dark" : "light";
-}
+import { useTheme } from "@/lib/useTheme";
+import { useCommandPalette } from "./CommandPaletteContext";
 
 export default function Nav() {
-  // Base design is dark-first by default, matching the original site behavior.
-  const [isDark, setIsDark] = useState(true);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const { isDark, toggleTheme } = useTheme();
+  const { isOpen: paletteOpen, toggle: togglePalette } = useCommandPalette();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Syncs React state from the theme actually in effect — an explicit
-    // data-theme stamp the pre-hydration inline script (see app/layout.tsx)
-    // may have set from localStorage, or the system preference otherwise.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsDark(effectiveTheme() === "dark");
-  }, []);
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    function onPointerDown(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setMenuOpen(false);
-      }
-    }
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setMenuOpen(false);
-    }
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [menuOpen]);
 
   // Mobile drawer: Escape closes it, and — since it's a fixed-position
   // overlay rather than a normal document flow element — resizing past
@@ -107,89 +45,14 @@ export default function Nav() {
     };
   }, [mobileMenuOpen]);
 
-  // The ⌘K / Ctrl+K hint on the command cell is a real shortcut, not just
-  // decoration — it opens the same menu as clicking the grid icon.
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
-        event.preventDefault();
-        setMenuOpen((open) => !open);
-      }
-    }
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, []);
-
-  function toggleTheme(event: React.MouseEvent<HTMLButtonElement>) {
-    const next = effectiveTheme() === "dark" ? "light" : "dark";
-
-    const applyTheme = () => {
-      document.documentElement.setAttribute("data-theme", next);
-      try {
-        localStorage.setItem("kps-theme", next);
-      } catch {}
-      setIsDark(next === "dark");
-    };
-
-    const doc = document as ViewTransitionDocument;
-    if (!doc.startViewTransition || prefersReducedMotion()) {
-      applyTheme();
-      return;
-    }
-
-    // Touch/coarse-pointer devices (phones) skip the clip-path wave —
-    // animating clip-path repaints the mask on every frame, which is
-    // cheap enough on desktop GPUs to look smooth but not guaranteed on
-    // phone-class hardware. A plain opacity crossfade instead (see the
-    // `(pointer: coarse)` block in globals.css) is compositor-only, so
-    // it stays smooth regardless of the device underneath it.
-    const coarsePointer =
-      window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
-    if (coarsePointer) {
-      doc.startViewTransition(() => {
-        flushSync(applyTheme);
-      });
-      return;
-    }
-
-    // Wave/reveal animation: the incoming theme expands out from the
-    // toggle button's own center as a growing circle until it covers the
-    // screen — anchored to the button, not wherever inside it was clicked.
+  // Runs the same wave/reveal animation as before: the incoming theme
+  // expands out from the clicked button's own center as a growing
+  // circle. See lib/useTheme.ts for the shared implementation (also
+  // used by the command palette's "Toggle dark mode" action, which has
+  // no click origin to anchor to and falls back to a plain crossfade).
+  function toggleThemeFromButton(event: React.MouseEvent<HTMLButtonElement>) {
     const rect = event.currentTarget.getBoundingClientRect();
-    const x = rect.left + rect.width / 2;
-    const y = rect.top + rect.height / 2;
-    const endRadius = Math.hypot(
-      Math.max(x, window.innerWidth - x),
-      Math.max(y, window.innerHeight - y)
-    );
-
-    const transition = doc.startViewTransition(() => {
-      flushSync(applyTheme);
-    });
-
-    transition.ready.then(() => {
-      document.documentElement.animate(
-        {
-          clipPath: [
-            `circle(0px at ${x}px ${y}px)`,
-            `circle(${endRadius}px at ${x}px ${y}px)`,
-          ],
-        },
-        {
-          duration: 650,
-          easing: "ease-in-out",
-          pseudoElement: "::view-transition-new(root)",
-        }
-      );
-    });
-  }
-
-  async function copyEmail() {
-    try {
-      await navigator.clipboard.writeText(SOCIAL_LINKS.email);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {}
+    toggleTheme({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
   }
 
   return (
@@ -237,70 +100,18 @@ export default function Nav() {
               ))}
             </ul>
 
-            <div className="nav-command" ref={menuRef}>
+            <div className="nav-command">
               <button
                 type="button"
                 className="nav-cmd-trigger"
-                aria-label="Open command menu"
-                aria-haspopup="menu"
-                aria-expanded={menuOpen}
-                title="Command menu (⌘K)"
-                onClick={() => setMenuOpen((open) => !open)}
+                aria-label="Open command palette"
+                aria-haspopup="dialog"
+                aria-expanded={paletteOpen}
+                title="Command palette (⌘K)"
+                onClick={() => togglePalette()}
               >
                 <span className="nav-cmd-kbd mono">⌘</span>
               </button>
-              {menuOpen && (
-                <div className="nav-command-menu" role="menu">
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={() => {
-                      copyEmail();
-                    }}
-                  >
-                    {copied ? <IconCheck /> : <IconMail />}
-                    {copied ? "Copied!" : "Copy email"}
-                  </button>
-                  <a
-                    role="menuitem"
-                    href={SOCIAL_LINKS.resume}
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <IconResume />
-                    Download resume
-                  </a>
-                  <a
-                    role="menuitem"
-                    href={SOCIAL_LINKS.github}
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <IconGithub />
-                    GitHub
-                  </a>
-                  <a
-                    role="menuitem"
-                    href={SOCIAL_LINKS.linkedin}
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <IconLinkedin />
-                    LinkedIn
-                  </a>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={(event) => {
-                      toggleTheme(event);
-                      setMenuOpen(false);
-                    }}
-                  >
-                    {isDark ? <IconSun /> : <IconMoon />}
-                    {isDark ? "Light mode" : "Dark mode"}
-                  </button>
-                </div>
-              )}
             </div>
           </div>
 
@@ -309,7 +120,7 @@ export default function Nav() {
               className="theme-toggle-btn"
               aria-label="Toggle color theme"
               title="Toggle color theme"
-              onClick={toggleTheme}
+              onClick={toggleThemeFromButton}
             >
               <IconThemeCircle />
             </button>
@@ -375,7 +186,7 @@ export default function Nav() {
               className="theme-toggle-btn"
               aria-label="Toggle color theme"
               title="Toggle color theme"
-              onClick={toggleTheme}
+              onClick={toggleThemeFromButton}
             >
               <IconThemeCircle />
             </button>
