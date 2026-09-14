@@ -1,0 +1,29 @@
+---
+title: "Adding a blog, a devlog, and an actual command palette"
+date: "2026-09-14"
+summary: "The site goes from a single scrolling page to a real multi-route app — blog, this devlog, a fuzzy-search ⌘K, and an inline resume viewer."
+cover: "03"
+---
+
+Everything up to this point lived on one route. Today that changed.
+
+## The plumbing first
+
+Before any of the actual features, the nav and footer had to move out of the homepage's
+`page.tsx` and into the root layout — otherwise every new route would need to
+reimplement the same chrome by hand. Small change, but it's the thing that makes
+multi-page navigation work at all.
+
+## What's landing this week
+
+- **Blog** — MDX posts with frontmatter, a search box, tag filtering, and pagination on
+  the index.
+- **This devlog** — numbered, dated entries, newest first, which is exactly what
+  you're reading right now.
+- **A real ⌘K** — replacing the small dropdown menu with an actual fuzzy-searchable
+  command palette that can jump to any page or post.
+- **An inline resume viewer** — instead of just a download link, the PDF renders
+  directly on the page with zoom controls.
+
+Same red-and-black terminal aesthetic throughout — the goal was new functionality, not
+a new look.

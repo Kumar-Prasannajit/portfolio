@@ -1,0 +1,24 @@
+/* Shared 3-column card grid + empty-state styling for the Blog and
+   Weekly index pages — kept separate from either page's own component
+   so neither reaches into the other's "private" CSS module. */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+@media (max-width: 980px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.empty {
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  border: 1px dashed var(--border-2);
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+}

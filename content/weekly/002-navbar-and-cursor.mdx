@@ -1,0 +1,35 @@
+---
+title: "Navbar, cursor, and a week of small nav bugs"
+date: "2026-09-13"
+summary: "Two full navbar rewrites, a site-wide custom cursor, and a mobile drawer to replace the desktop nav that couldn't just shrink."
+cover: "02"
+---
+
+Most of this stretch went into the nav — which sounds small until you remember the nav
+is the one piece of UI present on every single page.
+
+## Navbar v1 → v2
+
+First pass rebuilt the navbar as a blueprint-style grid layout. Second pass added the
+indexed nav links (`01 About`, `02 Stack`, ...) and cleaned up the cursor interaction —
+turned out the two were more tangled together than expected, since the cursor's
+per-section "morph" effect reads directly off the nav's own DOM structure.
+
+## The cursor
+
+A site-wide pixel-block cursor replacement, with a `mix-blend-mode: difference` trick so
+it reads correctly against both the light and dark themes without maintaining two
+separate color sets. Fun problem, more edge cases than expected:
+
+- Firefox needed its own visibility fix that Chromium didn't
+- The ⌘K trigger's morph animation had a glitch where fast hovers could leave it
+  stuck mid-transition
+
+## Mobile nav
+
+The desktop nav grid doesn't just shrink gracefully below a certain width — past a point
+it needed to actually become a different UI, not a smaller version of the same one. Ended
+up rebuilding it as a hamburger + slide-out drawer, portaled to `<body>` instead of
+rendered in place (the sticky nav's `backdrop-filter` turns it into a containing block
+for `position: fixed` children, which was quietly breaking the drawer's positioning
+before that fix).

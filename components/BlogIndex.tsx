@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import type { BlogPostSummary } from "@/lib/content";
 import BlogCard from "./BlogCard";
 import styles from "./BlogIndex.module.css";
+import gridStyles from "./ContentGrid.module.css";
 
 const PAGE_SIZE_OPTIONS = [3, 6, 9, 12] as const;
 const DEFAULT_PAGE_SIZE = 6;
@@ -91,12 +92,12 @@ export default function BlogIndex({
       </div>
 
       {paged.length === 0 ? (
-        <p className={styles.empty}>
+        <p className={gridStyles.empty}>
           No posts match{query ? ` “${query}”` : ""}
           {tag !== "all" ? ` in #${tag}` : ""}.
         </p>
       ) : (
-        <div className={styles.grid}>
+        <div className={gridStyles.grid}>
           {paged.map((post) => (
             <BlogCard key={post.slug} post={post} />
           ))}

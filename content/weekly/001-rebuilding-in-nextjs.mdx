@@ -1,0 +1,29 @@
+---
+title: "Rebuilding the portfolio in Next.js"
+date: "2026-09-09"
+summary: "Wiped the repo down to a bare .git and rebuilt the old hand-authored index.html as a pixel-accurate Next.js port."
+cover: "01"
+---
+
+Old version of this site was one hand-authored `index.html` — no build step, no
+components, just a big file I kept editing in place. It worked, but it had reached the
+point where every change meant scrolling through a wall of markup to find the right
+`<div>`.
+
+## The rule for this rebuild
+
+Pixel-accurate port, not a redesign. Same layout, same colors, same copy — just broken
+into actual React components, on Next.js's App Router, so future changes touch one file
+instead of the whole page.
+
+Two deliberate deviations from a literal port, both small:
+
+- A toggle bug in the old markup (a checkbox that could get out of sync with its own
+  label) — fixed instead of faithfully reproduced.
+- The wave-style theme-transition animation — rebuilt using the View Transitions API
+  instead of the old approach, since Next gives a cleaner place to hook it in.
+
+## What's next
+
+Frame borders, section dividers, and scaling the whole layout down to feel more boxed
+and intentional rather than sprawling — that's the rest of this week.
