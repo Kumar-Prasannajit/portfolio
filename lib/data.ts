@@ -89,17 +89,18 @@ export const PROJECTS = [
     title: "Manima Online",
     badge: "LIVE",
     description:
-      "A multi-role spiritual-services marketplace for administrators, clients and agents, covering the complete service-booking lifecycle — with secure Razorpay and QR/UPI payments, server-side validation, idempotent payment handling, and CI/CD via GitHub Actions.",
+      "A live spiritual-services marketplace that moves real money: Razorpay and UPI/QR payments end-to-end, with idempotent handling and server-side validation to prevent double-charges across three roles — admin, client and agent. Shipped with CI/CD via GitHub Actions.",
     tags: ["React", "Node.js", "Express", "MongoDB", "JWT", "Razorpay"],
     links: [
       { label: "Live platform", href: "https://manimaonline.com/" },
     ] satisfies ProjectLink[],
+    sourceNote: "Source private — client codebase",
   },
   {
     title: "BIRAC E-YUVA Center",
     badge: "LIVE",
     description:
-      "Official site for the BIRAC E-YUVA Center at GIET University — a biotech innovation and entrepreneurship hub. Built section by section: a CSS 3D DNA-helix hero, a lightbox gallery, and a theme context for dark/light mode.",
+      "Solo-built site for GIET University's BIRAC E-YUVA Center, a biotech innovation and entrepreneurship hub — a CSS-only 3D DNA-helix hero, a lightbox project gallery, and a full dark/light theme system, end to end.",
     tags: ["Next.js", "React", "TypeScript", "Tailwind CSS"],
     links: [
       {
@@ -116,7 +117,7 @@ export const PROJECTS = [
     title: "NIPL Website",
     badge: "LIVE",
     description:
-      "The official website for Navgyan Innovations Pvt. Ltd. — an engaging, responsive presentation of the startup, with particle-field backgrounds, Lenis smooth scrolling and Swiper-powered sliders.",
+      "Solo-built marketing site for Navgyan Innovations Pvt. Ltd. — particle-field backgrounds, Lenis smooth scrolling and Swiper-powered sliders, built fully responsive from scratch.",
     tags: ["HTML", "CSS", "JavaScript", "Particle.js", "Lenis", "Swiper.js"],
     links: [
       {

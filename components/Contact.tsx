@@ -24,10 +24,9 @@ export default function Contact() {
           </a>
           <a
             className="btn btn-ghost"
-            href="about:blank"
+            href={SOCIAL_LINKS.resume}
             target="_blank"
             rel="noopener"
-            title="Resume — coming soon"
           >
             Resume
           </a>

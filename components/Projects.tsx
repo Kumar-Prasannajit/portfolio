@@ -37,6 +37,11 @@ export default function Projects() {
                     <IconExternalLink />
                   </a>
                 ))}
+                {"sourceNote" in project && (
+                  <span className="card-source-note mono">
+                    {project.sourceNote}
+                  </span>
+                )}
               </div>
             </div>
           ))}

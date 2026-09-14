@@ -1455,6 +1455,13 @@ header.site-nav {
   width: 12px;
   height: 12px;
 }
+.card-source-note {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  padding: 8px 0 4px;
+}
 .card-badge {
   font-family: var(--font-mono);
   font-size: 0.68rem;

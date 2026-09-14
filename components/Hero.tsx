@@ -63,6 +63,9 @@ export default function Hero() {
           <a className="btn btn-primary" href={`mailto:${SOCIAL_LINKS.email}`}>
             Get in touch
           </a>
+          <a className="btn btn-ghost" href="#work">
+            View work
+          </a>
           <a
             className="btn btn-ghost"
             href={SOCIAL_LINKS.resume}
