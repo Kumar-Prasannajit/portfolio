@@ -28,6 +28,7 @@ const PAGES = [
   { title: "Blogs", href: "/blog" },
   { title: "Weekly", href: "/weekly" },
   { title: "Contact", href: "/#contact" },
+  { title: "Resume", href: "/resume" },
 ];
 
 export default function CommandPalette({
