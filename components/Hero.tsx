@@ -1,5 +1,4 @@
 import { HERO_BINARY, SOCIAL_LINKS } from "@/lib/data";
-import NowPlayingWidget from "./NowPlayingWidget";
 
 export default function Hero() {
   return (
@@ -49,16 +48,11 @@ export default function Hero() {
             · returns: building
           </span>
         </div>
-        <div className="hero-title-row">
-          <h1>
-            KUMAR
-            <br />
-            <span className="l2">PRASANNAJIT</span>
-          </h1>
-          <div className="hero-nowplaying">
-            <NowPlayingWidget />
-          </div>
-        </div>
+        <h1>
+          KUMAR
+          <br />
+          <span className="l2">PRASANNAJIT</span>
+        </h1>
         <p className="hero-sub">
           Backend-leaning <strong>full-stack developer</strong> on the MERN
           stack — I ship REST APIs, booking platforms and the interfaces that

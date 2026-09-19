@@ -14,6 +14,7 @@ import {
   IconThemeCircle,
 } from "./icons";
 import TaglineCycler from "./TaglineCycler";
+import NowPlayingWidget from "./NowPlayingWidget";
 import { NAV_LINKS, NAV_LOGO_MARK, SOCIAL_LINKS } from "@/lib/data";
 import { useTheme } from "@/lib/useTheme";
 import { useCommandPalette } from "./CommandPaletteContext";
@@ -100,6 +101,8 @@ export default function Nav() {
               ))}
             </ul>
 
+            <NowPlayingWidget />
+
             <div className="nav-command">
               <button
                 type="button"
@@ -185,6 +188,7 @@ export default function Nav() {
             >
               <IconThemeCircle />
             </button>
+            <NowPlayingWidget variant="mobile" />
             <button
               type="button"
               className="nav-hamburger-btn"
