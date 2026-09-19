@@ -144,6 +144,50 @@ export const PROJECTS = [
   },
 ] as const;
 
+// /specs page. Same shape as STACK_GROUPS (label + pill items) so the page
+// reuses Stack.tsx's exact pill-row rendering. Machine/OS/Editor rows are
+// the real thing (pulled from the dev machine via PowerShell) — swap them
+// if you switch rigs. Peripherals can't be detected from code, so those
+// are placeholder jokes; replace with your actual gear whenever.
+export const SPECS_GROUPS: { label: string; items: string[] }[] = [
+  {
+    label: "Machine",
+    items: [
+      "11th Gen Intel Core i5-1145G7 @ 2.60GHz",
+      "15GB RAM (send help)",
+      "Intel Iris Xe Graphics",
+      "512GB NVMe SSD",
+    ],
+  },
+  {
+    label: "OS & Runtime",
+    items: ["Windows 11 Pro", "Node.js v24", "Git 2.55"],
+  },
+  {
+    label: "Editor & Terminal",
+    items: ["VS Code", "PowerShell", "Git Bash"],
+  },
+  {
+    label: "Peripherals",
+    items: [
+      "Mouse — clicks when needed",
+      "Keyboard — types when asked",
+      "Monitor — renders whatever VS Code throws at it",
+    ],
+  },
+];
+
+// /places page — bucket-list destinations. Placeholder wishlist, swap for
+// your real list whenever — see PLACES type shape above SPECS_GROUPS.
+export const PLACES: { name: string; note: string }[] = [
+  { name: "Japan", note: "For the neon signs and the WiFi that actually works" },
+  { name: "Iceland", note: "Aurora borealis > any CSS gradient I've ever shipped" },
+  { name: "Ladakh", note: "High altitude, low bandwidth, zero regrets" },
+  { name: "Switzerland", note: "Mountains, trains on time, sanity briefly restored" },
+  { name: "New York", note: "To see if it's really as fast-paced as the memes say" },
+  { name: "Bali", note: "Coding from a beach, at least once, for the plot" },
+];
+
 export const MARQUEE_ITEMS = [
   "MERN STACK",
   "REACT · NODE.JS · EXPRESS · MONGODB",

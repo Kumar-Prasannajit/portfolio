@@ -155,6 +155,27 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 8px;
+  /* Custom scrollbar: slim transparent track, red thumb. The standard
+     properties cover Firefox/modern Chromium; the ::-webkit rules give
+     older WebKit the same look and a rounded thumb inset from the edge. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--red) transparent;
+}
+.list::-webkit-scrollbar {
+  width: 8px;
+}
+.list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.list::-webkit-scrollbar-thumb {
+  background: var(--red);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.list::-webkit-scrollbar-thumb:hover {
+  background: var(--red-dim);
+  background-clip: padding-box;
 }
 
 .empty {

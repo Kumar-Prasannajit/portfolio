@@ -212,35 +212,3 @@ export function getWeeklyEntryBySlug(slug: string): WeeklyEntry | null {
 export function getAllWeeklySlugs(): string[] {
   return listContentFiles(WEEKLY_DIR).map(slugFromFilename);
 }
-
-/* -------------------------- Command palette -------------------------- */
-
-// Lightweight index (title/href/tags only — no post bodies) for the
-// command palette's "Blog posts" and "Weekly" groups. Built server-side
-// (this whole module is fs-based) and passed down as plain serializable
-// props from the root layout to the client CommandPalette component.
-export type CommandIndexItem = {
-  title: string;
-  description: string;
-  href: string;
-  group: "blog" | "weekly";
-  keywords: string[];
-};
-
-export function getCommandIndex(): CommandIndexItem[] {
-  const posts = getAllBlogPosts().map((post) => ({
-    title: post.frontmatter.title,
-    description: post.frontmatter.excerpt,
-    href: `/blog/${post.slug}`,
-    group: "blog" as const,
-    keywords: post.frontmatter.tags ?? [],
-  }));
-  const weekly = getAllWeeklyEntries().map((entry) => ({
-    title: `#${String(entry.number).padStart(3, "0")} — ${entry.frontmatter.title}`,
-    description: entry.frontmatter.summary,
-    href: `/weekly/${entry.slug}`,
-    group: "weekly" as const,
-    keywords: [] as string[],
-  }));
-  return [...posts, ...weekly];
-}

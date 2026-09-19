@@ -3,9 +3,9 @@
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
-import type { CommandIndexItem } from "@/lib/content";
 import { SOCIAL_LINKS } from "@/lib/data";
 import { useTheme } from "@/lib/useTheme";
+import { nowPlayingCopy, useNowPlaying } from "@/lib/useNowPlaying";
 import { useCommandPalette } from "./CommandPaletteContext";
 import {
   IconArrowDown,
@@ -14,13 +14,17 @@ import {
   IconBriefcase,
   IconCalendar,
   IconCornerDownLeft,
+  IconCpu,
   IconFolder,
   IconGithub,
   IconHome,
+  IconImage,
   IconLayers,
   IconLinkedin,
   IconMail,
+  IconMapPin,
   IconMoon,
+  IconMusic,
   IconPhone,
   IconResume,
   IconSearch,
@@ -29,16 +33,15 @@ import {
 } from "./icons";
 import styles from "./CommandPalette.module.css";
 
-// One flat, searchable list instead of the old Pages/Blog posts/Weekly/
-// Actions groups — cmdk's own fuzzy filter (shouldFilter) is the way
-// down to a specific item, not a wall of section headings. Each entry
-// carries everything a result row renders: an icon, a title, a short
-// description, and a "type" badge (Page / Blog / Weekly / Action).
+// One flat, searchable list — cmdk's own fuzzy filter (shouldFilter) is
+// the way down to a specific item, not a wall of section headings. Each
+// entry carries everything a result row renders: an icon, a title, a
+// short description, and a "type" badge (Page / Action).
 type PaletteEntry = {
   key: string;
   title: string;
   description: string;
-  type: "Page" | "Blog" | "Weekly" | "Action";
+  type: "Page" | "Action";
   icon: ReactNode;
   keywords?: string[];
   onSelect: () => void;
@@ -66,21 +69,23 @@ const PAGES: Array<{
   { title: "Work", description: "Jump to the Work section", href: "/#work", icon: <IconFolder /> },
   { title: "Blogs", description: "Browse all blog posts", href: "/blog", icon: <IconBookOpen /> },
   { title: "Weekly", description: "Browse the weekly devlog", href: "/weekly", icon: <IconCalendar /> },
+  { title: "Gallery", description: "Proof I touch grass sometimes", href: "/gallery", icon: <IconImage /> },
+  { title: "Specs", description: "The hardware & software running the show", href: "/specs", icon: <IconCpu /> },
+  {
+    title: "Places I wanna go",
+    description: "The bucket list, funding TBD",
+    href: "/places",
+    icon: <IconMapPin />,
+  },
   { title: "Contact", description: "Jump to the Contact section", href: "/#contact", icon: <IconPhone /> },
   { title: "Resume", description: "View the resume inline", href: "/resume", icon: <IconResume /> },
 ];
 
-export default function CommandPalette({
-  index,
-}: {
-  index: CommandIndexItem[];
-}) {
+export default function CommandPalette() {
   const router = useRouter();
   const { isOpen, close } = useCommandPalette();
   const { isDark, toggleTheme } = useTheme();
-
-  const blogItems = index.filter((item) => item.group === "blog");
-  const weeklyItems = index.filter((item) => item.group === "weekly");
+  const nowPlaying = useNowPlaying(isOpen);
 
   // Belt-and-braces alongside the [cmdk-root] flex fix in the CSS
   // module (see the comment there for the actual root cause): even
@@ -107,6 +112,8 @@ export default function CommandPalette({
     action();
   }
 
+  const nowPlayingEntry = nowPlayingCopy(nowPlaying);
+
   const entries: PaletteEntry[] = [
     ...PAGES.map((page) => ({
       key: page.href,
@@ -116,6 +123,20 @@ export default function CommandPalette({
       icon: page.icon,
       onSelect: () => goTo(page.href),
     })),
+    {
+      key: "action-now-playing",
+      title: nowPlayingEntry.title,
+      description: nowPlayingEntry.description,
+      type: "Action",
+      icon: <IconMusic />,
+      keywords: ["spotify", "music", "now playing", "lastfm", "song"],
+      onSelect: () =>
+        runAction(() => {
+          if (nowPlayingEntry.url) {
+            window.open(nowPlayingEntry.url, "_blank", "noopener");
+          }
+        }),
+    },
     {
       key: "action-theme",
       title: isDark ? "Switch to light mode" : "Switch to dark mode",
@@ -167,23 +188,6 @@ export default function CommandPalette({
       onSelect: () =>
         runAction(() => window.open(SOCIAL_LINKS.linkedin, "_blank", "noopener")),
     },
-    ...blogItems.map((item) => ({
-      key: item.href,
-      title: item.title,
-      description: item.description,
-      type: "Blog" as const,
-      icon: <IconBookOpen />,
-      keywords: item.keywords,
-      onSelect: () => goTo(item.href),
-    })),
-    ...weeklyItems.map((item) => ({
-      key: item.href,
-      title: item.title,
-      description: item.description,
-      type: "Weekly" as const,
-      icon: <IconCalendar />,
-      onSelect: () => goTo(item.href),
-    })),
   ];
 
   return (

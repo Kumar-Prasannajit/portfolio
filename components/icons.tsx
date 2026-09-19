@@ -418,3 +418,76 @@ export function IconZap(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+// --- Personal-commands icon set (gallery / specs / places / now-playing) ---
+
+export function IconImage(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <rect x="2.5" y="4" width="19" height="16" rx="2" />
+      <circle cx="8.5" cy="9.5" r="1.75" />
+      <path d="m4 17 5-5 3.5 3.5L17 11l3 3" />
+    </svg>
+  );
+}
+
+export function IconCpu(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <rect x="7" y="7" width="10" height="10" rx="1.5" />
+      <rect x="10" y="10" width="4" height="4" />
+      <path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3" />
+    </svg>
+  );
+}
+
+export function IconMapPin(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M12 21.5S4.5 14.9 4.5 9.8a7.5 7.5 0 0 1 15 0c0 5.1-7.5 11.7-7.5 11.7Z" />
+      <circle cx="12" cy="9.8" r="2.8" />
+    </svg>
+  );
+}
+
+export function IconMusic(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M9 18V5.5L20 3v12.5" />
+      <circle cx="6.5" cy="18" r="2.5" />
+      <circle cx="17.5" cy="15.5" r="2.5" />
+    </svg>
+  );
+}
