@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
 import { SOCIAL_LINKS } from "@/lib/data";
 import { useTheme } from "@/lib/useTheme";
+import { scrollToSection } from "@/lib/panelScroll";
 import { nowPlayingCopy, useNowPlaying } from "@/lib/useNowPlaying";
 import { useCommandPalette } from "./CommandPaletteContext";
 import {
@@ -104,6 +105,11 @@ export default function CommandPalette() {
 
   function goTo(href: string) {
     close();
+    // On the home page the sections live in separate scroll containers, so
+    // jump with the home scrollers instead of a hash navigation.
+    if (href.startsWith("/#") && window.location.pathname === "/" && scrollToSection(href.slice(2))) {
+      return;
+    }
     router.push(href);
   }
 

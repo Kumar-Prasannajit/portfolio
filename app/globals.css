@@ -1120,6 +1120,7 @@ header.site-nav {
   padding: clamp(44px, 7vw, 84px) 0 clamp(32px, 5vw, 48px);
   overflow: hidden;
   position: relative;
+  container-type: inline-size;
 }
 .hero-lines {
   position: absolute;
@@ -1187,6 +1188,9 @@ header.site-nav {
   line-height: 0.86;
   letter-spacing: -0.01em;
   font-size: clamp(2.4rem, 7.4vw, 5.4rem);
+  /* Sized off the hero column itself (it is narrower than the viewport on
+     the three-panel home layout): the name is ~7.9em wide. */
+  font-size: clamp(2.4rem, calc(12.2cqw - 12px), 5.4rem);
   margin: 0 0 24px;
 }
 
@@ -2017,4 +2021,241 @@ footer {
 }
 ::view-transition-new(root) {
   z-index: 2;
+}
+
+/* ============ HOME PANELS ============ */
+/* HomeShell.tsx: on wide screens the middle column is the page and the two
+   gutters become fixed side panels, each with its own Lenis scroller.
+   ≥1280px  three columns (left profile · middle page · right project loop)
+   1024–1279px  middle + ONE side panel with PROFILE / PROJECTS tabs
+   <1024px  no panels — one stacked page, ordered by the `order` rules below */
+html.lenis {
+  scroll-behavior: auto;
+}
+.panel-tabs,
+.panel-status {
+  display: none;
+}
+.panel-head .path {
+  white-space: nowrap;
+}
+.panel-tabs {
+  gap: 6px;
+  margin-left: auto;
+}
+.panel-tabs button {
+  padding: 4px 8px;
+  border: 2px solid var(--ink-faint);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink-dim);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+.panel-tabs button[aria-selected="true"] {
+  border-color: var(--red);
+  background: var(--red);
+  color: var(--red-ink);
+}
+.panel-status {
+  margin-left: auto;
+  padding: 2px 6px;
+  border: 2px solid var(--ink-faint);
+  color: var(--ink-dim);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+@media (min-width: 1024px) {
+  .site-frame:has(.home-shell) {
+    /* --vw is the viewport width minus the page scrollbar (set from JS);
+       100vw is the pre-hydration fallback. */
+    --vw-px: var(--vw, 100vw);
+    --panel-w: clamp(300px, calc((var(--vw-px) - 64rem) / 2), 460px);
+    --frame-w: min(64rem, calc(var(--vw-px) - 2 * var(--panel-w)));
+    max-width: var(--frame-w);
+  }
+  .side-panel {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    z-index: 40; /* under the sticky nav (50) so its divider line crosses the panels */
+    width: var(--panel-w);
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+  }
+  .side-left {
+    right: calc(50% + var(--frame-w) / 2);
+    border-left: 1px solid var(--border);
+  }
+  .side-right {
+    left: calc(50% + var(--frame-w) / 2);
+    border-right: 1px solid var(--border);
+  }
+
+  /* Same height as the nav, with the same 2px rule under it, so the three
+     columns share one header line. */
+  .panel-head {
+    flex: none;
+    height: var(--nav-h, 86px);
+    padding-top: 0;
+    padding-bottom: 0;
+    border-bottom: 2px solid var(--border);
+  }
+  .panel-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .panel-content {
+    position: relative;
+  }
+  .side-left .panel-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--red) transparent;
+  }
+  .side-left .panel-scroll::-webkit-scrollbar {
+    width: 8px;
+  }
+  .side-left .panel-scroll::-webkit-scrollbar-thumb {
+    background: var(--red);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  /* The right panel moves by itself; a scrollbar would just twitch. */
+  .side-right .panel-scroll {
+    scrollbar-width: none;
+  }
+  .side-right .panel-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  .side-right .panel-status {
+    display: inline-block;
+  }
+
+  /* The sections were designed for the full-width column: tighten them for
+     a 300–460px panel. */
+  .side-panel .section {
+    padding: 28px 0 34px;
+  }
+  .side-panel .wrap {
+    padding: 0 20px;
+  }
+  .side-panel .h2 {
+    font-size: 1.35rem;
+  }
+  .side-panel .about-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .side-panel .term-card {
+    box-shadow: none;
+  }
+  .side-panel .proj-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .side-panel .card {
+    height: auto;
+    padding: 20px;
+  }
+  /* The panel head already says "projects"; the heading would just repeat
+     at every turn of the loop. */
+  .side-right .proj-heading {
+    display: none;
+  }
+  .side-right .band.alt {
+    background: transparent;
+  }
+  .side-right .section {
+    padding: 20px 0;
+  }
+}
+
+/* The frame gets narrower than the nav was drawn for (down to ~680px at
+   1280px wide): drop the social icon column, same as the ≤880px rule, until
+   the viewport is wide enough (≥1460px) to leave the frame ~860px+. */
+@media (min-width: 1024px) and (max-width: 1459px) {
+  .site-frame:has(.home-shell) .nav-cell-social,
+  .site-frame:has(.home-shell) .nav-cell-top.nav-cell-social {
+    display: none;
+  }
+}
+
+/* One side panel at a time, switched by the PROFILE / PROJECTS tabs. */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .site-frame:has(.home-shell) {
+    --panel-w: 340px;
+    --frame-w: calc(var(--vw-px) - var(--panel-w));
+    margin: 0;
+  }
+  .side-left,
+  .side-right {
+    left: auto;
+    right: 0;
+    border-left: 1px solid var(--border);
+    border-right: none;
+  }
+  .home-shell[data-tab="profile"] .side-right,
+  .home-shell[data-tab="projects"] .side-left {
+    display: none;
+  }
+  .panel-tabs {
+    display: flex;
+  }
+  .panel-head .path,
+  .side-right .panel-status {
+    display: none;
+  }
+}
+
+/* No panels: flatten the wrappers and lay the sections out in one column,
+   in reading order. `display: contents` makes each section a direct flex
+   item of .home-shell so `order` can interleave the three groups. */
+@media (max-width: 1023px) {
+  .home-shell {
+    display: flex;
+    flex-direction: column;
+  }
+  .home-main,
+  .side-panel,
+  .panel-scroll,
+  .panel-content {
+    display: contents;
+  }
+  .panel-head,
+  .loop-clone {
+    display: none;
+  }
+  .hero {
+    order: 1;
+  }
+  .marquee-band {
+    order: 2;
+  }
+  #about {
+    order: 3;
+  }
+  #stack {
+    order: 4;
+  }
+  #experience {
+    order: 5;
+  }
+  #work {
+    order: 6;
+  }
+  #activity {
+    order: 7;
+  }
+  #contact {
+    order: 8;
+  }
 }
