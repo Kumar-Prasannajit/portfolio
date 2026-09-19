@@ -1,4 +1,4 @@
-import { IconExternalLink } from "./icons";
+import ProjectCard from "./ProjectCard";
 import { PROJECTS } from "@/lib/data";
 
 export default function Projects() {
@@ -14,38 +14,7 @@ export default function Projects() {
         </div>
         <div className="proj-grid">
           {PROJECTS.map((project) => (
-            <div className="card" key={project.title}>
-              <div className="card-top">
-                <h3>{project.title}</h3>
-                <span className="card-badge">{project.badge}</span>
-              </div>
-              <p>{project.description}</p>
-              <div className="card-tags">
-                {project.tags.map((tag) => (
-                  <span className="tag" key={tag}>
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              <div className="card-links">
-                {project.links.map((link) => (
-                  <a
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener"
-                    key={link.href}
-                  >
-                    {link.label}
-                    <IconExternalLink />
-                  </a>
-                ))}
-                {"sourceNote" in project && (
-                  <span className="card-source-note mono">
-                    {project.sourceNote}
-                  </span>
-                )}
-              </div>
-            </div>
+            <ProjectCard project={project} key={project.title} />
           ))}
         </div>
       </div>

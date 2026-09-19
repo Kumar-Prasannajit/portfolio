@@ -100,6 +100,9 @@ export const PROJECTS = [
   {
     title: "Manima Online",
     badge: "LIVE",
+    image: "/projects/manima.jpg",
+    summary:
+      "Live spiritual-services marketplace with Razorpay and UPI/QR payments.",
     description:
       "A live spiritual-services marketplace that moves real money: Razorpay and UPI/QR payments end-to-end, with idempotent handling and server-side validation to prevent double-charges across three roles — admin, client and agent. Shipped with CI/CD via GitHub Actions.",
     tags: ["React", "Node.js", "Express", "MongoDB", "JWT", "Razorpay"],
@@ -111,6 +114,9 @@ export const PROJECTS = [
   {
     title: "BIRAC E-YUVA Center",
     badge: "LIVE",
+    image: "/projects/eyuva.jpg",
+    summary:
+      "Biotech innovation hub site with a CSS-only 3D DNA-helix hero and dark/light themes.",
     description:
       "Solo-built site for GIET University's BIRAC E-YUVA Center, a biotech innovation and entrepreneurship hub — a CSS-only 3D DNA-helix hero, a lightbox project gallery, and a full dark/light theme system, end to end.",
     tags: ["Next.js", "React", "TypeScript", "Tailwind CSS"],
@@ -128,13 +134,16 @@ export const PROJECTS = [
   {
     title: "NIPL Website",
     badge: "LIVE",
+    image: "/projects/nipl.jpg",
+    summary:
+      "Marketing site with particle backgrounds, Lenis smooth scrolling and Swiper sliders.",
     description:
       "Solo-built marketing site for Navgyan Innovations Pvt. Ltd. — particle-field backgrounds, Lenis smooth scrolling and Swiper-powered sliders, built fully responsive from scratch.",
     tags: ["HTML", "CSS", "JavaScript", "Particle.js", "Lenis", "Swiper.js"],
     links: [
       {
         label: "Live site",
-        href: "https://kumar-prasannajit.github.io/NIPL-Website/",
+        href: "https://navgyaninnovations.com/",
       },
       {
         label: "Source",
@@ -222,3 +231,5 @@ export const GH_COUNTS: number[] = [
   0, 0, 0, 0, 1, 0, 2, 1, 1, 0, 0, 5, 2, 0, 12, 0, 0, 0, 1, 1,
   0, 1, 4, 5, 0, 0, 0, 2, 8, 0,
 ];
+
+export type Project = (typeof PROJECTS)[number];

@@ -172,6 +172,9 @@ export default function HomeShell({
       registerScroller("right", rightLenis);
 
       // --- Right panel: infinite loop -----------------------------------
+      rightContent
+        .querySelectorAll<HTMLElement>(".loop-clone a")
+        .forEach((link) => (link.tabIndex = -1));
       let setHeight = 0;
       let positioned = false;
       const measure = () => {
@@ -263,7 +266,13 @@ export default function HomeShell({
           rightLenis.scrollTo(current, { immediate: true });
         }
 
-        const drifting = !isPaused && !document.hidden && !reducedMotion.matches;
+        // A card revealed by a tap also holds the drift, so it isn't pulled
+        // out from under the reader.
+        const drifting =
+          !isPaused &&
+          !document.hidden &&
+          !reducedMotion.matches &&
+          !rightAside.querySelector(".pcard.is-revealed");
         if (drifting) {
           // The drift keeps its own fractional position: at 1x DPR the
           // browser rounds scrollTop, and re-reading it every frame would
@@ -381,14 +390,15 @@ export default function HomeShell({
         <div className="panel-scroll" data-scroller="right" ref={rightScrollRef}>
           <div className="panel-content">
             {/* Only the first copy is real: the rest exist to make the loop
-                seamless, so they're hidden from assistive tech and can't be
-                tabbed into. The first copy also carries #work. */}
+                seamless, so they're hidden from assistive tech and their links
+                are taken out of the tab order (see mountPanels). They must
+                stay clickable though — the scroll sits in the middle copies
+                most of the time. The first copy also carries #work. */}
             {Array.from({ length: LOOP_SETS }, (_, i) => (
               <div
                 key={i}
                 id={i === 0 ? "work" : undefined}
                 className={i === 0 ? "loop-set" : "loop-set loop-clone"}
-                inert={i > 0}
                 aria-hidden={i > 0 ? true : undefined}
               >
                 {right}
