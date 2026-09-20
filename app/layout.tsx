@@ -7,6 +7,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import CommandPalette from "@/components/CommandPalette";
 import { CommandPaletteProvider } from "@/components/CommandPaletteContext";
+import MotionProvider from "@/components/MotionProvider";
 
 const SITE_URL = "https://kumarp.in";
 
@@ -143,6 +144,7 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
+        <MotionProvider>
         <CommandPaletteProvider>
           <div className="site-frame" id="top">
             <Nav />
@@ -151,6 +153,7 @@ export default function RootLayout({
           </div>
           <CommandPalette />
         </CommandPaletteProvider>
+        </MotionProvider>
         <CustomCursor />
       </body>
     </html>

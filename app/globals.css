@@ -1136,6 +1136,23 @@ header.site-nav {
   filter: none;
 }
 
+/* Scroll-reveal (components/Reveal.tsx): elements start hidden and animate in.
+   Users who asked for reduced motion, or have no JS to run the reveal, just
+   get the content. !important beats motion's inline styles and animations. */
+@media (prefers-reduced-motion: reduce), (scripting: none) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Hero parallax layers (components/ScrollLayer.tsx). */
+@media (prefers-reduced-motion: reduce) {
+  [data-scroll-layer] {
+    transform: none !important;
+  }
+}
+
 /* ============ HERO ============ */
 .hero {
   padding: clamp(44px, 7vw, 84px) 0 clamp(32px, 5vw, 48px);
@@ -1319,22 +1336,44 @@ header.site-nav {
   overflow: hidden;
   white-space: nowrap;
 }
+/* Eases in on load instead of snapping to full speed. Two chained animations:
+   an accelerating intro that covers exactly the distance a constant-speed
+   scroll would in half the ramp time (so its end velocity equals the loop
+   speed), then the endless loop starting from where the intro stopped. The
+   loop shifts by 50% per cycle, so starting at an offset is still seamless.
+   All plain CSS: no JS to fail, and prefers-reduced-motion turns it all off. */
 .marquee-track {
+  --marquee-secs: 34; /* seconds per loop (unitless, used in calc) */
+  --marquee-ramp: 2.4; /* seconds of ease-in */
+  --marquee-ramp-shift: calc(
+    -25% * var(--marquee-ramp) / var(--marquee-secs)
+  );
   display: inline-flex;
   align-items: center;
-  animation: scroll-left 34s linear infinite;
+  animation:
+    marquee-in calc(var(--marquee-ramp) * 1s) cubic-bezier(0.11, 0, 0.5, 0) both,
+    marquee-loop calc(var(--marquee-secs) * 1s) linear
+      calc(var(--marquee-ramp) * 1s) infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .marquee-track {
     animation: none;
   }
 }
-@keyframes scroll-left {
+@keyframes marquee-in {
   from {
     transform: translateX(0);
   }
   to {
-    transform: translateX(-50%);
+    transform: translateX(var(--marquee-ramp-shift));
+  }
+}
+@keyframes marquee-loop {
+  from {
+    transform: translateX(var(--marquee-ramp-shift));
+  }
+  to {
+    transform: translateX(calc(var(--marquee-ramp-shift) - 50%));
   }
 }
 .marquee-track span {

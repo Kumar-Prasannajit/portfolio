@@ -1,9 +1,10 @@
+import ScrollLayer from "./ScrollLayer";
 import { HERO_BINARY, SOCIAL_LINKS } from "@/lib/data";
 
 export default function Hero() {
   return (
     <section className="hero">
-      <div className="hero-lines" aria-hidden="true">
+      <ScrollLayer className="hero-lines" aria-hidden y={[0, 90]} scale={[1, 1.08]}>
         <svg
           viewBox="0 0 1200 500"
           preserveAspectRatio="none"
@@ -36,7 +37,7 @@ export default function Hero() {
             />
           </g>
         </svg>
-      </div>
+      </ScrollLayer>
       <div className="hero-bin mono" aria-hidden="true">
         {HERO_BINARY}
       </div>
@@ -48,11 +49,11 @@ export default function Hero() {
             · returns: building
           </span>
         </div>
-        <h1>
+        <ScrollLayer as="h1" y={[0, 56]} scale={[1, 0.96]} origin="left top">
           KUMAR
           <br />
           <span className="l2">PRASANNAJIT</span>
-        </h1>
+        </ScrollLayer>
         <p className="hero-sub">
           Backend-leaning <strong>full-stack developer</strong> on the MERN
           stack — I ship REST APIs, booking platforms and the interfaces that

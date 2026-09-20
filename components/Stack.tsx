@@ -1,3 +1,4 @@
+import { RevealGroup, RevealItem } from "./Reveal";
 import { STACK_GROUPS } from "@/lib/data";
 
 export default function Stack() {
@@ -10,8 +11,9 @@ export default function Stack() {
         <h2 className="h2">Tools I reach for</h2>
         <div style={{ height: 28 }}></div>
 
+        <RevealGroup stagger={0.12}>
         {STACK_GROUPS.map((group) => (
-          <div className="stack-group" key={group.label}>
+          <RevealItem className="stack-group" key={group.label}>
             <div className="stack-label">{group.label}</div>
             <div className="pill-row">
               {group.items.map((item) => (
@@ -20,8 +22,9 @@ export default function Stack() {
                 </span>
               ))}
             </div>
-          </div>
+          </RevealItem>
         ))}
+        </RevealGroup>
       </div>
     </section>
   );
