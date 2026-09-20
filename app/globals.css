@@ -2331,8 +2331,8 @@ footer {
 
 /* ============ HOME PANELS ============ */
 /* HomeShell.tsx: on wide screens the middle column is the page and the two
-   gutters become fixed side panels, each with its own Lenis scroller.
-   ≥1280px  three columns (left profile · middle page · right project loop)
+   gutters become fixed side panels (the right one has its own Lenis scroller).
+   ≥1280px  three columns (left identity · middle page · right project loop)
    1024–1279px  middle + ONE side panel with PROFILE / PROJECTS tabs
    <1024px  no panels — one stacked page, ordered by the `order` rules below */
 html.lenis {
@@ -2378,11 +2378,13 @@ html.lenis {
 
 @media (min-width: 1024px) {
   .site-frame:has(.home-shell) {
-    /* --vw is the viewport width minus the page scrollbar (set from JS);
-       100vw is the pre-hydration fallback. */
-    --vw-px: var(--vw, 100vw);
-    --panel-w: clamp(300px, calc((var(--vw-px) - 64rem) / 2), 460px);
-    --frame-w: min(64rem, calc(var(--vw-px) - 2 * var(--panel-w)));
+    /* Sizes come from percentages, not 100vw: on the frame (a child of <body>)
+       and on the fixed panels a % resolves against the viewport width WITHOUT
+       the page scrollbar, which is what the layout needs, and it is right on
+       the first frame. (100vw includes the scrollbar; correcting that from JS
+       moved the whole layout ~15px once the page hydrated.) */
+    --panel-w: clamp(300px, calc((100% - 64rem) / 2), 460px);
+    --frame-w: min(64rem, calc(100% - 2 * var(--panel-w)));
     max-width: var(--frame-w);
   }
   .side-panel {
@@ -2408,7 +2410,10 @@ html.lenis {
      columns share one header line. */
   .panel-head {
     flex: none;
-    height: var(--nav-h, 86px);
+    /* The fallback is the nav's real height, so the panel headers don't jump
+       when HomeShell measures it: 87px, or 61px between 1024 and 1459px where
+       the nav drops its social column (see below). */
+    height: var(--nav-h, 87px);
     padding-top: 0;
     padding-bottom: 0;
     border-bottom: 2px solid var(--border);
@@ -2423,18 +2428,6 @@ html.lenis {
   .panel-content {
     position: relative;
   }
-  .side-left .panel-scroll {
-    scrollbar-width: thin;
-    scrollbar-color: var(--red) transparent;
-  }
-  .side-left .panel-scroll::-webkit-scrollbar {
-    width: 8px;
-  }
-  .side-left .panel-scroll::-webkit-scrollbar-thumb {
-    background: var(--red);
-    border: 2px solid transparent;
-    background-clip: padding-box;
-  }
   /* The right panel moves by itself; a scrollbar would just twitch. */
   .side-right .panel-scroll {
     scrollbar-width: none;
@@ -2446,23 +2439,13 @@ html.lenis {
     display: inline-block;
   }
 
-  /* The sections were designed for the full-width column: tighten them for
-     a 300–460px panel. */
+  /* The project cards were designed for the full-width column: tighten them
+     for a 300–460px panel. */
   .side-panel .section {
     padding: 28px 0 34px;
   }
   .side-panel .wrap {
     padding: 0 20px;
-  }
-  .side-panel .h2 {
-    font-size: 1.35rem;
-  }
-  .side-panel .about-grid {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-  .side-panel .term-card {
-    box-shadow: none;
   }
   .side-panel .proj-grid {
     grid-template-columns: 1fr;
@@ -2480,10 +2463,153 @@ html.lenis {
   }
 }
 
+/* ============ IDENTITY PANEL ============ */
+/* IdentityPanel.tsx: the fixed left panel. The portrait takes the top ~half;
+   three tiles (time, date, viewers) share the rest down to the bottom of the
+   screen. Each tile is a size container, so its numerals are sized from the
+   tile's own width and height (cqw / cqh) and fill it at any panel size.
+   --w (set inline) is the value's rough width in em. */
+.panel-fixed {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.ident {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 11fr) minmax(0, 10fr);
+}
+.ident-photo {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  background: #8a3d0b; /* the photo's orange, while it loads */
+  border-bottom: 2px solid var(--border);
+}
+.ident-img {
+  object-fit: cover;
+  object-position: 55% 38%;
+}
+/* Faint scanlines tie the photo to the site's hatched, pixel look. */
+.ident-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.18) 0,
+    rgba(0, 0, 0, 0.18) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+}
+.ident-tag {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 1;
+  padding: 5px 8px;
+  border: 2px solid var(--line-strong);
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  color: var(--ink);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.ident-stats {
+  display: grid;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  min-height: 0;
+}
+.stat {
+  position: relative;
+  container-type: size;
+  overflow: hidden;
+  padding: 0 12px;
+}
+.stat + .stat {
+  border-top: 2px solid var(--border);
+}
+.stat-head {
+  position: absolute;
+  top: 10px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+.stat-label::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 7px;
+  background: var(--red);
+}
+.stat-value {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 6px;
+  font-family: var(--font-display);
+  font-size: min(calc(100cqw / var(--w)), 76cqh);
+  line-height: 0.8;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.stat-red .stat-value {
+  color: var(--red);
+}
+/* Fixed-width digits so a ticking clock doesn't jitter. */
+.dg {
+  display: inline-block;
+  width: 0.7em;
+  text-align: center;
+}
+/* Odometer leading zeros. --ink-faint (not a darker grey) so they still pass
+   contrast, though they are decorative. */
+.dim {
+  color: var(--ink-faint);
+}
+.cl {
+  display: inline-block;
+  width: 0.34em;
+  text-align: center;
+  color: var(--red);
+  animation: blink 1s steps(1) infinite;
+}
+.sp {
+  display: inline-block;
+  width: 0.3em;
+}
+/* The seconds live in the tile's header, in red. */
+.stat-sec {
+  color: var(--red);
+  font-weight: 700;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl {
+    animation: none;
+  }
+}
+
 /* The frame gets narrower than the nav was drawn for (down to ~680px at
    1280px wide): drop the social icon column, same as the ≤880px rule, until
    the viewport is wide enough (≥1460px) to leave the frame ~860px+. */
 @media (min-width: 1024px) and (max-width: 1459px) {
+  .panel-head {
+    height: var(--nav-h, 61px);
+  }
   .site-frame:has(.home-shell) .nav-cell-social,
   .site-frame:has(.home-shell) .nav-cell-top.nav-cell-social {
     display: none;
@@ -2494,7 +2620,7 @@ html.lenis {
 @media (min-width: 1024px) and (max-width: 1279px) {
   .site-frame:has(.home-shell) {
     --panel-w: 340px;
-    --frame-w: calc(var(--vw-px) - var(--panel-w));
+    --frame-w: calc(100% - var(--panel-w));
     margin: 0;
   }
   .side-left,
@@ -2535,8 +2661,9 @@ html.lenis {
   .loop-clone {
     display: none;
   }
-  /* The looping ticker is decoration for wide screens; stacked, the Work
-     section (#work, below) is the one list of projects. */
+  /* The looping ticker and the identity panel are for wide screens; stacked,
+     the Work section (#work, below) is the one list of projects. */
+  .side-left,
   .side-right {
     display: none;
   }

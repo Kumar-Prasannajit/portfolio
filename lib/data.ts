@@ -40,6 +40,12 @@ export const BOOT_LINES = [
   "starting portfolio.service",
 ] as const;
 
+// The clock in the home page's left panel (components/IdentityPanel.tsx) shows
+// this time zone. Kumar's own time; use the visitor's instead by removing the
+// timeZone option there.
+export const PANEL_TIME_ZONE = "Asia/Kolkata";
+export const PANEL_TIME_ZONE_LABEL = "IST";
+
 export const NAV_LOGO_MARK = "KP.";
 
 export const SOCIAL_LINKS = {

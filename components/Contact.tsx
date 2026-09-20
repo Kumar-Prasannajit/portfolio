@@ -9,11 +9,11 @@ export default function Contact() {
         <div className="eyebrow">
           <span className="idx">06</span> Contact
         </div>
-        <h1 className="contact-h">
+        <h2 className="contact-h">
           LET&apos;S BUILD
           <br />
           SOMETHING
-        </h1>
+        </h2>
         <p className="contact-sub">
           Open to backend-leaning full-stack work and interesting problems —
           reach out about a role, a freelance build, or just to talk MERN and

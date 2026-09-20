@@ -1,7 +1,7 @@
 // Registry of the home page's Lenis scrollers (see components/HomeShell.tsx)
 // plus the one function anything else needs: scrollToSection(). On the home
-// page the sections live in different scroll containers (left panel, the
-// page itself, the looping right panel), so a plain `#about` anchor can't be
+// page the sections live in different scroll containers (the page itself and
+// the looping right panel), so a plain `#about` anchor can't be
 // trusted to scroll the right one — the nav links, the hero's "View work"
 // button and the ⌘K palette all go through here instead.
 
@@ -14,7 +14,7 @@ export const PANEL_MEDIA = "(min-width: 1024px)";
 // tabbed 1024–1279px layout only shows one side panel at a time).
 export const PANEL_TAB_EVENT = "home-panel-tab";
 
-export type ScrollerName = "page" | "left" | "right";
+export type ScrollerName = "page" | "right";
 
 const scrollers = new Map<ScrollerName, Lenis>();
 

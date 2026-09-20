@@ -1,19 +1,20 @@
 "use client";
 
 // The home page's three-zone layout. On wide screens the middle column is the
-// normal page (Hero, heatmap, contact, footer under the sticky nav) and the
-// two hatched gutters become fixed side panels that each scroll on their own:
+// page (Hero, About, Stack, Experience, Work, heatmap, contact, footer under
+// the sticky nav) and the two hatched gutters become fixed side panels:
 //
-//   left  — profile: About, Stack, Experience. Ordinary scroll, stops at its
-//           ends.
+//   left  — identity: the portrait plus big time / date / viewers tiles
+//           (IdentityPanel). It does not scroll.
 //   right — projects. Loops forever, drifting slowly; hovering pauses it so
 //           a project can be read and clicked, and the wheel scrolls it by
 //           hand in either direction.
 //
-// Every scroller is a Lenis instance (smooth wheel scrolling). Below 1024px
-// there are no panels: CSS collapses everything into one stacked page (see
-// the "HOME PANELS" block in globals.css) and only the page-level Lenis runs.
-// The 1024–1279px range shows a single side panel with PROFILE / PROJECTS tabs.
+// The page and the right panel are Lenis instances (smooth wheel scrolling).
+// Below 1024px there are no panels: CSS collapses everything into one stacked
+// page (see the "HOME PANELS" block in globals.css) and only the page-level
+// Lenis runs. The 1024–1279px range shows a single side panel with
+// PROFILE / PROJECTS tabs.
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Lenis from "lenis";
@@ -102,18 +103,15 @@ export default function HomeShell({
 }) {
   const [tab, setTab] = useState<Tab>("profile");
   const [paused, setPaused] = useState(false);
-  const leftScrollRef = useRef<HTMLDivElement>(null);
   const rightAsideRef = useRef<HTMLElement>(null);
   const rightScrollRef = useRef<HTMLDivElement>(null);
 
-  // Measurements the CSS can't know: the real viewport width (without the
-  // page scrollbar, which 100vw includes) and the nav's height, so the panel
-  // headers line up exactly with it.
+  // The nav's real height, so the panel headers line up exactly with it (the
+  // CSS fallback for --nav-h is already right, this only corrects any drift).
   useEffect(() => {
     const root = document.documentElement;
     const nav = document.querySelector<HTMLElement>("header.site-nav");
     const sync = () => {
-      root.style.setProperty("--vw", `${root.clientWidth}px`);
       if (nav) root.style.setProperty("--nav-h", `${nav.offsetHeight}px`);
     };
     sync();
@@ -122,8 +120,6 @@ export default function HomeShell({
     if (nav) observer.observe(nav);
     return () => {
       observer.disconnect();
-      root.style.removeProperty("--vw");
-      root.style.removeProperty("--nav-h");
     };
   }, []);
 
@@ -149,26 +145,18 @@ export default function HomeShell({
     registerScroller("page", page);
 
     function mountPanels() {
-      const leftEl = leftScrollRef.current;
       const rightEl = rightScrollRef.current;
       const rightAside = rightAsideRef.current;
-      const leftContent = leftEl?.firstElementChild;
       const rightContent = rightEl?.firstElementChild;
-      if (!leftEl || !rightEl || !rightAside || !leftContent || !rightContent) {
+      if (!rightEl || !rightAside || !rightContent) {
         return () => {};
       }
 
-      const leftLenis = new Lenis({
-        wrapper: leftEl,
-        content: leftContent,
-        autoRaf: true,
-      });
       const rightLenis = new Lenis({
         wrapper: rightEl,
         content: rightContent,
         autoRaf: true,
       });
-      registerScroller("left", leftLenis);
       registerScroller("right", rightLenis);
 
       // --- Right panel: infinite loop -----------------------------------
@@ -298,9 +286,7 @@ export default function HomeShell({
         rightAside.removeEventListener("focusin", onFocusIn);
         rightAside.removeEventListener("focusout", onFocusOut);
         setPaused(false);
-        unregisterScroller("left", leftLenis);
         unregisterScroller("right", rightLenis);
-        leftLenis.destroy();
         rightLenis.destroy();
       };
     }
@@ -364,16 +350,9 @@ export default function HomeShell({
         {middle}
       </main>
 
-      <aside className="side-panel side-left" aria-label="Profile">
+      <aside className="side-panel side-left" aria-label="Portrait, time, date and viewers">
         <PanelHead path="~/kumar/profile.sh" tab={tab} onTab={setTab} />
-        <div
-          className="panel-scroll"
-          data-scroller="left"
-          ref={leftScrollRef}
-          tabIndex={0}
-        >
-          <div className="panel-content">{left}</div>
-        </div>
+        <div className="panel-fixed">{left}</div>
       </aside>
 
       <aside
