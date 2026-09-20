@@ -107,7 +107,10 @@ const PERSON_JSON_LD = {
   sameAs: [SOCIAL_LINKS.github, SOCIAL_LINKS.linkedin],
 };
 
-// Runs before paint to stamp the saved theme, avoiding a flash of the wrong palette.
+// Runs before paint to stamp the saved theme, avoiding a flash of the wrong
+// palette. The server can't know localStorage, so <html> below carries
+// suppressHydrationWarning: this attribute is the one intended difference
+// between server and client HTML (the same approach next-themes takes).
 const THEME_INIT_SCRIPT = `
 (function(){
   try{
@@ -127,6 +130,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${archivoBlack.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
     >
       <head>

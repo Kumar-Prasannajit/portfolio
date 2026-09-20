@@ -360,13 +360,34 @@ header.site-nav {
 .nav-cell-logo:hover {
   opacity: 0.8;
 }
+/* Theme-specific elements. Dark is the default; light applies for an explicit
+   data-theme="light", or with no explicit choice when the system prefers
+   light — the same rule the palette variables above use. Pure CSS, so the
+   first paint is right before React hydrates. */
+.theme-light-only {
+  display: none;
+}
+:root[data-theme="light"] .theme-dark-only {
+  display: none;
+}
+:root[data-theme="light"] .theme-light-only {
+  display: revert;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .theme-dark-only {
+    display: none;
+  }
+  :root:not([data-theme="dark"]) .theme-light-only {
+    display: revert;
+  }
+}
 .nav-logo-swap {
   position: relative;
   display: inline-flex;
 }
 .nav-logo-img {
   /* One class shared by every state — default, hover-swap, dark, and
-     light (see Nav.tsx's src swaps) — so bumping it here covers all of
+     light (see Nav.tsx's per-theme images) — so bumping it here covers all of
      them at once. */
   height: 30.6px;
   width: auto;
