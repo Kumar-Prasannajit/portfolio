@@ -17,7 +17,7 @@ export default function WeeklyIndexPage() {
       <section className="section band">
         <div className="wrap">
           <div className="eyebrow">
-            <span className="idx">03</span> Weekly
+            Weekly
           </div>
           <h1 className="h2">Build log</h1>
           <div style={{ height: 28 }} />

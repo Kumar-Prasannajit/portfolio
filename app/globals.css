@@ -2166,11 +2166,6 @@ html.lenis {
     height: auto;
     padding: 20px;
   }
-  /* The panel head already says "projects"; the heading would just repeat
-     at every turn of the loop. */
-  .side-right .proj-heading {
-    display: none;
-  }
   .side-right .band.alt {
     background: transparent;
   }
@@ -2234,6 +2229,11 @@ html.lenis {
   .loop-clone {
     display: none;
   }
+  /* The looping ticker is decoration for wide screens; stacked, the Work
+     section (#work, below) is the one list of projects. */
+  .side-right {
+    display: none;
+  }
   .hero {
     order: 1;
   }
@@ -2258,6 +2258,41 @@ html.lenis {
   #contact {
     order: 8;
   }
+}
+
+/* ============ WORK SECTION ============ */
+/* WorkSection.tsx: the in-flow list behind /#work. One stretched link per
+   card, so the whole card is clickable. */
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 22px;
+}
+.work-card {
+  position: relative;
+}
+.work-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: none;
+}
+.work-card-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.work-card:hover .work-card-link {
+  color: var(--red);
+}
+.work-card:has(.work-card-link:focus-visible) {
+  outline: 3px solid var(--red);
+  outline-offset: 2px;
 }
 
 /* ============ PROJECT CARDS ============ */
@@ -2328,22 +2363,38 @@ html.lenis {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  cursor: pointer;
 }
-.pcard-cta:hover {
-  background: var(--red-dim);
+/* Invisible link over the whole card. Keyboard focus lands here and the
+   :focus-within rule below reveals the overlay. */
+.pcard-link {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
 }
-.pcard-cta:active {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
+.pcard-link:focus-visible {
+  outline: 3px solid var(--red);
+  outline-offset: -6px;
+}
+/* Touch: the first tap only reveals the overlay (ProjectCard's onClick), so
+   the link ignores taps until then. */
+@media (hover: none) {
+  .pcard-link {
+    pointer-events: none;
+  }
+  .pcard.is-revealed .pcard-link {
+    pointer-events: auto;
+  }
 }
 
 /* Reveal: hover only on devices that have it (on touch, :hover sticks after
    a tap and would fight the tap toggle), plus keyboard focus and the tap
-   state. The button is focusable while hidden so focusing it reveals it. */
+   state. The link is focusable while the overlay is hidden so focusing it reveals it. */
 @media (hover: hover) {
   .pcard:hover {
     border-color: var(--red);
+  }
+  .pcard:hover .pcard-cta {
+    background: var(--red-dim);
   }
   .pcard:hover .pcard-overlay {
     clip-path: inset(0);

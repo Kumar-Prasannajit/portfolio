@@ -94,7 +94,7 @@ export default function Nav() {
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
                   <a href={link.href}>
-                    <span className="nav-link-idx mono">{link.idx}</span>
+                    {link.idx && <span className="nav-link-idx mono">{link.idx}</span>}
                     {link.label}
                   </a>
                 </li>
@@ -222,7 +222,7 @@ export default function Nav() {
                     {NAV_LINKS.map((link) => (
                       <li key={link.href}>
                         <a href={link.href} onClick={() => setMobileMenuOpen(false)}>
-                          <span className="nav-link-idx mono">{link.idx}</span>
+                          {link.idx && <span className="nav-link-idx mono">{link.idx}</span>}
                           {link.label}
                         </a>
                       </li>

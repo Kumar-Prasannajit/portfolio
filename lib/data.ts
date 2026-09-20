@@ -1,24 +1,21 @@
-// idx mostly mirrors each target section's own eyebrow index (see
-// About.tsx, Projects.tsx, Contact.tsx) — 05 (Activity) has no nav link,
-// hence the jump from 04 to 06. Stack (idx 02 on-page) and Experience
-// (idx 03 on-page) were deliberately dropped from the navbar in favor of
-// Blogs/Weekly at those nav slots — both sections are still live on the
-// homepage (reachable by scroll or via "/#stack" / "/#experience", and
-// still listed in the command palette), they just no longer have a top
-// nav link, so idx 02/03 here point at different content than the
-// same-numbered eyebrows on the page itself. This is an intentional,
-// explicitly-confirmed exception to "idx mirrors the target's own idx".
+// Numbers appear only on entries that scroll within the home page, and match
+// the eyebrow index on the target section (01 About, 02 Stack, 03 Experience,
+// 04 Work, 05 Activity, 06 Contact). Blogs and Weekly are separate routes, so
+// they carry no number. Stack, Experience and Activity have no top-nav link
+// (they're reachable by scroll or the command palette), hence the gaps.
 //
 // Home-section links are root-relative ("/#about") rather than bare
 // hashes so they still work when Nav is rendered on a non-home route
 // (e.g. clicking "About" from /blog navigates to / and jumps there).
-export const NAV_LINKS = [
+export type NavLink = { href: string; label: string; idx?: string };
+
+export const NAV_LINKS: readonly NavLink[] = [
   { href: "/#about", label: "About", idx: "01" },
-  { href: "/blog", label: "Blogs", idx: "02" },
-  { href: "/weekly", label: "Weekly", idx: "03" },
+  { href: "/blog", label: "Blogs" },
+  { href: "/weekly", label: "Weekly" },
   { href: "/#work", label: "Work", idx: "04" },
   { href: "/#contact", label: "Contact", idx: "06" },
-] as const;
+];
 
 // Rotates in the nav's tagline slot via a GSAP letter-scatter transition
 // (see components/TaglineCycler.tsx). Case is intentional per-line — most
@@ -98,6 +95,7 @@ export type ProjectLink = { label: string; href: string };
 
 export const PROJECTS = [
   {
+    slug: "manima",
     title: "Manima Online",
     badge: "LIVE",
     image: "/projects/manima.jpg",
@@ -112,6 +110,7 @@ export const PROJECTS = [
     sourceNote: "Source private — client codebase",
   },
   {
+    slug: "eyuva",
     title: "BIRAC E-YUVA Center",
     badge: "LIVE",
     image: "/projects/eyuva.jpg",
@@ -132,6 +131,7 @@ export const PROJECTS = [
     ] satisfies ProjectLink[],
   },
   {
+    slug: "nipl",
     title: "NIPL Website",
     badge: "LIVE",
     image: "/projects/nipl.jpg",

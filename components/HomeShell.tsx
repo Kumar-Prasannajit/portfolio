@@ -393,11 +393,10 @@ export default function HomeShell({
                 seamless, so they're hidden from assistive tech and their links
                 are taken out of the tab order (see mountPanels). They must
                 stay clickable though — the scroll sits in the middle copies
-                most of the time. The first copy also carries #work. */}
+                most of the time. #work lives in the main column, not here. */}
             {Array.from({ length: LOOP_SETS }, (_, i) => (
               <div
                 key={i}
-                id={i === 0 ? "work" : undefined}
                 className={i === 0 ? "loop-set" : "loop-set loop-clone"}
                 aria-hidden={i > 0 ? true : undefined}
               >

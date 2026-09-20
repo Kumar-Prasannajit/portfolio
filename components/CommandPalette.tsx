@@ -17,6 +17,7 @@ import {
   IconCornerDownLeft,
   IconCpu,
   IconFolder,
+  IconGrid,
   IconGithub,
   IconHome,
   IconImage,
@@ -48,10 +49,10 @@ type PaletteEntry = {
   onSelect: () => void;
 };
 
-// Home-section entries (About/Stack/Experience/Work/Contact) still jump
-// here even though Stack and Experience lost their top-nav link — both
-// sections are still live on the homepage, and the palette is exactly
-// the power-user path that should keep reaching them.
+// Home-section entries come first, in page order (01 About … 06 Contact —
+// the same numbering as the section eyebrows), then the separate routes.
+// Stack, Experience and Activity have no top-nav link, so the palette is the
+// power-user path that keeps reaching them.
 const PAGES: Array<{
   title: string;
   description: string;
@@ -59,15 +60,17 @@ const PAGES: Array<{
   icon: ReactNode;
 }> = [
   { title: "Home", description: "Go to the home page", href: "/", icon: <IconHome /> },
-  { title: "About", description: "Jump to the About section", href: "/#about", icon: <IconUser /> },
-  { title: "Stack", description: "Jump to the Stack section", href: "/#stack", icon: <IconLayers /> },
+  { title: "01 About", description: "Jump to the About section", href: "/#about", icon: <IconUser /> },
+  { title: "02 Stack", description: "Jump to the Stack section", href: "/#stack", icon: <IconLayers /> },
   {
-    title: "Experience",
+    title: "03 Experience",
     description: "Jump to the Experience section",
     href: "/#experience",
     icon: <IconBriefcase />,
   },
-  { title: "Work", description: "Jump to the Work section", href: "/#work", icon: <IconFolder /> },
+  { title: "04 Work", description: "Jump to the Work section", href: "/#work", icon: <IconFolder /> },
+  { title: "05 Activity", description: "Jump to the Shipping log", href: "/#activity", icon: <IconGrid /> },
+  { title: "06 Contact", description: "Jump to the Contact section", href: "/#contact", icon: <IconPhone /> },
   { title: "Blogs", description: "Browse all blog posts", href: "/blog", icon: <IconBookOpen /> },
   { title: "Weekly", description: "Browse the weekly devlog", href: "/weekly", icon: <IconCalendar /> },
   { title: "Gallery", description: "Proof I touch grass sometimes", href: "/gallery", icon: <IconImage /> },
@@ -78,7 +81,6 @@ const PAGES: Array<{
     href: "/places",
     icon: <IconMapPin />,
   },
-  { title: "Contact", description: "Jump to the Contact section", href: "/#contact", icon: <IconPhone /> },
   { title: "Resume", description: "View the resume inline", href: "/resume", icon: <IconResume /> },
 ];
 

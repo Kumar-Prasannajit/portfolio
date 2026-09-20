@@ -5,11 +5,13 @@
 // the project name and a "Click me" button. On touch screens, which have no
 // hover, tapping the card toggles that state instead.
 //
-// The button is a placeholder for now: it will open a details modal (summary,
-// tech stack, links — all still in lib/data.ts) once that exists.
+// A transparent link covers the whole card and goes to /work/[slug]. On touch
+// it ignores taps until the card is revealed, so the first tap shows the
+// overlay and the second one follows the link.
 
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import type { Project } from "@/lib/data";
 
 export default function ProjectCard({ project }: { project: Project }) {
@@ -19,8 +21,8 @@ export default function ProjectCard({ project }: { project: Project }) {
   // Touch only: the CSS :hover reveal is scoped to hover-capable devices.
   function onClick(event: MouseEvent) {
     if (!window.matchMedia("(hover: none)").matches) return;
-    // Taps on the button belong to the button, not the toggle.
-    if ((event.target as Element).closest("button")) return;
+    // Taps on the link (only hittable once revealed) belong to the link.
+    if ((event.target as Element).closest("a")) return;
     setRevealed((value) => !value);
   }
 
@@ -53,10 +55,16 @@ export default function ProjectCard({ project }: { project: Project }) {
 
       <div className="pcard-overlay">
         <h3 className="pcard-name">{project.title}</h3>
-        <button type="button" className="pcard-cta">
-          Click me
-        </button>
+        <span className="pcard-cta" aria-hidden="true">
+          View project →
+        </span>
       </div>
+
+      <Link
+        href={`/work/${project.slug}`}
+        className="pcard-link"
+        aria-label={`${project.title}: view project`}
+      />
     </article>
   );
 }
