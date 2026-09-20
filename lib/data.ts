@@ -103,7 +103,34 @@ export const EXPERIENCE = [
 
 export type ProjectLink = { label: string; href: string };
 
-export const PROJECTS = [
+export type ProjectShot = { src: string; alt: string; caption: string };
+
+// One entry per project: drives the ticker/Work cards and the /work/[slug]
+// case study. Everything in the case-study fields is drawn from the project's
+// own description, the live site, or the blog — nothing is invented. Fields
+// that are still unknown are left out rather than filled with placeholders:
+//   TODO(content): `outcome` (a real result or metric) for each project —
+//   the case-study page shows the section only when it is set.
+export type Project = {
+  slug: string;
+  title: string;
+  badge: string;
+  image: string; // landing-page screenshot: card + case-study lead
+  summary: string;
+  description: string;
+  tags: readonly string[];
+  links: readonly ProjectLink[];
+  sourceNote?: string;
+  // --- case study ---
+  role: string;
+  context: string; // what it is and what it had to do
+  built: readonly string[]; // what I built
+  screenshots: readonly ProjectShot[]; // captured from the live site
+  related?: { label: string; href: string };
+  outcome?: string; // a real result; shown only when set
+};
+
+export const PROJECTS: readonly Project[] = [
   {
     slug: "manima",
     title: "Manima Online",
@@ -114,10 +141,33 @@ export const PROJECTS = [
     description:
       "A live spiritual-services marketplace that moves real money: Razorpay and UPI/QR payments end-to-end, with idempotent handling and server-side validation to prevent double-charges across three roles — admin, client and agent. Shipped with CI/CD via GitHub Actions.",
     tags: ["React", "Node.js", "Express", "MongoDB", "JWT", "Razorpay"],
-    links: [
-      { label: "Live platform", href: "https://manimaonline.com/" },
-    ] satisfies ProjectLink[],
+    links: [{ label: "Live platform", href: "https://manimaonline.com/" }],
     sourceNote: "Source private — client codebase",
+    role: "Full-stack developer",
+    context:
+      "Manima Online is a spiritual-services marketplace: people pick a puja or ritual, book it and pay online. It moves real money for three kinds of user — admin, client and agent — so the payment path has to be correct even when someone double-taps, retries or reloads.",
+    built: [
+      "Payments end to end with Razorpay and UPI/QR",
+      "Idempotent payment handling and server-side validation, so a retry or double-tap can't charge twice",
+      "Three user roles: admin, client and agent",
+      "CI/CD with GitHub Actions",
+    ],
+    screenshots: [
+      {
+        src: "/projects/manima-services.jpg",
+        alt: "Manima Online's featured services: a spotlight temple and a grid of pujas to choose from, with prices.",
+        caption: "Featured services — temples and pujas to book.",
+      },
+      {
+        src: "/projects/manima-how-it-works.jpg",
+        alt: "Manima Online's three-step flow: select your puja, book with ease through the secure payment process, receive blessings with confirmation updates.",
+        caption: "The three-step flow: select, book and pay, get confirmation.",
+      },
+    ],
+    related: {
+      label: "What actually breaks when a payment isn't idempotent",
+      href: "/blog/idempotent-payments-lessons",
+    },
   },
   {
     slug: "eyuva",
@@ -138,7 +188,28 @@ export const PROJECTS = [
         label: "Source",
         href: "https://github.com/Kumar-Prasannajit/giet-eyuva-center",
       },
-    ] satisfies ProjectLink[],
+    ],
+    role: "Solo developer, end to end",
+    context:
+      "The site for GIET University's BIRAC E-YUVA Center, a biotech innovation and entrepreneurship hub. It covers the centre's programs and fellowships, its people, lab-equipment booking and a gallery.",
+    built: [
+      "A CSS-only 3D DNA-helix hero",
+      "A lightbox gallery for projects",
+      "A full dark and light theme system",
+      "The whole site, built and shipped solo",
+    ],
+    screenshots: [
+      {
+        src: "/projects/eyuva-light-theme.jpg",
+        alt: "The E-YUVA Center hero in the light theme: the DNA helix beside the headline, with live-lab and fellowship cards.",
+        caption: "The hero in the light theme; the site ships dark and light.",
+      },
+      {
+        src: "/projects/eyuva-programs.jpg",
+        alt: "The Programs and Fellowships section: flagship fellowship program with student and advanced research tracks.",
+        caption: "Programs and fellowships.",
+      },
+    ],
   },
   {
     slug: "nipl",
@@ -159,9 +230,30 @@ export const PROJECTS = [
         label: "Source",
         href: "https://github.com/Kumar-Prasannajit/NIPL-Website",
       },
-    ] satisfies ProjectLink[],
+    ],
+    role: "Solo developer",
+    context:
+      "The marketing site for Navgyan Innovations Pvt. Ltd., an innovation studio behind a set of deep-tech startup projects across healthcare, agriculture and digital products. The site presents what the company does and the projects it has built.",
+    built: [
+      "Particle-field backgrounds behind the hero",
+      "Lenis smooth scrolling",
+      "Swiper-powered sliders",
+      "A fully responsive layout, built from scratch",
+    ],
+    screenshots: [
+      {
+        src: "/projects/nipl-focus-areas.jpg",
+        alt: "The Navgyan Innovations page: a large scrolling 'we build solutions that matter' headline above five focus areas.",
+        caption: "The headline marquee and the five focus areas.",
+      },
+      {
+        src: "/projects/nipl-works.jpg",
+        alt: "The 'Our works' section: six project cards for Breath X, Brain Viz, Neurolang, Aquatron, Unicollab and Manima.",
+        caption: "The works grid.",
+      },
+    ],
   },
-] as const;
+];
 
 // /specs page. Same shape as STACK_GROUPS (label + pill items) so the page
 // reuses Stack.tsx's exact pill-row rendering. Machine/OS/Editor rows are
@@ -242,4 +334,3 @@ export const GH_COUNTS: number[] = [
   0, 1, 4, 5, 0, 0, 0, 2, 8, 0,
 ];
 
-export type Project = (typeof PROJECTS)[number];
