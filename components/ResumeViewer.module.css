@@ -27,8 +27,8 @@
   padding: 3px;
 }
 .zoomBtn {
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px; /* touch target */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -91,4 +91,10 @@
 }
 .status.errorStatus {
   color: var(--red);
+}
+
+/* pdf.js link hotspots can be tiny (a word of text); keep them big enough to hit. */
+.viewport :global(.annotationLayer a) {
+  min-width: 24px;
+  min-height: 24px;
 }

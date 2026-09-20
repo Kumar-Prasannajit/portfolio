@@ -10,7 +10,7 @@ export default function BlogCard({ post }: { post: BlogPostSummary }) {
         <span>{formatContentDate(post.frontmatter.date)}</span>
         <span>{post.readTimeMinutes} min read</span>
       </div>
-      <h3 className={styles.title}>{post.frontmatter.title}</h3>
+      <h2 className={styles.title}>{post.frontmatter.title}</h2>
       <p className={styles.excerpt}>{post.frontmatter.excerpt}</p>
       <div className={styles.tags}>
         {(post.frontmatter.tags ?? []).map((tag) => (

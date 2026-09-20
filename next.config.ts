@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
   // `false`) default.
   trailingSlash: false,
 
+  // next/image serves WebP by default; AVIF first (smaller) where supported.
+  images: {
+    formats: ["image/avif", "image/webp"],
+  },
+
   // next-mdx-remote's own README calls this out explicitly for Turbopack
   // (which `next dev`/`next build` use by default here): without it,
   // Turbopack doesn't reliably tell the package's server-only code apart

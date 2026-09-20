@@ -13,7 +13,7 @@ export default function BlogIndexPage() {
   const tags = getAllBlogTags();
 
   return (
-    <main>
+    <main id="main" tabIndex={-1}>
       <section className="section band">
         <div className="wrap">
           <div className="eyebrow">

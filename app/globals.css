@@ -8,8 +8,10 @@
   --border-2: #33393f;
   --ink: #ecedef;
   --ink-dim: #8b929b;
-  --ink-faint: #565c64;
-  --red: #e0303a;
+  --ink-faint: #80878f; /* text: 5.4:1 on --bg */
+  --line-strong: #565c64; /* the old faint grey: borders and pixel fills only */
+  --red: #e8404a; /* accent: red text/lines on dark surfaces */
+  --red-solid: #b01c26; /* red SURFACES that carry light text (buttons, bands) */
   --red-dim: #a92329;
   --red-ink: #fff4f1;
   --heat-0: #1c2027;
@@ -39,8 +41,10 @@
     --border-2: #c9c9c1;
     --ink: #14161a;
     --ink-dim: #565c63;
-    --ink-faint: #8b9096;
+    --ink-faint: #5f656b; /* text: 5.2:1 on --bg */
+    --line-strong: #8b9096;
     --red: #c81e28;
+    --red-solid: #c81e28;
     --red-dim: #a3161f;
     --red-ink: #fff7f5;
     --heat-0: #e9ebed;
@@ -60,8 +64,10 @@
   --border-2: #c9c9c1;
   --ink: #14161a;
   --ink-dim: #565c63;
-  --ink-faint: #8b9096;
+  --ink-faint: #5f656b; /* text: 5.2:1 on --bg */
+  --line-strong: #8b9096;
   --red: #c81e28;
+  --red-solid: #c81e28;
   --red-dim: #a3161f;
   --red-ink: #fff7f5;
   --heat-0: #e9ebed;
@@ -80,8 +86,10 @@
   --border-2: #33393f;
   --ink: #ecedef;
   --ink-dim: #8b929b;
-  --ink-faint: #565c64;
-  --red: #e0303a;
+  --ink-faint: #80878f; /* text: 5.4:1 on --bg */
+  --line-strong: #565c64; /* the old faint grey: borders and pixel fills only */
+  --red: #e8404a; /* accent: red text/lines on dark surfaces */
+  --red-solid: #b01c26; /* red SURFACES that carry light text (buttons, bands) */
   --red-dim: #a92329;
   --red-ink: #fff4f1;
   --heat-0: #1c2027;
@@ -122,6 +130,39 @@ body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   text-wrap: pretty;
+}
+
+/* ============ FOCUS + SKIP LINK ============ */
+/* Keyboard focus is always visible: one ring for everything. The custom cursor
+   only hides the mouse pointer (cursor: none), never focus. Red on the red
+   Contact band would vanish, so it switches to the light ink there. */
+:focus-visible {
+  outline: 3px solid var(--red);
+  outline-offset: 3px;
+}
+.contact-band :focus-visible {
+  outline-color: var(--red-ink);
+}
+main:focus {
+  outline: none; /* the skip link's target; not a control */
+}
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 10000;
+  padding: 13px 16px;
+  background: var(--red-solid);
+  color: var(--red-ink);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+.skip-link:focus-visible {
+  transform: none;
+  outline-color: var(--ink);
 }
 
 /* ============ CUSTOM CURSOR ============ */
@@ -179,7 +220,7 @@ html.custom-cursor-active * {
   padding: 6px 10px;
   border: 2px solid var(--red-ink);
   border-radius: 0;
-  background: var(--red);
+  background: var(--red-solid);
   color: var(--red-ink);
   box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
   font-family: var(--font-mono);
@@ -266,7 +307,7 @@ img {
   display: block;
 }
 ::selection {
-  background: var(--red);
+  background: var(--red-solid);
   color: var(--red-ink);
 }
 
@@ -712,7 +753,7 @@ header.site-nav {
   flex-direction: column;
   gap: 12px;
   padding: 12px;
-  border: 2px solid var(--ink-faint);
+  border: 2px solid var(--line-strong);
   border-radius: 0;
   background: var(--panel);
   box-shadow: 4px 4px 0 var(--red-dim);
@@ -726,14 +767,14 @@ header.site-nav {
 }
 .np-tag {
   padding: 2px 6px;
-  background: var(--ink-faint);
+  background: var(--line-strong);
   color: var(--bg);
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.08em;
 }
 .np-pop.live .np-tag {
-  background: var(--red);
+  background: var(--red-solid);
   color: var(--red-ink);
 }
 
@@ -749,7 +790,7 @@ header.site-nav {
 .np-eq i {
   flex: 1;
   height: 4px;
-  background: var(--ink-faint);
+  background: var(--line-strong);
 }
 .np-pop.live .np-eq i {
   background: var(--red);
@@ -798,7 +839,7 @@ header.site-nav {
   width: 72px;
   height: 72px;
   object-fit: cover;
-  border: 2px solid var(--ink-faint);
+  border: 2px solid var(--line-strong);
   border-radius: 0;
   /* Snap the album art to visible pixels instead of smoothing it. */
   image-rendering: pixelated;
@@ -940,7 +981,7 @@ header.site-nav {
 .nav-hatch {
   height: 100%;
   min-height: 26px;
-  background-image: url("/test1.gif");
+  background-image: url("/nav-eyes.webp");
   background-size: cover;
   background-position: center;
 }
@@ -953,6 +994,7 @@ header.site-nav {
 .nav-mobile-bar {
   display: none;
   align-items: stretch;
+  min-height: 46px; /* 44px of content + the 1px border each side: its buttons stretch to 44px touch targets */
   border: 1px solid var(--border-2);
   background: var(--panel);
 }
@@ -1075,7 +1117,7 @@ header.site-nav {
 .nav-mobile-gif {
   height: 160px;
   flex-shrink: 0;
-  background-image: url("/test1.gif");
+  background-image: url("/nav-eyes.webp");
   background-size: cover;
   background-position: center;
 }
@@ -1203,28 +1245,14 @@ header.site-nav {
   filter: none;
 }
 
-/* Scroll-reveal (components/Reveal.tsx): elements start hidden and animate in.
-   Users who asked for reduced motion, or have no JS to run the reveal, just
-   get the content. !important beats motion's inline styles and animations. */
-@media (prefers-reduced-motion: reduce), (scripting: none) {
+/* Scroll-reveal (components/Reveal.tsx): content is visible in the server HTML,
+   and only elements that start below the fold are hidden (after mount) and
+   revealed as they scroll in, so nothing above the fold waits on JS. This
+   rule stays as a backstop for anyone who asks for reduced motion. */
+@media (prefers-reduced-motion: reduce) {
   [data-reveal] {
     opacity: 1 !important;
     transform: none !important;
-  }
-}
-
-/* Failsafe: reveal items are hidden in the server HTML and shown by JS. If the
-   scripts never load or hydrate (MotionProvider sets data-hydrated on <html>
-   once they have), show everything after 5s rather than leave it invisible. A
-   CSS animation overrides motion's inline styles; once hydrated the rule stops
-   matching and scroll-reveals carry on normally. */
-html:not([data-hydrated]) [data-reveal] {
-  animation: reveal-failsafe 0.01s linear 5s forwards;
-}
-@keyframes reveal-failsafe {
-  to {
-    opacity: 1;
-    transform: none;
   }
 }
 
@@ -1250,7 +1278,7 @@ html:not([data-hydrated]) [data-reveal] {
      1.15s  wipe (0.30s) -> hidden at 1.45s */
 .boot {
   position: fixed;
-  bottom: 0; /* anchored to the bottom so the wipe's edge travels down the page */
+  top: 0;
   left: 0;
   right: 0;
   height: 100vh;
@@ -1260,6 +1288,7 @@ html:not([data-hydrated]) [data-reveal] {
   background: var(--bg);
   border-top: 3px solid var(--red);
   color: var(--ink-dim);
+  will-change: transform;
   animation: boot-wipe 0.3s steps(8, end) 1.15s forwards;
 }
 html[data-boot="done"] .boot {
@@ -1271,8 +1300,9 @@ html[data-boot="done"] .boot {
   }
 }
 .boot-inner {
-  /* Pinned to the viewport, not the shrinking overlay, so the text holds still
-     while the wipe passes over it. */
+  /* Counter-moves against the overlay (boot-hold) so the text holds still in
+     the viewport while the wipe passes over it. */
+  animation: boot-hold 0.3s steps(8, end) 1.15s forwards;
   position: absolute;
   left: 0;
   right: 0;
@@ -1309,7 +1339,7 @@ html[data-boot="done"] .boot {
   width: 100%;
   height: 10px;
   margin-top: 10px;
-  border: 2px solid var(--ink-faint);
+  border: 2px solid var(--line-strong);
 }
 .boot-bar span {
   display: block;
@@ -1348,10 +1378,17 @@ html[data-boot="done"] .boot {
     visibility: visible;
   }
 }
+/* The wipe slides the overlay down with a transform. Animating its height
+   instead counts as layout shift (it scored a CLS of 0.56 in Lighthouse). */
 @keyframes boot-wipe {
   to {
-    height: 0;
+    transform: translateY(100%);
     visibility: hidden;
+  }
+}
+@keyframes boot-hold {
+  to {
+    transform: translateY(-100%);
   }
 }
 
@@ -1484,6 +1521,7 @@ html[data-boot="done"] .boot {
   font-weight: 500;
   text-decoration: none;
   padding: 11px 18px;
+  min-height: 44px; /* touch target */
   border-radius: 9px;
   border: 1px solid transparent;
   cursor: pointer;
@@ -1496,7 +1534,7 @@ html[data-boot="done"] .boot {
   transform: translateY(-2px);
 }
 .btn-primary {
-  background: var(--red);
+  background: var(--red-solid);
   color: var(--red-ink);
 }
 .btn-primary:hover {
@@ -1531,7 +1569,7 @@ html[data-boot="done"] .boot {
 /* ============ MARQUEE ============ */
 .marquee-band {
   position: relative;
-  background: var(--red);
+  background: var(--red-solid);
   color: var(--red-ink);
 }
 .marquee-clip {
@@ -1997,7 +2035,7 @@ html[data-boot="done"] .boot {
   color: var(--red);
   margin-bottom: 8px;
 }
-.place-card h3 {
+.place-card h2 {
   font-size: 1.05rem;
   font-weight: 700;
   margin-bottom: 8px;
@@ -2043,6 +2081,7 @@ html[data-boot="done"] .boot {
   border-bottom: 1px solid var(--border-2);
   /* See .card-links a's comment — same tap-target fix. */
   padding: 8px 0 4px;
+  min-height: 44px;
 }
 .gh-link:hover {
   color: var(--red);
@@ -2125,12 +2164,12 @@ html[data-boot="done"] .boot {
 
 /* ============ CONTACT ============ */
 .contact-band {
-  background: var(--red);
+  background: var(--red-solid);
   color: var(--red-ink);
 }
 .contact-band .eyebrow {
   color: var(--red-ink);
-  opacity: 0.85;
+  opacity: 0.92;
 }
 .contact-band .eyebrow::after {
   background: rgba(255, 255, 255, 0.35);
@@ -2155,7 +2194,7 @@ html[data-boot="done"] .boot {
 }
 .contact-band .btn-primary {
   background: var(--red-ink);
-  color: var(--red);
+  color: var(--red-solid);
 }
 .contact-band .btn-primary:hover {
   background: #fff;
@@ -2179,7 +2218,7 @@ html[data-boot="done"] .boot {
   font-family: var(--font-mono);
   font-size: 1rem;
   margin-top: 26px;
-  opacity: 0.9;
+  opacity: 0.92;
 }
 .contact-email a {
   text-decoration: underline;
@@ -2187,6 +2226,11 @@ html[data-boot="done"] .boot {
 }
 
 /* ============ FOOTER ============ */
+.footer-top {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px; /* touch target */
+}
 footer {
   position: relative;
   padding: 26px 0;
@@ -2307,7 +2351,7 @@ html.lenis {
 }
 .panel-tabs button {
   padding: 4px 8px;
-  border: 2px solid var(--ink-faint);
+  border: 2px solid var(--line-strong);
   border-radius: 0;
   background: transparent;
   color: var(--ink-dim);
@@ -2319,13 +2363,13 @@ html.lenis {
 }
 .panel-tabs button[aria-selected="true"] {
   border-color: var(--red);
-  background: var(--red);
+  background: var(--red-solid);
   color: var(--red-ink);
 }
 .panel-status {
   margin-left: auto;
   padding: 2px 6px;
-  border: 2px solid var(--ink-faint);
+  border: 2px solid var(--line-strong);
   color: var(--ink-dim);
   font-size: 0.62rem;
   font-weight: 700;
@@ -2538,6 +2582,7 @@ html.lenis {
   align-items: center;
   gap: 6px;
   margin-top: auto;
+  min-height: 44px; /* touch target (the whole card is also a link via ::after) */
   font-family: var(--font-mono);
   font-size: 0.8rem;
   font-weight: 500;
@@ -2567,7 +2612,7 @@ html.lenis {
   position: relative;
   overflow: hidden;
   container-type: inline-size; /* the name sizes off the card, not the viewport */
-  border: 2px solid var(--ink-faint);
+  border: 2px solid var(--line-strong);
   border-radius: 0;
   background: var(--panel);
   box-shadow: 4px 4px 0 var(--red-dim);
@@ -2617,7 +2662,7 @@ html.lenis {
   padding: 9px 16px;
   border: 2px solid var(--red-ink);
   border-radius: 0;
-  background: var(--red);
+  background: var(--red-solid);
   color: var(--red-ink);
   box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
   font-family: var(--font-mono);

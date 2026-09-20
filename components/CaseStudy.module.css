@@ -43,7 +43,7 @@
 }
 
 .frame {
-  border: 2px solid var(--ink-faint);
+  border: 2px solid var(--line-strong);
   background: var(--panel);
   box-shadow: 4px 4px 0 var(--red-dim);
   line-height: 0;

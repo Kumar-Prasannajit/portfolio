@@ -163,6 +163,9 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
+        <a className="skip-link" href="#main" data-skip-link="">
+          Skip to content
+        </a>
         <MotionProvider>
         <CommandPaletteProvider>
           <div className="site-frame" id="top">

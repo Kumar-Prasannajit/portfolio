@@ -55,7 +55,7 @@ export default async function WorkPage({
     project.badge.charAt(0).toUpperCase() + project.badge.slice(1).toLowerCase();
 
   return (
-    <main>
+    <main id="main" tabIndex={-1}>
       <section className="section band">
         <div className="wrap">
           <Link href="/#work" className={blogStyles.back}>

@@ -328,6 +328,8 @@ export default function HomeShell({
         return;
       }
       const anchor = (event.target as Element).closest("a");
+      // The skip link relies on the browser's own jump-and-focus.
+      if (anchor?.hasAttribute("data-skip-link")) return;
       const href = anchor?.getAttribute("href");
       if (!href) return;
       const id = href.startsWith("/#") ? href.slice(2) : href.startsWith("#") ? href.slice(1) : "";
@@ -358,7 +360,9 @@ export default function HomeShell({
 
   return (
     <div className="home-shell" data-tab={tab}>
-      <main className="home-main">{middle}</main>
+      <main className="home-main" id="main" tabIndex={-1}>
+        {middle}
+      </main>
 
       <aside className="side-panel side-left" aria-label="Profile">
         <PanelHead path="~/kumar/profile.sh" tab={tab} onTab={setTab} />

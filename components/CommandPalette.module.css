@@ -108,6 +108,8 @@
 }
 .input:focus {
   outline: none;
+  /* borderless field: a red underline is the focus indicator */
+  box-shadow: inset 0 -2px 0 var(--red);
 }
 
 /* Footer-style hint bar: ↑↓ Navigate · ↵ Open · esc Close. Each key is
@@ -253,10 +255,11 @@
   background: var(--panel-2);
 }
 .item[data-selected="true"] .itemIcon {
-  background: var(--red);
+  background: var(--red-solid);
   color: var(--red-ink);
 }
 .item[data-selected="true"] .itemType {
   border-color: var(--red-dim);
-  color: var(--red);
+  /* pure red is only 4.2:1 on the selected row; mixing in ink lifts it past 4.5 */
+  color: color-mix(in srgb, var(--red) 65%, var(--ink));
 }

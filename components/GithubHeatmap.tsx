@@ -117,7 +117,12 @@ export default function GithubHeatmap() {
               <IconExternalLink />
             </a>
           </RevealItem>
-          <RevealItem className="gh-scroll">
+          <RevealItem
+            className="gh-scroll"
+            tabIndex={0}
+            role="region"
+            aria-label="Contribution graph, scrolls sideways"
+          >
             <div className="gh-grid-wrap">
               <div className="gh-months mono">
                 {weeks.map((week) => (

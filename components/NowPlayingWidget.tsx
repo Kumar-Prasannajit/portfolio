@@ -128,7 +128,15 @@ export default function NowPlayingWidget({
               <div className="np-player">
                 {track.artwork ? (
                   // eslint-disable-next-line @next/next/no-img-element -- remote iTunes artwork, not worth next/image config for a tiny popover thumbnail
-                  <img src={track.artwork} alt="" className="np-art" />
+                  <img
+                    src={track.artwork}
+                    alt=""
+                    className="np-art"
+                    width={72}
+                    height={72}
+                    loading="lazy"
+                    decoding="async"
+                  />
                 ) : (
                   <span className="np-art np-art-empty" aria-hidden="true">
                     <IconMusic />

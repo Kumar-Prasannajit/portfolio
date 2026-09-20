@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function PlacesPage() {
   return (
-    <main>
+    <main id="main" tabIndex={-1}>
       <section className="section band">
         <div className="wrap">
           <div className="eyebrow">
@@ -36,7 +36,7 @@ export default function PlacesPage() {
                   <div className="place-idx mono">
                     {String(i + 1).padStart(2, "0")}
                   </div>
-                  <h3>{place.name}</h3>
+                  <h2>{place.name}</h2>
                   <p>{place.note}</p>
                 </div>
               ))}
