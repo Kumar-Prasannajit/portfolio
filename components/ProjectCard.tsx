@@ -63,6 +63,7 @@ export default function ProjectCard({ project }: { project: Project }) {
       <Link
         href={`/work/${project.slug}`}
         className="pcard-link"
+        data-cursor="View"
         aria-label={`${project.title}: view project`}
       />
     </article>

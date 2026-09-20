@@ -31,6 +31,7 @@ export default function WorkSection() {
               <Link
                 href={`/work/${project.slug}`}
                 className="work-card-link"
+                data-cursor="View"
                 aria-label={`${project.title}: view project`}
               >
                 View project <span aria-hidden="true">→</span>

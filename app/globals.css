@@ -168,6 +168,34 @@ html.custom-cursor-active * {
 :root[data-theme="dark"] .custom-cursor {
   animation-name: cursor-cycle-dark;
 }
+/* Label state (data-cursor="View", set from CustomCursor.tsx): the block
+   turns into a small red pixel tag carrying the word. Written as
+   `:root .custom-cursor.is-labelled` so it out-ranks the per-theme
+   animation-name rules above, which would otherwise keep the colour cycle
+   running. Never applies to touch: the whole cursor is hidden there. */
+:root .custom-cursor.is-labelled {
+  width: auto;
+  height: auto;
+  padding: 6px 10px;
+  border: 2px solid var(--red-ink);
+  border-radius: 0;
+  background: var(--red);
+  color: var(--red-ink);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  animation: none;
+  transform: translate(-50%, -50%) scale(1);
+}
+:root .custom-cursor.is-labelled::after {
+  content: attr(data-label) " \2192";
+}
+
 /* Belt-and-suspenders alongside CustomCursor.tsx's own `matchMedia`
    pointer check: forces the real cursor back and the fake one hidden on
    any touch/coarse-pointer device, regardless of what that JS check

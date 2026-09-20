@@ -2,6 +2,11 @@
 
 import { useEffect, useRef } from "react";
 
+// Elements that give the cursor a text label (data-cursor="View"): over them
+// the block becomes a small red tag reading that word — the project cards use
+// it, so a card reads as clickable even though it has no visible button.
+const LABEL_SELECTOR = "[data-cursor]";
+
 // Interactive elements the cursor "notices" (site-wide) — grows a little
 // over them.
 const HOVER_SELECTOR = 'a, button, [role="button"], input, textarea, summary';
@@ -40,8 +45,10 @@ export default function CustomCursor() {
     const dot = dotRef.current;
     if (!dot) return;
 
+    // Same test the magnetic buttons use: a hover-capable fine pointer.
     const finePointer =
-      window.matchMedia && window.matchMedia("(pointer: fine)").matches;
+      window.matchMedia &&
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     const reducedMotion =
       window.matchMedia &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -178,6 +185,16 @@ export default function CustomCursor() {
         enterMorph(morphTarget as HTMLElement, event.clientX, event.clientY);
         return;
       }
+      // Cleared here as well as in onOut: a labelled element that is removed
+      // under the pointer (route change) never fires its own mouseout.
+      const labelTarget = target?.closest<HTMLElement>(LABEL_SELECTOR);
+      if (labelTarget && dot) {
+        dot.dataset.label = labelTarget.dataset.cursor ?? "";
+        dot.classList.add("is-labelled");
+        dot.classList.remove("is-hovering");
+        return;
+      }
+      dot?.classList.remove("is-labelled");
       if (target?.closest(HOVER_SELECTOR)) {
         dot?.classList.add("is-hovering");
       }
@@ -186,6 +203,9 @@ export default function CustomCursor() {
     function onOut(event: MouseEvent) {
       const target = event.target as Element | null;
       const related = event.relatedTarget as Element | null;
+      if (target?.closest(LABEL_SELECTOR) && !related?.closest(LABEL_SELECTOR)) {
+        dot?.classList.remove("is-labelled");
+      }
       const leavingMorph = target?.closest(MORPH_SELECTOR);
       if (leavingMorph && !related?.closest(MORPH_SELECTOR)) {
         exitMorph();

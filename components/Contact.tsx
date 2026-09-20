@@ -1,4 +1,5 @@
 import { IconGithub, IconLinkedin } from "./icons";
+import Magnetic from "./Magnetic";
 import { SOCIAL_LINKS } from "@/lib/data";
 
 export default function Contact() {
@@ -19,17 +20,21 @@ export default function Contact() {
           DSA.
         </p>
         <div className="cta-row">
-          <a className="btn btn-primary" href={`mailto:${SOCIAL_LINKS.email}`}>
-            Email me
-          </a>
-          <a
-            className="btn btn-ghost"
-            href={SOCIAL_LINKS.resume}
-            target="_blank"
-            rel="noopener"
-          >
-            Resume
-          </a>
+          <Magnetic>
+            <a className="btn btn-primary" href={`mailto:${SOCIAL_LINKS.email}`}>
+              Email me
+            </a>
+          </Magnetic>
+          <Magnetic>
+            <a
+              className="btn btn-ghost"
+              href={SOCIAL_LINKS.resume}
+              target="_blank"
+              rel="noopener"
+            >
+              Resume
+            </a>
+          </Magnetic>
           <a
             className="btn btn-icon"
             href={SOCIAL_LINKS.github}

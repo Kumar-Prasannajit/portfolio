@@ -44,3 +44,13 @@ export function groupVariants(stagger = STAGGER, delay = 0): Variants {
 
 // Scroll-linked effects (the hero) run over the first this-many px of scroll.
 export const PARALLAX_RANGE = 640;
+
+// Magnetic buttons (components/Magnetic.tsx): pull toward the pointer within
+// `radius` px of the element's edge, by `strength` of the pointer's offset,
+// capped at `max` px; a spring returns it to rest.
+export const MAGNET = {
+  radius: 40,
+  strength: 0.28,
+  max: 9,
+  spring: { stiffness: 220, damping: 18, mass: 0.6 },
+};

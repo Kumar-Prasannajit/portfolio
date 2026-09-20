@@ -1,4 +1,5 @@
 import ScrollLayer from "./ScrollLayer";
+import Magnetic from "./Magnetic";
 import { HERO_BINARY, SOCIAL_LINKS } from "@/lib/data";
 
 export default function Hero() {
@@ -61,20 +62,26 @@ export default function Hero() {
         </p>
         <div className="meta-row">
           <span className="meta-chip">[ ODISHA, IN ]</span>
-          <a className="btn btn-primary" href={`mailto:${SOCIAL_LINKS.email}`}>
-            Get in touch
-          </a>
-          <a className="btn btn-ghost" href="#work">
-            View work
-          </a>
-          <a
-            className="btn btn-ghost"
-            href={SOCIAL_LINKS.resume}
-            target="_blank"
-            rel="noopener"
-          >
-            Resume
-          </a>
+          <Magnetic>
+            <a className="btn btn-primary" href={`mailto:${SOCIAL_LINKS.email}`}>
+              Get in touch
+            </a>
+          </Magnetic>
+          <Magnetic>
+            <a className="btn btn-ghost" href="#work">
+              View work
+            </a>
+          </Magnetic>
+          <Magnetic>
+            <a
+              className="btn btn-ghost"
+              href={SOCIAL_LINKS.resume}
+              target="_blank"
+              rel="noopener"
+            >
+              Resume
+            </a>
+          </Magnetic>
         </div>
       </div>
     </section>
