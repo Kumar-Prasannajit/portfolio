@@ -114,6 +114,8 @@ export default function CommandPalette() {
     // On the home page the sections live in separate scroll containers, so
     // jump with the home scrollers instead of a hash navigation.
     if (href.startsWith("/#") && window.location.pathname === "/" && scrollToSection(href.slice(2))) {
+      // Same as a nav click (HomeShell): keep the URL shareable.
+      history.replaceState(null, "", href.slice(1));
       return;
     }
     router.push(href);

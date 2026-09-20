@@ -16,9 +16,30 @@ import {
 import TaglineCycler from "./TaglineCycler";
 import NowPlayingWidget from "./NowPlayingWidget";
 import SoundToggle from "./SoundToggle";
-import { NAV_LINKS, NAV_LOGO_MARK, SOCIAL_LINKS } from "@/lib/data";
+import { NAV_LINKS, NAV_LOGO_MARK, SOCIAL_LINKS, type NavLink } from "@/lib/data";
 import { useTheme } from "@/lib/useTheme";
 import { useCommandPalette } from "./CommandPaletteContext";
+
+// In-page sections ("/#work") stay plain anchors: HomeShell's click handler
+// scrolls them inside the right panel, and from another route they load "/"
+// and jump. Separate routes (/blog, /weekly) navigate client-side.
+function NavLinkItem({ link, onClick }: { link: NavLink; onClick?: () => void }) {
+  const content = (
+    <>
+      {link.idx && <span className="nav-link-idx mono">{link.idx}</span>}
+      {link.label}
+    </>
+  );
+  return link.href.startsWith("/#") ? (
+    <a href={link.href} onClick={onClick}>
+      {content}
+    </a>
+  ) : (
+    <Link href={link.href} onClick={onClick}>
+      {content}
+    </Link>
+  );
+}
 
 export default function Nav() {
   const { toggleTheme } = useTheme();
@@ -112,10 +133,7 @@ export default function Nav() {
             <ul className="nav-links">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
-                  <a href={link.href}>
-                    {link.idx && <span className="nav-link-idx mono">{link.idx}</span>}
-                    {link.label}
-                  </a>
+                  <NavLinkItem link={link} />
                 </li>
               ))}
             </ul>
@@ -248,10 +266,7 @@ export default function Nav() {
                   <ul>
                     {NAV_LINKS.map((link) => (
                       <li key={link.href}>
-                        <a href={link.href} onClick={() => setMobileMenuOpen(false)}>
-                          {link.idx && <span className="nav-link-idx mono">{link.idx}</span>}
-                          {link.label}
-                        </a>
+                        <NavLinkItem link={link} onClick={() => setMobileMenuOpen(false)} />
                       </li>
                     ))}
                   </ul>

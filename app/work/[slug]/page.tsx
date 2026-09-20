@@ -97,7 +97,10 @@ export default async function WorkPage({
               width={1200}
               height={900}
               sizes="(min-width: 1024px) 960px, 100vw"
-              priority
+              // The LCP image. `priority` is deprecated in Next 16; this is the
+              // documented replacement for an image already in the initial HTML.
+              loading="eager"
+              fetchPriority="high"
             />
           </figure>
 
