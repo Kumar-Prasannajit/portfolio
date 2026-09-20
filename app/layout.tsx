@@ -123,6 +123,23 @@ const THEME_INIT_SCRIPT = `
 })();
 `;
 
+// Decides, before first paint, whether the boot overlay (components/Boot.tsx)
+// should be skipped: on repeat visits in this tab's session, when the visitor
+// asked for reduced motion, or when they landed somewhere other than the home
+// page (the boot leads into the hero, so it only makes sense there — landing
+// elsewhere counts as having seen it). data-boot="done" hides the overlay in
+// CSS, so it never renders at all rather than flashing and disappearing.
+const BOOT_INIT_SCRIPT = `
+(function(){
+  try{
+    var d = document.documentElement;
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){ d.setAttribute('data-boot','done'); return; }
+    if(sessionStorage.getItem('kps-booted')){ d.setAttribute('data-boot','done'); return; }
+    if(location.pathname !== '/'){ sessionStorage.setItem('kps-booted','1'); d.setAttribute('data-boot','done'); }
+  }catch(e){}
+})();
+`;
+
 export default function RootLayout({
   children,
 }: {
@@ -136,6 +153,7 @@ export default function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: BOOT_INIT_SCRIPT }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

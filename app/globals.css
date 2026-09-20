@@ -1146,10 +1146,145 @@ header.site-nav {
   }
 }
 
+/* Failsafe: reveal items are hidden in the server HTML and shown by JS. If the
+   scripts never load or hydrate (MotionProvider sets data-hydrated on <html>
+   once they have), show everything after 5s rather than leave it invisible. A
+   CSS animation overrides motion's inline styles; once hydrated the rule stops
+   matching and scroll-reveals carry on normally. */
+html:not([data-hydrated]) [data-reveal] {
+  animation: reveal-failsafe 0.01s linear 5s forwards;
+}
+@keyframes reveal-failsafe {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* Hero parallax layers (components/ScrollLayer.tsx). */
 @media (prefers-reduced-motion: reduce) {
   [data-scroll-layer] {
     transform: none !important;
+  }
+}
+
+/* ============ BOOT SEQUENCE ============ */
+/* components/Boot.tsx. A terminal boot log that covers the page for ~1.45s,
+   then wipes away downward in pixel steps, uncovering the hero first. The whole timeline
+   is CSS, so it ends on its own even if JS is slow or never runs (JS only
+   records the session flag and lets a key press / tap skip it). Never shown
+   for reduced motion, without scripting, or once data-boot="done" (set by the
+   inline script in layout.tsx on repeat visits, and by Boot when it finishes).
+   Keep the total in step with BOOT_MS in Boot.tsx.
+
+     0.10s  first line starts typing, one more every 0.2s
+     0.10s  progress bar fills (steps) until 1.00s
+     1.00s  "ready" line
+     1.15s  wipe (0.30s) -> hidden at 1.45s */
+.boot {
+  position: fixed;
+  bottom: 0; /* anchored to the bottom so the wipe's edge travels down the page */
+  left: 0;
+  right: 0;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 9000; /* over the nav (50) and panels, under the custom cursor (9999) */
+  overflow: hidden;
+  background: var(--bg);
+  border-top: 3px solid var(--red);
+  color: var(--ink-dim);
+  animation: boot-wipe 0.3s steps(8, end) 1.15s forwards;
+}
+html[data-boot="done"] .boot {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce), (scripting: none) {
+  .boot {
+    display: none;
+  }
+}
+.boot-inner {
+  /* Pinned to the viewport, not the shrinking overlay, so the text holds still
+     while the wipe passes over it. */
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  width: min(30rem, calc(100% - 48px));
+  margin: 0 auto;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.boot-title {
+  color: var(--ink);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.boot-line {
+  width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: boot-type 0.18s steps(var(--n), end) calc(0.1s + var(--i) * 0.2s)
+    forwards;
+}
+.boot-ok {
+  color: var(--red);
+  font-weight: 600;
+}
+.boot-bar {
+  width: 100%;
+  height: 10px;
+  margin-top: 10px;
+  border: 2px solid var(--ink-faint);
+}
+.boot-bar span {
+  display: block;
+  height: 100%;
+  background: var(--red);
+  transform-origin: left;
+  transform: scaleX(0);
+  animation: boot-fill 0.9s steps(16, end) 0.1s forwards;
+}
+.boot-ready {
+  color: var(--ink);
+  visibility: hidden;
+  animation: boot-show 0s linear 1s forwards;
+}
+.boot-ready .cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1.1em;
+  margin-left: 6px;
+  vertical-align: text-bottom;
+  background: var(--red);
+  animation: blink 1.1s steps(1) infinite;
+}
+@keyframes boot-type {
+  to {
+    width: calc(var(--n) * 1ch);
+  }
+}
+@keyframes boot-fill {
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes boot-show {
+  to {
+    visibility: visible;
+  }
+}
+@keyframes boot-wipe {
+  to {
+    height: 0;
+    visibility: hidden;
   }
 }
 

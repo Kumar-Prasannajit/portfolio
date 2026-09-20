@@ -30,6 +30,16 @@ export const NAV_TAGLINES = [
   "9 TO 5 PAYS THE BILLS, 5 TO 9 BUILDS THE FUTURE.",
 ] as const;
 
+// Boot-sequence preloader (components/Boot.tsx). Each line is typed out in
+// turn; the timings live in the "BOOT SEQUENCE" block of globals.css.
+export const BOOT_TITLE = "kps-os 1.0 // cold boot";
+export const BOOT_LINES = [
+  "mounting filesystem...",
+  "loading profile.sh",
+  "linking react, node, mongodb",
+  "starting portfolio.service",
+] as const;
+
 export const NAV_LOGO_MARK = "KP.";
 
 export const SOCIAL_LINKS = {
