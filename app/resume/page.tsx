@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function ResumePage() {
   return (
-    <main id="main" tabIndex={-1}>
+    <>
       <section className="section band">
         <div className="wrap">
           <div className="eyebrow">
@@ -19,6 +19,6 @@ export default function ResumePage() {
           <ResumeViewerLoader />
         </div>
       </section>
-    </main>
+    </>
   );
 }

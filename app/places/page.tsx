@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function PlacesPage() {
   return (
-    <main id="main" tabIndex={-1}>
+    <>
       <section className="section band">
         <div className="wrap">
           <div className="eyebrow">
@@ -44,6 +44,6 @@ export default function PlacesPage() {
           )}
         </div>
       </section>
-    </main>
+    </>
   );
 }

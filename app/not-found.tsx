@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <main id="main" tabIndex={-1}>
+    <>
       <section className="section band">
         <div className="wrap">
           <div className="eyebrow">404</div>
@@ -32,6 +32,6 @@ export default function NotFound() {
           </div>
         </div>
       </section>
-    </main>
+    </>
   );
 }

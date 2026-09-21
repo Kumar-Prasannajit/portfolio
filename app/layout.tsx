@@ -5,6 +5,9 @@ import { SOCIAL_LINKS } from "@/lib/data";
 import CustomCursor from "@/components/CustomCursor";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import HomeShell from "@/components/HomeShell";
+import IdentityPanel from "@/components/IdentityPanel";
+import Projects from "@/components/Projects";
 import CommandPalette from "@/components/CommandPalette";
 import { CommandPaletteProvider } from "@/components/CommandPaletteContext";
 import MotionProvider from "@/components/MotionProvider";
@@ -170,7 +173,12 @@ export default function RootLayout({
         <CommandPaletteProvider>
           <div className="site-frame" id="top">
             <Nav />
-            {children}
+            {/* The side panels live here, not in the pages, so they stay
+                mounted (clock, viewers, the drifting project rail) while only
+                the middle column changes between routes. */}
+            <HomeShell left={<IdentityPanel />} right={<Projects />}>
+              {children}
+            </HomeShell>
             <Footer />
           </div>
           <CommandPalette />

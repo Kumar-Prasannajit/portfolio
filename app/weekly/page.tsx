@@ -13,7 +13,7 @@ export default function WeeklyIndexPage() {
   const entries = getAllWeeklyEntries();
 
   return (
-    <main id="main" tabIndex={-1}>
+    <>
       <section className="section band">
         <div className="wrap">
           <div className="eyebrow">
@@ -32,6 +32,6 @@ export default function WeeklyIndexPage() {
           )}
         </div>
       </section>
-    </main>
+    </>
   );
 }

@@ -1,8 +1,10 @@
 "use client";
 
-// The home page's three-zone layout. On wide screens the middle column is the
-// page (Hero, About, Stack, Experience, Work, heatmap, contact, footer under
-// the sticky nav) and the two hatched gutters become fixed side panels:
+// The site's three-zone layout, mounted once in app/layout.tsx so it survives
+// navigation: only the middle column (the current route) changes. On wide
+// screens the middle column is the page (the home sections, /blog, /gallery,
+// ..., then the footer, under the sticky nav) and the two hatched gutters
+// become fixed side panels:
 //
 //   left  — identity: the portrait plus big time / date / viewers tiles
 //           (IdentityPanel). It does not scroll.
@@ -17,6 +19,7 @@
 // PROFILE / PROJECTS tabs.
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import Lenis from "lenis";
 import "lenis/dist/lenis.css";
 import {
@@ -94,13 +97,15 @@ function PanelHead({
 
 export default function HomeShell({
   left,
-  middle,
+  children,
   right,
 }: {
   left: ReactNode;
-  middle: ReactNode;
+  children: ReactNode;
   right: ReactNode;
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [tab, setTab] = useState<Tab>("profile");
   const [paused, setPaused] = useState(false);
   const rightAsideRef = useRef<HTMLElement>(null);
@@ -318,11 +323,24 @@ export default function HomeShell({
       if (anchor?.hasAttribute("data-skip-link")) return;
       const href = anchor?.getAttribute("href");
       if (!href) return;
+      // "Home" while already home: scroll to the top rather than do nothing.
+      if (href === "/" && window.location.pathname === "/" && anchor?.closest(".nav-links, .nav-mobile-links")) {
+        event.preventDefault();
+        scrollToSection("top");
+        history.replaceState(null, "", "/");
+        return;
+      }
       const id = href.startsWith("/#") ? href.slice(2) : href.startsWith("#") ? href.slice(1) : "";
       if (!id) return;
       if (scrollToSection(decodeURIComponent(id))) {
         event.preventDefault();
         history.replaceState(null, "", `#${id}`);
+      } else if (href.startsWith("/#") && window.location.pathname !== "/") {
+        // From another route: go to the home page client-side, so the side
+        // panels stay put instead of reloading. The pathname effect below
+        // scrolls to the section once the home page is in.
+        event.preventDefault();
+        router.push(href);
       }
     }
     document.addEventListener("click", onClick);
@@ -342,12 +360,27 @@ export default function HomeShell({
       unregisterScroller("page", page);
       page.destroy();
     };
-  }, []);
+  }, [router]);
+
+  // Route changes: the page scroller outlives the route, so put it back where
+  // the new page starts (the top, or the section a "/#work" link names).
+  const lastPathname = useRef(pathname);
+  useEffect(() => {
+    if (lastPathname.current === pathname) return;
+    lastPathname.current = pathname;
+    const hash = window.location.hash.slice(1);
+    const timer = setTimeout(() => {
+      if (!hash || !scrollToSection(decodeURIComponent(hash), true)) {
+        scrollToSection("top", true);
+      }
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [pathname]);
 
   return (
     <div className="home-shell" data-tab={tab}>
       <main className="home-main" id="main" tabIndex={-1}>
-        {middle}
+        {children}
       </main>
 
       <aside className="side-panel side-left" aria-label="Portrait, time, date and viewers">

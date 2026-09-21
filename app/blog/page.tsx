@@ -13,7 +13,7 @@ export default function BlogIndexPage() {
   const tags = getAllBlogTags();
 
   return (
-    <main id="main" tabIndex={-1}>
+    <>
       <section className="section band">
         <div className="wrap">
           <div className="eyebrow">
@@ -24,6 +24,6 @@ export default function BlogIndexPage() {
           <BlogIndex posts={posts} tags={tags} />
         </div>
       </section>
-    </main>
+    </>
   );
 }

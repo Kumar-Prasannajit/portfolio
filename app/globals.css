@@ -110,6 +110,11 @@ html {
   /* The full-bleed divider lines below use width:100vw, which can be a
      hair wider than the viewport when a scrollbar is present. */
   overflow-x: hidden;
+  /* Always reserve the page scrollbar. The frame and the fixed side panels are
+     sized from the viewport width, so a short page (/blog, /weekly) losing its
+     scrollbar would widen the viewport by ~15px and shift the whole layout
+     when navigating from a long one. */
+  overflow-y: scroll;
 }
 @media (prefers-reduced-motion: reduce) {
   html {

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function SpecsPage() {
   return (
-    <main id="main" tabIndex={-1}>
+    <>
       <section className="section band">
         <div className="wrap">
           <div className="eyebrow">
@@ -46,6 +46,6 @@ export default function SpecsPage() {
           )}
         </div>
       </section>
-    </main>
+    </>
   );
 }
