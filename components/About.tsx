@@ -6,7 +6,7 @@ export default function About() {
     <section className="section band" id="about">
       <div className="wrap">
         <div className="eyebrow">
-          <span className="idx">01</span> About
+          <span className="idx">02</span> About
         </div>
         <div className="about-grid">
           <RevealGroup className="about-copy">

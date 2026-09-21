@@ -94,13 +94,8 @@ export default function GithubHeatmap() {
   const total = GH_COUNTS.reduce((a, b) => a + b, 0);
 
   return (
-    <section className="section band" id="activity">
-      <div className="wrap">
-        <div className="eyebrow">
-          <span className="idx">05</span> Activity
-        </div>
-        <h2 className="h2">Shipping log</h2>
-        <div style={{ height: 28 }}></div>
+    <section className="band gh-band" id="activity">
+      <div>
         <RevealGroup className="gh-card" stagger={0.12}>
           <RevealItem className="gh-top">
             <div className="gh-total">

@@ -9,7 +9,7 @@ export default function WorkSection() {
     <section className="section band alt" id="work">
       <div className="wrap">
         <div className="eyebrow">
-          <span className="idx">04</span> Work
+          <span className="idx">05</span> Work
         </div>
         <h2 className="h2">Selected projects</h2>
         <div style={{ height: 28 }}></div>

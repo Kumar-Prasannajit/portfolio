@@ -25,11 +25,11 @@ export default function Home() {
         <>
           <Hero />
           <Marquee />
+          <GithubHeatmap />
           <About />
           <Stack />
           <Experience />
           <WorkSection />
-          <GithubHeatmap />
           <Contact />
         </>
       }

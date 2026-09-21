@@ -6,7 +6,7 @@ export default function Stack() {
     <section className="section band alt" id="stack">
       <div className="wrap">
         <div className="eyebrow">
-          <span className="idx">02</span> Stack
+          <span className="idx">03</span> Stack
         </div>
         <h2 className="h2">Tools I reach for</h2>
         <div style={{ height: 28 }}></div>

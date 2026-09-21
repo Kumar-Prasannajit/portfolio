@@ -1,6 +1,6 @@
 // Numbers appear only on entries that scroll within the home page, and match
-// the eyebrow index on the target section (01 About, 02 Stack, 03 Experience,
-// 04 Work, 05 Activity, 06 Contact). Blogs and Weekly are separate routes, so
+// the eyebrow index on the target section (01 Activity, 02 About, 03 Stack,
+// 04 Experience, 05 Work, 06 Contact). Blogs and Weekly are separate routes, so
 // they carry no number. Stack, Experience and Activity have no top-nav link
 // (they're reachable by scroll or the command palette), hence the gaps.
 //
@@ -10,10 +10,10 @@
 export type NavLink = { href: string; label: string; idx?: string };
 
 export const NAV_LINKS: readonly NavLink[] = [
-  { href: "/#about", label: "About", idx: "01" },
+  { href: "/#about", label: "About", idx: "02" },
   { href: "/blog", label: "Blogs" },
   { href: "/weekly", label: "Weekly" },
-  { href: "/#work", label: "Work", idx: "04" },
+  { href: "/#work", label: "Work", idx: "05" },
   { href: "/#contact", label: "Contact", idx: "06" },
 ];
 
