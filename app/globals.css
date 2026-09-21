@@ -15,10 +15,10 @@
   --red-dim: #a92329;
   --red-ink: #fff4f1;
   --heat-0: #1c2027;
-  --heat-1: #12432b;
-  --heat-2: #0f6b32;
-  --heat-3: #2ea043;
-  --heat-4: #56d364;
+  --heat-1: #45151b;
+  --heat-2: #7a1b23;
+  --heat-3: #b01c26;
+  --heat-4: #e8404a;
   --shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
   --font-display: var(--font-archivo-black), "Arial Black", sans-serif;
   --font-body: var(--font-ibm-plex-sans), -apple-system, "Segoe UI", sans-serif;
@@ -48,10 +48,10 @@
     --red-dim: #a3161f;
     --red-ink: #fff7f5;
     --heat-0: #e9ebed;
-    --heat-1: #9be9a8;
-    --heat-2: #40c463;
-    --heat-3: #30a14e;
-    --heat-4: #216e39;
+    --heat-1: #f3b4b8;
+    --heat-2: #e5737a;
+    --heat-3: #d13842;
+    --heat-4: #9e141d;
     --shadow: 0 20px 50px -24px rgba(20, 20, 20, 0.25);
   }
 }
@@ -71,10 +71,10 @@
   --red-dim: #a3161f;
   --red-ink: #fff7f5;
   --heat-0: #e9ebed;
-  --heat-1: #9be9a8;
-  --heat-2: #40c463;
-  --heat-3: #30a14e;
-  --heat-4: #216e39;
+  --heat-1: #f3b4b8;
+  --heat-2: #e5737a;
+  --heat-3: #d13842;
+  --heat-4: #9e141d;
   --shadow: 0 20px 50px -24px rgba(20, 20, 20, 0.25);
 }
 :root[data-theme="dark"] {
@@ -93,10 +93,10 @@
   --red-dim: #a92329;
   --red-ink: #fff4f1;
   --heat-0: #1c2027;
-  --heat-1: #12432b;
-  --heat-2: #0f6b32;
-  --heat-3: #2ea043;
-  --heat-4: #56d364;
+  --heat-1: #45151b;
+  --heat-2: #7a1b23;
+  --heat-3: #b01c26;
+  --heat-4: #e8404a;
   --shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
 }
 
