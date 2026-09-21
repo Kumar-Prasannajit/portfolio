@@ -21,6 +21,12 @@ const nextConfig: NextConfig = {
   // rendering depends on.
   transpilePackages: ["next-mdx-remote"],
 
+  // Dev only: `next dev` refuses requests to its own /_next/* assets from any
+  // host but localhost, so a page opened through an ngrok tunnel loads its HTML
+  // but no JavaScript (no clock, no animations). Allow the ngrok hostnames.
+  // Has no effect on `next build` / production.
+  allowedDevOrigins: ["*.ngrok-free.app", "*.ngrok-free.dev", "*.ngrok.app", "*.ngrok.io"],
+
   // No `redirects()`/`rewrites()` here and no proxy.ts (Next 16's
   // renamed middleware) in the project — nothing in the app is
   // redirecting the root route. If the 308 loop persists after a
