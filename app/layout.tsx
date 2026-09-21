@@ -8,7 +8,6 @@ import Footer from "@/components/Footer";
 import CommandPalette from "@/components/CommandPalette";
 import { CommandPaletteProvider } from "@/components/CommandPaletteContext";
 import MotionProvider from "@/components/MotionProvider";
-import SoundEffects from "@/components/SoundEffects";
 import ViewCounter from "@/components/ViewCounter";
 
 const SITE_URL = "https://kumarp.in";
@@ -178,7 +177,6 @@ export default function RootLayout({
         </CommandPaletteProvider>
         </MotionProvider>
         <CustomCursor />
-        <SoundEffects />
         <ViewCounter />
       </body>
     </html>

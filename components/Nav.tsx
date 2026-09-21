@@ -15,7 +15,6 @@ import {
 } from "./icons";
 import TaglineCycler from "./TaglineCycler";
 import NowPlayingWidget from "./NowPlayingWidget";
-import SoundToggle from "./SoundToggle";
 import { NAV_LINKS, NAV_LOGO_MARK, SOCIAL_LINKS, type NavLink } from "@/lib/data";
 import { useTheme } from "@/lib/useTheme";
 import { useCommandPalette } from "./CommandPaletteContext";
@@ -141,7 +140,6 @@ export default function Nav() {
             <NowPlayingWidget />
 
             <div className="nav-command">
-              <SoundToggle />
               <button
                 type="button"
                 className="nav-cmd-trigger"
@@ -233,7 +231,6 @@ export default function Nav() {
               <IconThemeCircle />
             </button>
             <NowPlayingWidget variant="mobile" />
-            <SoundToggle variant="mobile" />
             <button
               type="button"
               className="nav-hamburger-btn"

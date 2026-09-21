@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
 import { SOCIAL_LINKS } from "@/lib/data";
 import { useTheme } from "@/lib/useTheme";
-import { toggleSound, useSoundEnabled } from "@/lib/sound";
 import { scrollToSection } from "@/lib/panelScroll";
 import { nowPlayingCopy, useNowPlaying } from "@/lib/useNowPlaying";
 import { useCommandPalette } from "./CommandPaletteContext";
@@ -33,8 +32,6 @@ import {
   IconSearch,
   IconSun,
   IconUser,
-  IconVolume,
-  IconVolumeOff,
 } from "./icons";
 import styles from "./CommandPalette.module.css";
 
@@ -91,7 +88,6 @@ export default function CommandPalette() {
   const router = useRouter();
   const { isOpen, close } = useCommandPalette();
   const { isDark, toggleTheme } = useTheme();
-  const soundOn = useSoundEnabled();
   const nowPlaying = useNowPlaying(isOpen);
 
   // Belt-and-braces alongside the [cmdk-root] flex fix in the CSS
@@ -159,15 +155,6 @@ export default function CommandPalette() {
       icon: isDark ? <IconSun /> : <IconMoon />,
       keywords: ["toggle", "theme", "dark", "light", "mode"],
       onSelect: () => runAction(() => toggleTheme()),
-    },
-    {
-      key: "action-sound",
-      title: soundOn ? "Turn interaction sounds off" : "Turn interaction sounds on",
-      description: "Soft ticks on hover and click (off by default)",
-      type: "Action",
-      icon: soundOn ? <IconVolume /> : <IconVolumeOff />,
-      keywords: ["sound", "audio", "mute", "volume", "click", "noise"],
-      onSelect: () => runAction(() => toggleSound()),
     },
     {
       key: "action-email",

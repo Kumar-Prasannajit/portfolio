@@ -690,45 +690,6 @@ header.site-nav {
     animation: none;
   }
 }
-/* Sound switch (SoundToggle.tsx). Desktop: a 44px square inside .nav-command,
-   left of the ⌘ button, with its own divider; it reuses .nav-cmd-trigger so
-   the cursor morph and colours match. Off = dim speaker with an x, on = red
-   speaker with waves. */
-.sound-btn {
-  width: 44px;
-  padding: 0;
-  justify-content: center;
-  border-right: 1px solid var(--border-2);
-}
-.sound-btn svg {
-  width: 16px;
-  height: 16px;
-}
-.sound-btn[aria-pressed="true"],
-.sound-btn-mobile[aria-pressed="true"] {
-  color: var(--red);
-}
-/* Mobile bar variant: the same 54px column as the other bar buttons. */
-.sound-btn-mobile {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 54px;
-  border: none;
-  border-right: 1px solid var(--border-2);
-  background: none;
-  cursor: pointer;
-  color: var(--ink-dim);
-}
-.sound-btn-mobile svg {
-  width: 20px;
-  height: 20px;
-}
-.sound-btn-mobile:hover,
-.sound-btn:hover {
-  color: var(--red);
-}
-
 /* Mobile bar variant: same 54px column as the theme toggle / hamburger. */
 .np-mobile {
   display: flex;
