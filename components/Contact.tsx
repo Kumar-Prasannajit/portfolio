@@ -7,7 +7,7 @@ export default function Contact() {
     <section className="section contact-band" id="contact">
       <div className="wrap">
         <div className="eyebrow">
-          <span className="idx">06</span> Contact
+          <span className="idx">100</span> Contact
         </div>
         <h2 className="contact-h">
           LET&apos;S BUILD
