@@ -7,7 +7,9 @@ export default function Footer() {
           © {year} Kumar Prasannajit Sahu — built with IBM Plex &amp; clean
           commits.
         </span>
-        <a href="#top">back to top ↑</a>
+        <a href="#top" className="footer-top">
+          back to top ↑
+        </a>
       </div>
     </footer>
   );

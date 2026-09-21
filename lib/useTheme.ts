@@ -110,6 +110,9 @@ export function useTheme() {
             pseudoElement: "::view-transition-new(root)",
           }
         );
+      }).catch(() => {
+        // `ready` rejects (InvalidStateError) when the transition is skipped,
+        // e.g. the tab is hidden mid-toggle. The theme still applies.
       });
     },
     [applyTheme]

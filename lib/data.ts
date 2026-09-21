@@ -1,24 +1,21 @@
-// idx mostly mirrors each target section's own eyebrow index (see
-// About.tsx, Projects.tsx, Contact.tsx) — 05 (Activity) has no nav link,
-// hence the jump from 04 to 06. Stack (idx 02 on-page) and Experience
-// (idx 03 on-page) were deliberately dropped from the navbar in favor of
-// Blogs/Weekly at those nav slots — both sections are still live on the
-// homepage (reachable by scroll or via "/#stack" / "/#experience", and
-// still listed in the command palette), they just no longer have a top
-// nav link, so idx 02/03 here point at different content than the
-// same-numbered eyebrows on the page itself. This is an intentional,
-// explicitly-confirmed exception to "idx mirrors the target's own idx".
+// Numbers appear only on entries that scroll within the home page, and match
+// the eyebrow index on the target section (01 Activity, 02 About, 03 Stack,
+// 04 Experience, 05 Work, 06 Contact). Blogs and Weekly are separate routes, so
+// they carry no number. Stack, Experience and Activity have no top-nav link
+// (they're reachable by scroll or the command palette), hence the gaps.
 //
 // Home-section links are root-relative ("/#about") rather than bare
 // hashes so they still work when Nav is rendered on a non-home route
 // (e.g. clicking "About" from /blog navigates to / and jumps there).
-export const NAV_LINKS = [
-  { href: "/#about", label: "About", idx: "01" },
-  { href: "/blog", label: "Blogs", idx: "02" },
-  { href: "/weekly", label: "Weekly", idx: "03" },
-  { href: "/#work", label: "Work", idx: "04" },
+export type NavLink = { href: string; label: string; idx?: string };
+
+export const NAV_LINKS: readonly NavLink[] = [
+  { href: "/#about", label: "About", idx: "02" },
+  { href: "/blog", label: "Blogs" },
+  { href: "/weekly", label: "Weekly" },
+  { href: "/#work", label: "Work", idx: "05" },
   { href: "/#contact", label: "Contact", idx: "06" },
-] as const;
+];
 
 // Rotates in the nav's tagline slot via a GSAP letter-scatter transition
 // (see components/TaglineCycler.tsx). Case is intentional per-line — most
@@ -32,6 +29,22 @@ export const NAV_TAGLINES = [
   "OFFICIALLY EMPLOYED, UNOFFICIALLY BUILDING THE NEXT THING.",
   "9 TO 5 PAYS THE BILLS, 5 TO 9 BUILDS THE FUTURE.",
 ] as const;
+
+// Boot-sequence preloader (components/Boot.tsx). Each line is typed out in
+// turn; the timings live in the "BOOT SEQUENCE" block of globals.css.
+export const BOOT_TITLE = "kps-os 1.0 // cold boot";
+export const BOOT_LINES = [
+  "mounting filesystem...",
+  "loading profile.sh",
+  "linking react, node, mongodb",
+  "starting portfolio.service",
+] as const;
+
+// The clock in the home page's left panel (components/IdentityPanel.tsx) shows
+// this time zone. Kumar's own time; use the visitor's instead by removing the
+// timeZone option there.
+export const PANEL_TIME_ZONE = "Asia/Kolkata";
+export const PANEL_TIME_ZONE_LABEL = "IST";
 
 export const NAV_LOGO_MARK = "KP.";
 
@@ -96,21 +109,79 @@ export const EXPERIENCE = [
 
 export type ProjectLink = { label: string; href: string };
 
-export const PROJECTS = [
+export type ProjectShot = { src: string; alt: string; caption: string };
+
+// One entry per project: drives the ticker/Work cards and the /work/[slug]
+// case study. Everything in the case-study fields is drawn from the project's
+// own description, the live site, or the blog — nothing is invented. Fields
+// that are still unknown are left out rather than filled with placeholders:
+//   TODO(content): `outcome` (a real result or metric) for each project —
+//   the case-study page shows the section only when it is set.
+export type Project = {
+  slug: string;
+  title: string;
+  badge: string;
+  image: string; // landing-page screenshot: card + case-study lead
+  summary: string;
+  description: string;
+  tags: readonly string[];
+  links: readonly ProjectLink[];
+  sourceNote?: string;
+  // --- case study ---
+  role: string;
+  context: string; // what it is and what it had to do
+  built: readonly string[]; // what I built
+  screenshots: readonly ProjectShot[]; // captured from the live site
+  related?: { label: string; href: string };
+  outcome?: string; // a real result; shown only when set
+};
+
+export const PROJECTS: readonly Project[] = [
   {
+    slug: "manima",
     title: "Manima Online",
     badge: "LIVE",
+    image: "/projects/manima.jpg",
+    summary:
+      "Live spiritual-services marketplace with Razorpay and UPI/QR payments.",
     description:
       "A live spiritual-services marketplace that moves real money: Razorpay and UPI/QR payments end-to-end, with idempotent handling and server-side validation to prevent double-charges across three roles — admin, client and agent. Shipped with CI/CD via GitHub Actions.",
     tags: ["React", "Node.js", "Express", "MongoDB", "JWT", "Razorpay"],
-    links: [
-      { label: "Live platform", href: "https://manimaonline.com/" },
-    ] satisfies ProjectLink[],
+    links: [{ label: "Live platform", href: "https://manimaonline.com/" }],
     sourceNote: "Source private — client codebase",
+    role: "Full-stack developer",
+    context:
+      "Manima Online is a spiritual-services marketplace: people pick a puja or ritual, book it and pay online. It moves real money for three kinds of user — admin, client and agent — so the payment path has to be correct even when someone double-taps, retries or reloads.",
+    built: [
+      "Payments end to end with Razorpay and UPI/QR",
+      "Idempotent payment handling and server-side validation, so a retry or double-tap can't charge twice",
+      "Three user roles: admin, client and agent",
+      "CI/CD with GitHub Actions",
+    ],
+    screenshots: [
+      {
+        src: "/projects/manima-services.jpg",
+        alt: "Manima Online's featured services: a spotlight temple and a grid of pujas to choose from, with prices.",
+        caption: "Featured services — temples and pujas to book.",
+      },
+      {
+        src: "/projects/manima-how-it-works.jpg",
+        alt: "Manima Online's three-step flow: select your puja, book with ease through the secure payment process, receive blessings with confirmation updates.",
+        caption: "The three-step flow: select, book and pay, get confirmation.",
+      },
+    ],
+    related: {
+      label: "What actually breaks when a payment isn't idempotent",
+      href: "/blog/idempotent-payments-lessons",
+    },
   },
   {
+    slug: "eyuva",
     title: "BIRAC E-YUVA Center",
     badge: "LIVE",
+    image: "/projects/eyuva.jpg",
+    summary:
+      "Biotech innovation hub site with a CSS-only 3D DNA-helix hero and dark/light themes.",
     description:
       "Solo-built site for GIET University's BIRAC E-YUVA Center, a biotech innovation and entrepreneurship hub — a CSS-only 3D DNA-helix hero, a lightbox project gallery, and a full dark/light theme system, end to end.",
     tags: ["Next.js", "React", "TypeScript", "Tailwind CSS"],
@@ -123,26 +194,72 @@ export const PROJECTS = [
         label: "Source",
         href: "https://github.com/Kumar-Prasannajit/giet-eyuva-center",
       },
-    ] satisfies ProjectLink[],
+    ],
+    role: "Solo developer, end to end",
+    context:
+      "The site for GIET University's BIRAC E-YUVA Center, a biotech innovation and entrepreneurship hub. It covers the centre's programs and fellowships, its people, lab-equipment booking and a gallery.",
+    built: [
+      "A CSS-only 3D DNA-helix hero",
+      "A lightbox gallery for projects",
+      "A full dark and light theme system",
+      "The whole site, built and shipped solo",
+    ],
+    screenshots: [
+      {
+        src: "/projects/eyuva-light-theme.jpg",
+        alt: "The E-YUVA Center hero in the light theme: the DNA helix beside the headline, with live-lab and fellowship cards.",
+        caption: "The hero in the light theme; the site ships dark and light.",
+      },
+      {
+        src: "/projects/eyuva-programs.jpg",
+        alt: "The Programs and Fellowships section: flagship fellowship program with student and advanced research tracks.",
+        caption: "Programs and fellowships.",
+      },
+    ],
   },
   {
+    slug: "nipl",
     title: "NIPL Website",
     badge: "LIVE",
+    image: "/projects/nipl.jpg",
+    summary:
+      "Marketing site with particle backgrounds, Lenis smooth scrolling and Swiper sliders.",
     description:
       "Solo-built marketing site for Navgyan Innovations Pvt. Ltd. — particle-field backgrounds, Lenis smooth scrolling and Swiper-powered sliders, built fully responsive from scratch.",
     tags: ["HTML", "CSS", "JavaScript", "Particle.js", "Lenis", "Swiper.js"],
     links: [
       {
         label: "Live site",
-        href: "https://kumar-prasannajit.github.io/NIPL-Website/",
+        href: "https://navgyaninnovations.com/",
       },
       {
         label: "Source",
         href: "https://github.com/Kumar-Prasannajit/NIPL-Website",
       },
-    ] satisfies ProjectLink[],
+    ],
+    role: "Solo developer",
+    context:
+      "The marketing site for Navgyan Innovations Pvt. Ltd., an innovation studio behind a set of deep-tech startup projects across healthcare, agriculture and digital products. The site presents what the company does and the projects it has built.",
+    built: [
+      "Particle-field backgrounds behind the hero",
+      "Lenis smooth scrolling",
+      "Swiper-powered sliders",
+      "A fully responsive layout, built from scratch",
+    ],
+    screenshots: [
+      {
+        src: "/projects/nipl-focus-areas.jpg",
+        alt: "The Navgyan Innovations page: a large scrolling 'we build solutions that matter' headline above five focus areas.",
+        caption: "The headline marquee and the five focus areas.",
+      },
+      {
+        src: "/projects/nipl-works.jpg",
+        alt: "The 'Our works' section: six project cards for Breath X, Brain Viz, Neurolang, Aquatron, Unicollab and Manima.",
+        caption: "The works grid.",
+      },
+    ],
   },
-] as const;
+];
 
 // /specs page. Same shape as STACK_GROUPS (label + pill items) so the page
 // reuses Stack.tsx's exact pill-row rendering. Machine/OS/Editor rows are
@@ -222,3 +339,4 @@ export const GH_COUNTS: number[] = [
   0, 0, 0, 0, 1, 0, 2, 1, 1, 0, 0, 5, 2, 0, 12, 0, 0, 0, 1, 1,
   0, 1, 4, 5, 0, 0, 0, 2, 8, 0,
 ];
+

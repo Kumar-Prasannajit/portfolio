@@ -13,11 +13,11 @@ export default function BlogIndexPage() {
   const tags = getAllBlogTags();
 
   return (
-    <main>
+    <main id="main" tabIndex={-1}>
       <section className="section band">
         <div className="wrap">
           <div className="eyebrow">
-            <span className="idx">02</span> Blogs
+            Blogs
           </div>
           <h1 className="h2">Field notes</h1>
           <div style={{ height: 28 }} />

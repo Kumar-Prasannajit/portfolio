@@ -8,15 +8,17 @@
   --border-2: #33393f;
   --ink: #ecedef;
   --ink-dim: #8b929b;
-  --ink-faint: #565c64;
-  --red: #e0303a;
+  --ink-faint: #80878f; /* text: 5.4:1 on --bg */
+  --line-strong: #565c64; /* the old faint grey: borders and pixel fills only */
+  --red: #e8404a; /* accent: red text/lines on dark surfaces */
+  --red-solid: #b01c26; /* red SURFACES that carry light text (buttons, bands) */
   --red-dim: #a92329;
   --red-ink: #fff4f1;
   --heat-0: #1c2027;
-  --heat-1: #12432b;
-  --heat-2: #0f6b32;
-  --heat-3: #2ea043;
-  --heat-4: #56d364;
+  --heat-1: #45151b;
+  --heat-2: #7a1b23;
+  --heat-3: #b01c26;
+  --heat-4: #e8404a;
   --shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
   --font-display: var(--font-archivo-black), "Arial Black", sans-serif;
   --font-body: var(--font-ibm-plex-sans), -apple-system, "Segoe UI", sans-serif;
@@ -39,15 +41,17 @@
     --border-2: #c9c9c1;
     --ink: #14161a;
     --ink-dim: #565c63;
-    --ink-faint: #8b9096;
+    --ink-faint: #5f656b; /* text: 5.2:1 on --bg */
+    --line-strong: #8b9096;
     --red: #c81e28;
+    --red-solid: #c81e28;
     --red-dim: #a3161f;
     --red-ink: #fff7f5;
     --heat-0: #e9ebed;
-    --heat-1: #9be9a8;
-    --heat-2: #40c463;
-    --heat-3: #30a14e;
-    --heat-4: #216e39;
+    --heat-1: #f3b4b8;
+    --heat-2: #e5737a;
+    --heat-3: #d13842;
+    --heat-4: #9e141d;
     --shadow: 0 20px 50px -24px rgba(20, 20, 20, 0.25);
   }
 }
@@ -60,15 +64,17 @@
   --border-2: #c9c9c1;
   --ink: #14161a;
   --ink-dim: #565c63;
-  --ink-faint: #8b9096;
+  --ink-faint: #5f656b; /* text: 5.2:1 on --bg */
+  --line-strong: #8b9096;
   --red: #c81e28;
+  --red-solid: #c81e28;
   --red-dim: #a3161f;
   --red-ink: #fff7f5;
   --heat-0: #e9ebed;
-  --heat-1: #9be9a8;
-  --heat-2: #40c463;
-  --heat-3: #30a14e;
-  --heat-4: #216e39;
+  --heat-1: #f3b4b8;
+  --heat-2: #e5737a;
+  --heat-3: #d13842;
+  --heat-4: #9e141d;
   --shadow: 0 20px 50px -24px rgba(20, 20, 20, 0.25);
 }
 :root[data-theme="dark"] {
@@ -80,15 +86,17 @@
   --border-2: #33393f;
   --ink: #ecedef;
   --ink-dim: #8b929b;
-  --ink-faint: #565c64;
-  --red: #e0303a;
+  --ink-faint: #80878f; /* text: 5.4:1 on --bg */
+  --line-strong: #565c64; /* the old faint grey: borders and pixel fills only */
+  --red: #e8404a; /* accent: red text/lines on dark surfaces */
+  --red-solid: #b01c26; /* red SURFACES that carry light text (buttons, bands) */
   --red-dim: #a92329;
   --red-ink: #fff4f1;
   --heat-0: #1c2027;
-  --heat-1: #12432b;
-  --heat-2: #0f6b32;
-  --heat-3: #2ea043;
-  --heat-4: #56d364;
+  --heat-1: #45151b;
+  --heat-2: #7a1b23;
+  --heat-3: #b01c26;
+  --heat-4: #e8404a;
   --shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
 }
 
@@ -122,6 +130,39 @@ body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   text-wrap: pretty;
+}
+
+/* ============ FOCUS + SKIP LINK ============ */
+/* Keyboard focus is always visible: one ring for everything. The custom cursor
+   only hides the mouse pointer (cursor: none), never focus. Red on the red
+   Contact band would vanish, so it switches to the light ink there. */
+:focus-visible {
+  outline: 3px solid var(--red);
+  outline-offset: 3px;
+}
+.contact-band :focus-visible {
+  outline-color: var(--red-ink);
+}
+main:focus {
+  outline: none; /* the skip link's target; not a control */
+}
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 10000;
+  padding: 13px 16px;
+  background: var(--red-solid);
+  color: var(--red-ink);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+.skip-link:focus-visible {
+  transform: none;
+  outline-color: var(--ink);
 }
 
 /* ============ CUSTOM CURSOR ============ */
@@ -168,6 +209,34 @@ html.custom-cursor-active * {
 :root[data-theme="dark"] .custom-cursor {
   animation-name: cursor-cycle-dark;
 }
+/* Label state (data-cursor="View", set from CustomCursor.tsx): the block
+   turns into a small red pixel tag carrying the word. Written as
+   `:root .custom-cursor.is-labelled` so it out-ranks the per-theme
+   animation-name rules above, which would otherwise keep the colour cycle
+   running. Never applies to touch: the whole cursor is hidden there. */
+:root .custom-cursor.is-labelled {
+  width: auto;
+  height: auto;
+  padding: 6px 10px;
+  border: 2px solid var(--red-ink);
+  border-radius: 0;
+  background: var(--red-solid);
+  color: var(--red-ink);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  animation: none;
+  transform: translate(-50%, -50%) scale(1);
+}
+:root .custom-cursor.is-labelled::after {
+  content: attr(data-label) " \2192";
+}
+
 /* Belt-and-suspenders alongside CustomCursor.tsx's own `matchMedia`
    pointer check: forces the real cursor back and the fake one hidden on
    any touch/coarse-pointer device, regardless of what that JS check
@@ -238,7 +307,7 @@ img {
   display: block;
 }
 ::selection {
-  background: var(--red);
+  background: var(--red-solid);
   color: var(--red-ink);
 }
 
@@ -360,13 +429,34 @@ header.site-nav {
 .nav-cell-logo:hover {
   opacity: 0.8;
 }
+/* Theme-specific elements. Dark is the default; light applies for an explicit
+   data-theme="light", or with no explicit choice when the system prefers
+   light — the same rule the palette variables above use. Pure CSS, so the
+   first paint is right before React hydrates. */
+.theme-light-only {
+  display: none;
+}
+:root[data-theme="light"] .theme-dark-only {
+  display: none;
+}
+:root[data-theme="light"] .theme-light-only {
+  display: revert;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .theme-dark-only {
+    display: none;
+  }
+  :root:not([data-theme="dark"]) .theme-light-only {
+    display: revert;
+  }
+}
 .nav-logo-swap {
   position: relative;
   display: inline-flex;
 }
 .nav-logo-img {
   /* One class shared by every state — default, hover-swap, dark, and
-     light (see Nav.tsx's src swaps) — so bumping it here covers all of
+     light (see Nav.tsx's per-theme images) — so bumping it here covers all of
      them at once. */
   height: 30.6px;
   width: auto;
@@ -624,7 +714,7 @@ header.site-nav {
   flex-direction: column;
   gap: 12px;
   padding: 12px;
-  border: 2px solid var(--ink-faint);
+  border: 2px solid var(--line-strong);
   border-radius: 0;
   background: var(--panel);
   box-shadow: 4px 4px 0 var(--red-dim);
@@ -638,14 +728,14 @@ header.site-nav {
 }
 .np-tag {
   padding: 2px 6px;
-  background: var(--ink-faint);
+  background: var(--line-strong);
   color: var(--bg);
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.08em;
 }
 .np-pop.live .np-tag {
-  background: var(--red);
+  background: var(--red-solid);
   color: var(--red-ink);
 }
 
@@ -661,7 +751,7 @@ header.site-nav {
 .np-eq i {
   flex: 1;
   height: 4px;
-  background: var(--ink-faint);
+  background: var(--line-strong);
 }
 .np-pop.live .np-eq i {
   background: var(--red);
@@ -710,7 +800,7 @@ header.site-nav {
   width: 72px;
   height: 72px;
   object-fit: cover;
-  border: 2px solid var(--ink-faint);
+  border: 2px solid var(--line-strong);
   border-radius: 0;
   /* Snap the album art to visible pixels instead of smoothing it. */
   image-rendering: pixelated;
@@ -852,7 +942,7 @@ header.site-nav {
 .nav-hatch {
   height: 100%;
   min-height: 26px;
-  background-image: url("/test1.gif");
+  background-image: url("/nav-eyes.webp");
   background-size: cover;
   background-position: center;
 }
@@ -865,6 +955,7 @@ header.site-nav {
 .nav-mobile-bar {
   display: none;
   align-items: stretch;
+  min-height: 46px; /* 44px of content + the 1px border each side: its buttons stretch to 44px touch targets */
   border: 1px solid var(--border-2);
   background: var(--panel);
 }
@@ -987,7 +1078,7 @@ header.site-nav {
 .nav-mobile-gif {
   height: 160px;
   flex-shrink: 0;
-  background-image: url("/test1.gif");
+  background-image: url("/nav-eyes.webp");
   background-size: cover;
   background-position: center;
 }
@@ -1115,11 +1206,159 @@ header.site-nav {
   filter: none;
 }
 
+/* Scroll-reveal (components/Reveal.tsx): content is visible in the server HTML,
+   and only elements that start below the fold are hidden (after mount) and
+   revealed as they scroll in, so nothing above the fold waits on JS. This
+   rule stays as a backstop for anyone who asks for reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Hero parallax layers (components/ScrollLayer.tsx). */
+@media (prefers-reduced-motion: reduce) {
+  [data-scroll-layer] {
+    transform: none !important;
+  }
+}
+
+/* ============ BOOT SEQUENCE ============ */
+/* components/Boot.tsx. A terminal boot log that covers the page for ~1.45s,
+   then wipes away downward in pixel steps, uncovering the hero first. The whole timeline
+   is CSS, so it ends on its own even if JS is slow or never runs (JS only
+   records the session flag and lets a key press / tap skip it). Never shown
+   for reduced motion, without scripting, or once data-boot="done" (set by the
+   inline script in layout.tsx on repeat visits, and by Boot when it finishes).
+   Keep the total in step with BOOT_MS in Boot.tsx.
+
+     0.10s  first line starts typing, one more every 0.2s
+     0.10s  progress bar fills (steps) until 1.00s
+     1.00s  "ready" line
+     1.15s  wipe (0.30s) -> hidden at 1.45s */
+.boot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 9000; /* over the nav (50) and panels, under the custom cursor (9999) */
+  overflow: hidden;
+  background: var(--bg);
+  border-top: 3px solid var(--red);
+  color: var(--ink-dim);
+  will-change: transform;
+  animation: boot-wipe 0.3s steps(8, end) 1.15s forwards;
+}
+html[data-boot="done"] .boot {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce), (scripting: none) {
+  .boot {
+    display: none;
+  }
+}
+.boot-inner {
+  /* Counter-moves against the overlay (boot-hold) so the text holds still in
+     the viewport while the wipe passes over it. */
+  animation: boot-hold 0.3s steps(8, end) 1.15s forwards;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  width: min(30rem, calc(100% - 48px));
+  margin: 0 auto;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.boot-title {
+  color: var(--ink);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.boot-line {
+  width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: boot-type 0.18s steps(var(--n), end) calc(0.1s + var(--i) * 0.2s)
+    forwards;
+}
+.boot-ok {
+  color: var(--red);
+  font-weight: 600;
+}
+.boot-bar {
+  width: 100%;
+  height: 10px;
+  margin-top: 10px;
+  border: 2px solid var(--line-strong);
+}
+.boot-bar span {
+  display: block;
+  height: 100%;
+  background: var(--red);
+  transform-origin: left;
+  transform: scaleX(0);
+  animation: boot-fill 0.9s steps(16, end) 0.1s forwards;
+}
+.boot-ready {
+  color: var(--ink);
+  visibility: hidden;
+  animation: boot-show 0s linear 1s forwards;
+}
+.boot-ready .cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1.1em;
+  margin-left: 6px;
+  vertical-align: text-bottom;
+  background: var(--red);
+  animation: blink 1.1s steps(1) infinite;
+}
+@keyframes boot-type {
+  to {
+    width: calc(var(--n) * 1ch);
+  }
+}
+@keyframes boot-fill {
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes boot-show {
+  to {
+    visibility: visible;
+  }
+}
+/* The wipe slides the overlay down with a transform. Animating its height
+   instead counts as layout shift (it scored a CLS of 0.56 in Lighthouse). */
+@keyframes boot-wipe {
+  to {
+    transform: translateY(100%);
+    visibility: hidden;
+  }
+}
+@keyframes boot-hold {
+  to {
+    transform: translateY(-100%);
+  }
+}
+
 /* ============ HERO ============ */
 .hero {
   padding: clamp(44px, 7vw, 84px) 0 clamp(32px, 5vw, 48px);
   overflow: hidden;
   position: relative;
+  container-type: inline-size;
 }
 .hero-lines {
   position: absolute;
@@ -1187,6 +1426,9 @@ header.site-nav {
   line-height: 0.86;
   letter-spacing: -0.01em;
   font-size: clamp(2.4rem, 7.4vw, 5.4rem);
+  /* Sized off the hero column itself (it is narrower than the viewport on
+     the three-panel home layout): the name is ~7.9em wide. */
+  font-size: clamp(2.4rem, calc(12.2cqw - 12px), 5.4rem);
   margin: 0 0 24px;
 }
 
@@ -1240,6 +1482,7 @@ header.site-nav {
   font-weight: 500;
   text-decoration: none;
   padding: 11px 18px;
+  min-height: 44px; /* touch target */
   border-radius: 9px;
   border: 1px solid transparent;
   cursor: pointer;
@@ -1252,7 +1495,7 @@ header.site-nav {
   transform: translateY(-2px);
 }
 .btn-primary {
-  background: var(--red);
+  background: var(--red-solid);
   color: var(--red-ink);
 }
 .btn-primary:hover {
@@ -1287,29 +1530,51 @@ header.site-nav {
 /* ============ MARQUEE ============ */
 .marquee-band {
   position: relative;
-  background: var(--red);
+  background: var(--red-solid);
   color: var(--red-ink);
 }
 .marquee-clip {
   overflow: hidden;
   white-space: nowrap;
 }
+/* Eases in on load instead of snapping to full speed. Two chained animations:
+   an accelerating intro that covers exactly the distance a constant-speed
+   scroll would in half the ramp time (so its end velocity equals the loop
+   speed), then the endless loop starting from where the intro stopped. The
+   loop shifts by 50% per cycle, so starting at an offset is still seamless.
+   All plain CSS: no JS to fail, and prefers-reduced-motion turns it all off. */
 .marquee-track {
+  --marquee-secs: 34; /* seconds per loop (unitless, used in calc) */
+  --marquee-ramp: 2.4; /* seconds of ease-in */
+  --marquee-ramp-shift: calc(
+    -25% * var(--marquee-ramp) / var(--marquee-secs)
+  );
   display: inline-flex;
   align-items: center;
-  animation: scroll-left 34s linear infinite;
+  animation:
+    marquee-in calc(var(--marquee-ramp) * 1s) cubic-bezier(0.11, 0, 0.5, 0) both,
+    marquee-loop calc(var(--marquee-secs) * 1s) linear
+      calc(var(--marquee-ramp) * 1s) infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .marquee-track {
     animation: none;
   }
 }
-@keyframes scroll-left {
+@keyframes marquee-in {
   from {
     transform: translateX(0);
   }
   to {
-    transform: translateX(-50%);
+    transform: translateX(var(--marquee-ramp-shift));
+  }
+}
+@keyframes marquee-loop {
+  from {
+    transform: translateX(var(--marquee-ramp-shift));
+  }
+  to {
+    transform: translateX(calc(var(--marquee-ramp-shift) - 50%));
   }
 }
 .marquee-track span {
@@ -1731,7 +1996,7 @@ header.site-nav {
   color: var(--red);
   margin-bottom: 8px;
 }
-.place-card h3 {
+.place-card h2 {
   font-size: 1.05rem;
   font-weight: 700;
   margin-bottom: 8px;
@@ -1744,20 +2009,27 @@ header.site-nav {
 }
 
 /* ============ GITHUB ACTIVITY ============ */
+/* The heatmap sits flush under the marquee: no section padding, no heading,
+   one full-width container. Cells are sized from the container's width
+   (--cell) so the graph fits without sideways scrolling; below ~7px a cell it
+   falls back to scrolling (phones). */
+.gh-band {
+  padding: 0;
+}
+.gh-band::before {
+  display: none; /* the marquee's bottom rule is already there */
+}
 .gh-card {
-  border: 1px solid var(--border-2);
-  border-radius: 16px;
   background: var(--panel);
-  padding: clamp(20px, 3vw, 32px);
-  box-shadow: var(--shadow);
+  padding: 14px clamp(16px, 2.4vw, 24px) 10px;
 }
 .gh-top {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 22px;
+  gap: 4px 16px;
+  margin-bottom: 6px;
 }
 .gh-total {
   font-size: 1.15rem;
@@ -1777,6 +2049,7 @@ header.site-nav {
   border-bottom: 1px solid var(--border-2);
   /* See .card-links a's comment — same tap-target fix. */
   padding: 8px 0 4px;
+  min-height: 44px;
 }
 .gh-link:hover {
   color: var(--red);
@@ -1790,14 +2063,39 @@ header.site-nav {
   overflow-x: auto;
   padding-bottom: 6px;
 }
+/* Pixel theme: the sideways scrollbar (phones) is a square bar, not the
+   browser's rounded one. */
+.gh-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+.gh-scroll::-webkit-scrollbar-track {
+  background: var(--panel-2);
+  border-radius: 0;
+}
+.gh-scroll::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 0;
+}
+@supports not selector(::-webkit-scrollbar) {
+  .gh-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-strong) var(--panel-2);
+  }
+}
 .gh-grid-wrap {
-  display: inline-block;
-  min-width: 100%;
+  display: block;
+  min-width: max-content;
+  container-type: inline-size;
+}
+/* 53 weeks, 52 gaps of 3px, and the 30px day-label column */
+.gh-months,
+.gh-body {
+  --cell: clamp(7px, calc((100cqw - 30px - 156px) / 53), 16px);
 }
 .gh-months {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: 11px;
+  grid-auto-columns: var(--cell);
   gap: 3px;
   margin-bottom: 6px;
   padding-left: 30px;
@@ -1815,7 +2113,7 @@ header.site-nav {
 }
 .gh-daylabels {
   display: grid;
-  grid-template-rows: repeat(7, 11px);
+  grid-template-rows: repeat(7, var(--cell));
   gap: 3px;
   font-family: var(--font-mono);
   font-size: 0.62rem;
@@ -1828,43 +2126,42 @@ header.site-nav {
 .gh-weeks {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: 11px;
+  grid-auto-columns: var(--cell);
   gap: 3px;
 }
 .gh-week {
   display: grid;
-  grid-template-rows: repeat(7, 11px);
+  grid-template-rows: repeat(7, var(--cell));
   gap: 3px;
 }
 .gh-cell {
-  width: 11px;
-  height: 11px;
-  border-radius: 2px;
+  width: var(--cell, 11px);
+  height: var(--cell, 11px);
+  border-radius: 0; /* pixel theme: square cells */
   background: var(--heat-0);
 }
 .gh-legend {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 16px;
+  margin-top: 6px;
   font-family: var(--font-mono);
   font-size: 0.68rem;
   color: var(--ink-faint);
   justify-content: flex-end;
 }
 .gh-legend .gh-cell {
-  width: 10px;
-  height: 10px;
+  --cell: 10px;
 }
 
 /* ============ CONTACT ============ */
 .contact-band {
-  background: var(--red);
+  background: var(--red-solid);
   color: var(--red-ink);
 }
 .contact-band .eyebrow {
   color: var(--red-ink);
-  opacity: 0.85;
+  opacity: 0.92;
 }
 .contact-band .eyebrow::after {
   background: rgba(255, 255, 255, 0.35);
@@ -1889,7 +2186,7 @@ header.site-nav {
 }
 .contact-band .btn-primary {
   background: var(--red-ink);
-  color: var(--red);
+  color: var(--red-solid);
 }
 .contact-band .btn-primary:hover {
   background: #fff;
@@ -1913,7 +2210,7 @@ header.site-nav {
   font-family: var(--font-mono);
   font-size: 1rem;
   margin-top: 26px;
-  opacity: 0.9;
+  opacity: 0.92;
 }
 .contact-email a {
   text-decoration: underline;
@@ -1921,6 +2218,11 @@ header.site-nav {
 }
 
 /* ============ FOOTER ============ */
+.footer-top {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px; /* touch target */
+}
 footer {
   position: relative;
   padding: 26px 0;
@@ -2017,4 +2319,522 @@ footer {
 }
 ::view-transition-new(root) {
   z-index: 2;
+}
+
+/* ============ HOME PANELS ============ */
+/* HomeShell.tsx: on wide screens the middle column is the page and the two
+   gutters become fixed side panels (the right one has its own Lenis scroller).
+   ≥1280px  three columns (left identity · middle page · right project loop)
+   1024–1279px  middle + ONE side panel with PROFILE / PROJECTS tabs
+   <1024px  no panels — one stacked page, ordered by the `order` rules below */
+html.lenis {
+  scroll-behavior: auto;
+}
+.panel-tabs,
+.panel-status {
+  display: none;
+}
+.panel-head .path {
+  white-space: nowrap;
+}
+.panel-tabs {
+  gap: 6px;
+  margin-left: auto;
+}
+.panel-tabs button {
+  padding: 4px 8px;
+  border: 2px solid var(--line-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink-dim);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+.panel-tabs button[aria-selected="true"] {
+  border-color: var(--red);
+  background: var(--red-solid);
+  color: var(--red-ink);
+}
+.panel-status {
+  margin-left: auto;
+  padding: 2px 6px;
+  border: 2px solid var(--line-strong);
+  color: var(--ink-dim);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+@media (min-width: 1024px) {
+  .site-frame:has(.home-shell) {
+    /* Sizes come from percentages, not 100vw: on the frame (a child of <body>)
+       and on the fixed panels a % resolves against the viewport width WITHOUT
+       the page scrollbar, which is what the layout needs, and it is right on
+       the first frame. (100vw includes the scrollbar; correcting that from JS
+       moved the whole layout ~15px once the page hydrated.) */
+    --panel-w: clamp(300px, calc((100% - 64rem) / 2), 460px);
+    --frame-w: min(64rem, calc(100% - 2 * var(--panel-w)));
+    max-width: var(--frame-w);
+  }
+  .side-panel {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    z-index: 40; /* under the sticky nav (50) so its divider line crosses the panels */
+    width: var(--panel-w);
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+  }
+  .side-left {
+    right: calc(50% + var(--frame-w) / 2);
+    border-left: 1px solid var(--border);
+  }
+  .side-right {
+    left: calc(50% + var(--frame-w) / 2);
+    border-right: 1px solid var(--border);
+  }
+
+  /* Same height as the nav, with the same 2px rule under it, so the three
+     columns share one header line. */
+  .panel-head {
+    flex: none;
+    /* The fallback is the nav's real height, so the panel headers don't jump
+       when HomeShell measures it: 87px, or 61px between 1024 and 1459px where
+       the nav drops its social column (see below). */
+    height: var(--nav-h, 87px);
+    padding-top: 0;
+    padding-bottom: 0;
+    border-bottom: 2px solid var(--border);
+  }
+  .panel-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .panel-content {
+    position: relative;
+  }
+  /* The right panel moves by itself; a scrollbar would just twitch. */
+  .side-right .panel-scroll {
+    scrollbar-width: none;
+  }
+  .side-right .panel-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  .side-right .panel-status {
+    display: inline-block;
+  }
+
+  /* The project cards were designed for the full-width column: tighten them
+     for a 300–460px panel. */
+  .side-panel .section {
+    padding: 28px 0 34px;
+  }
+  .side-panel .wrap {
+    padding: 0 20px;
+  }
+  .side-panel .proj-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .side-panel .card {
+    height: auto;
+    padding: 20px;
+  }
+  .side-right .band.alt {
+    background: transparent;
+  }
+  .side-right .section {
+    padding: 20px 0;
+  }
+}
+
+/* ============ IDENTITY PANEL ============ */
+/* IdentityPanel.tsx: the fixed left panel. The portrait takes the top ~half;
+   three tiles (time, date, viewers) share the rest down to the bottom of the
+   screen. Each tile is a size container, so its numerals are sized from the
+   tile's own width and height (cqw / cqh) and fill it at any panel size.
+   --w (set inline) is the value's rough width in em. */
+.panel-fixed {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.ident {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 11fr) minmax(0, 10fr);
+}
+.ident-photo {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  background: #8a3d0b; /* the photo's orange, while it loads */
+  border-bottom: 2px solid var(--border);
+}
+.ident-img {
+  object-fit: cover;
+  object-position: 55% 38%;
+}
+/* Faint scanlines tie the photo to the site's hatched, pixel look. */
+.ident-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.18) 0,
+    rgba(0, 0, 0, 0.18) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+}
+.ident-tag {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 1;
+  padding: 5px 8px;
+  border: 2px solid var(--line-strong);
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  color: var(--ink);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.ident-stats {
+  display: grid;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  min-height: 0;
+}
+.stat {
+  position: relative;
+  container-type: size;
+  overflow: hidden;
+  padding: 0 12px;
+}
+.stat + .stat {
+  border-top: 2px solid var(--border);
+}
+.stat-head {
+  position: absolute;
+  top: 10px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+.stat-label::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 7px;
+  background: var(--red);
+}
+.stat-value {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 6px;
+  font-family: var(--font-display);
+  font-size: min(calc(100cqw / var(--w)), 76cqh);
+  line-height: 0.8;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.stat-red .stat-value {
+  color: var(--red);
+}
+/* Fixed-width digits so a ticking clock doesn't jitter. */
+.dg {
+  display: inline-block;
+  width: 0.7em;
+  text-align: center;
+}
+/* Odometer leading zeros. --ink-faint (not a darker grey) so they still pass
+   contrast, though they are decorative. */
+.dim {
+  color: var(--ink-faint);
+}
+.cl {
+  display: inline-block;
+  width: 0.34em;
+  text-align: center;
+  color: var(--red);
+  animation: blink 1s steps(1) infinite;
+}
+.sp {
+  display: inline-block;
+  width: 0.3em;
+}
+/* The seconds live in the tile's header, in red. */
+.stat-sec {
+  color: var(--red);
+  font-weight: 700;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl {
+    animation: none;
+  }
+}
+
+/* The frame gets narrower than the nav was drawn for (down to ~680px at
+   1280px wide): drop the social icon column, same as the ≤880px rule, until
+   the viewport is wide enough (≥1460px) to leave the frame ~860px+. */
+@media (min-width: 1024px) and (max-width: 1459px) {
+  .panel-head {
+    height: var(--nav-h, 61px);
+  }
+  .site-frame:has(.home-shell) .nav-cell-social,
+  .site-frame:has(.home-shell) .nav-cell-top.nav-cell-social {
+    display: none;
+  }
+}
+
+/* One side panel at a time, switched by the PROFILE / PROJECTS tabs. */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .site-frame:has(.home-shell) {
+    --panel-w: 340px;
+    --frame-w: calc(100% - var(--panel-w));
+    margin: 0;
+  }
+  .side-left,
+  .side-right {
+    left: auto;
+    right: 0;
+    border-left: 1px solid var(--border);
+    border-right: none;
+  }
+  .home-shell[data-tab="profile"] .side-right,
+  .home-shell[data-tab="projects"] .side-left {
+    display: none;
+  }
+  .panel-tabs {
+    display: flex;
+  }
+  .panel-head .path,
+  .side-right .panel-status {
+    display: none;
+  }
+}
+
+/* No panels: flatten the wrappers and lay the sections out in one column,
+   in reading order. `display: contents` makes each section a direct flex
+   item of .home-shell so `order` can interleave the three groups. */
+@media (max-width: 1023px) {
+  .home-shell {
+    display: flex;
+    flex-direction: column;
+  }
+  .home-main,
+  .side-panel,
+  .panel-scroll,
+  .panel-content {
+    display: contents;
+  }
+  .panel-head,
+  .loop-clone {
+    display: none;
+  }
+  /* The looping ticker and the identity panel are for wide screens; stacked,
+     the Work section (#work, below) is the one list of projects. */
+  .side-left,
+  .side-right {
+    display: none;
+  }
+  .hero {
+    order: 1;
+  }
+  .marquee-band {
+    order: 2;
+  }
+  #activity {
+    order: 3;
+  }
+  #about {
+    order: 4;
+  }
+  #stack {
+    order: 5;
+  }
+  #experience {
+    order: 6;
+  }
+  #work {
+    order: 7;
+  }
+  #contact {
+    order: 8;
+  }
+}
+
+/* ============ WORK SECTION ============ */
+/* WorkSection.tsx: the in-flow list behind /#work. One stretched link per
+   card, so the whole card is clickable. */
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 22px;
+}
+.work-card {
+  position: relative;
+}
+.work-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  min-height: 44px; /* touch target (the whole card is also a link via ::after) */
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: none;
+}
+.work-card-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.work-card:hover .work-card-link {
+  color: var(--red);
+}
+.work-card:has(.work-card-link:focus-visible) {
+  outline: 3px solid var(--red);
+  outline-offset: 2px;
+}
+
+/* ============ PROJECT CARDS ============ */
+/* ProjectCard.tsx. At rest a card is only its landing-page screenshot in a
+   pixel frame. On hover / keyboard focus (or a tap on touch screens, which
+   adds .is-revealed) a dark scrim wipes in over the image in pixel rows,
+   carrying the project name and a "Click me" button. Pixel rules throughout:
+   square corners, 2px border, hard shadow, stepped animation. */
+.pcard {
+  position: relative;
+  overflow: hidden;
+  container-type: inline-size; /* the name sizes off the card, not the viewport */
+  border: 2px solid var(--line-strong);
+  border-radius: 0;
+  background: var(--panel);
+  box-shadow: 4px 4px 0 var(--red-dim);
+  /* Taps toggle the card — don't flash a tap highlight or start a selection. */
+  -webkit-tap-highlight-color: transparent;
+}
+.pcard-media {
+  aspect-ratio: 4 / 3;
+}
+.pcard-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
+
+.pcard-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px;
+  /* Dark enough for the text to read, thin enough that the screenshot still
+     shows through underneath. */
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path 0.26s steps(6, end);
+}
+.pcard-name {
+  margin: 0;
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 7.5cqw, 1.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--ink);
+  /* Hard, un-blurred shadow: reads as a pixel drop-shadow. */
+  text-shadow: 2px 2px 0 var(--red-dim);
+}
+.pcard-cta {
+  padding: 9px 16px;
+  border: 2px solid var(--red-ink);
+  border-radius: 0;
+  background: var(--red-solid);
+  color: var(--red-ink);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+/* Invisible link over the whole card. Keyboard focus lands here and the
+   :focus-within rule below reveals the overlay. */
+.pcard-link {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+.pcard-link:focus-visible {
+  outline: 3px solid var(--red);
+  outline-offset: -6px;
+}
+/* Touch: the first tap only reveals the overlay (ProjectCard's onClick), so
+   the link ignores taps until then. */
+@media (hover: none) {
+  .pcard-link {
+    pointer-events: none;
+  }
+  .pcard.is-revealed .pcard-link {
+    pointer-events: auto;
+  }
+}
+
+/* Reveal: hover only on devices that have it (on touch, :hover sticks after
+   a tap and would fight the tap toggle), plus keyboard focus and the tap
+   state. The link is focusable while the overlay is hidden so focusing it reveals it. */
+@media (hover: hover) {
+  .pcard:hover {
+    border-color: var(--red);
+  }
+  .pcard:hover .pcard-cta {
+    background: var(--red-dim);
+  }
+  .pcard:hover .pcard-overlay {
+    clip-path: inset(0);
+  }
+}
+.pcard:focus-within .pcard-overlay,
+.pcard.is-revealed .pcard-overlay {
+  clip-path: inset(0);
+}
+.pcard.is-revealed {
+  border-color: var(--red);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pcard-overlay {
+    transition: none;
+  }
 }

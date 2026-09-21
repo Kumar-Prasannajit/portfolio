@@ -1,3 +1,4 @@
+import { RevealGroup, RevealItem } from "./Reveal";
 import { EXPERIENCE } from "@/lib/data";
 
 export default function Experience() {
@@ -5,13 +6,13 @@ export default function Experience() {
     <section className="section band" id="experience">
       <div className="wrap">
         <div className="eyebrow">
-          <span className="idx">03</span> Experience
+          <span className="idx">04</span> Experience
         </div>
         <h2 className="h2">Where I&apos;ve worked</h2>
         <div style={{ height: 28 }}></div>
-        <div className="tl">
+        <RevealGroup className="tl" stagger={0.14}>
           {EXPERIENCE.map((item) => (
-            <div className="tl-item" key={item.role}>
+            <RevealItem className="tl-item" key={item.role}>
               <div className="tl-top">
                 <span className="tl-role">{item.role}</span>
                 <span className="tl-date mono">{item.date}</span>
@@ -24,9 +25,9 @@ export default function Experience() {
                   <li key={bullet}>{bullet}</li>
                 ))}
               </ul>
-            </div>
+            </RevealItem>
           ))}
-        </div>
+        </RevealGroup>
       </div>
     </section>
   );

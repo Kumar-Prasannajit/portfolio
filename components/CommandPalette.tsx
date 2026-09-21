@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
 import { SOCIAL_LINKS } from "@/lib/data";
 import { useTheme } from "@/lib/useTheme";
+import { scrollToSection } from "@/lib/panelScroll";
 import { nowPlayingCopy, useNowPlaying } from "@/lib/useNowPlaying";
 import { useCommandPalette } from "./CommandPaletteContext";
 import {
@@ -16,6 +17,7 @@ import {
   IconCornerDownLeft,
   IconCpu,
   IconFolder,
+  IconGrid,
   IconGithub,
   IconHome,
   IconImage,
@@ -47,10 +49,10 @@ type PaletteEntry = {
   onSelect: () => void;
 };
 
-// Home-section entries (About/Stack/Experience/Work/Contact) still jump
-// here even though Stack and Experience lost their top-nav link — both
-// sections are still live on the homepage, and the palette is exactly
-// the power-user path that should keep reaching them.
+// Home-section entries come first, in page order (01 Activity … 06 Contact —
+// the same numbering as the section eyebrows), then the separate routes.
+// Stack, Experience and Activity have no top-nav link, so the palette is the
+// power-user path that keeps reaching them.
 const PAGES: Array<{
   title: string;
   description: string;
@@ -58,15 +60,17 @@ const PAGES: Array<{
   icon: ReactNode;
 }> = [
   { title: "Home", description: "Go to the home page", href: "/", icon: <IconHome /> },
-  { title: "About", description: "Jump to the About section", href: "/#about", icon: <IconUser /> },
-  { title: "Stack", description: "Jump to the Stack section", href: "/#stack", icon: <IconLayers /> },
+  { title: "01 Activity", description: "Jump to the Shipping log", href: "/#activity", icon: <IconGrid /> },
+  { title: "02 About", description: "Jump to the About section", href: "/#about", icon: <IconUser /> },
+  { title: "03 Stack", description: "Jump to the Stack section", href: "/#stack", icon: <IconLayers /> },
   {
-    title: "Experience",
+    title: "04 Experience",
     description: "Jump to the Experience section",
     href: "/#experience",
     icon: <IconBriefcase />,
   },
-  { title: "Work", description: "Jump to the Work section", href: "/#work", icon: <IconFolder /> },
+  { title: "05 Work", description: "Jump to the Work section", href: "/#work", icon: <IconFolder /> },
+  { title: "06 Contact", description: "Jump to the Contact section", href: "/#contact", icon: <IconPhone /> },
   { title: "Blogs", description: "Browse all blog posts", href: "/blog", icon: <IconBookOpen /> },
   { title: "Weekly", description: "Browse the weekly devlog", href: "/weekly", icon: <IconCalendar /> },
   { title: "Gallery", description: "Proof I touch grass sometimes", href: "/gallery", icon: <IconImage /> },
@@ -77,7 +81,6 @@ const PAGES: Array<{
     href: "/places",
     icon: <IconMapPin />,
   },
-  { title: "Contact", description: "Jump to the Contact section", href: "/#contact", icon: <IconPhone /> },
   { title: "Resume", description: "View the resume inline", href: "/resume", icon: <IconResume /> },
 ];
 
@@ -104,6 +107,13 @@ export default function CommandPalette() {
 
   function goTo(href: string) {
     close();
+    // On the home page the sections live in separate scroll containers, so
+    // jump with the home scrollers instead of a hash navigation.
+    if (href.startsWith("/#") && window.location.pathname === "/" && scrollToSection(href.slice(2))) {
+      // Same as a nav click (HomeShell): keep the URL shareable.
+      history.replaceState(null, "", href.slice(1));
+      return;
+    }
     router.push(href);
   }
 

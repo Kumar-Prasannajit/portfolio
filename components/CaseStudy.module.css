@@ -1,0 +1,176 @@
+/* /work/[slug] case study (app/work/[slug]/page.tsx). Back link, title and tag
+   styles come from BlogPost.module.css; the pixel frame (2px border, hard red
+   shadow) matches the project cards in globals.css. */
+
+.lead {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 40px;
+  margin: 0 0 32px;
+  padding: 16px 0;
+  border-top: 1px solid var(--border-2);
+  border-bottom: 1px solid var(--border-2);
+}
+.meta dt {
+  margin-bottom: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.meta dd {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+.meta a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--red);
+  text-underline-offset: 3px;
+}
+.meta a:hover {
+  color: var(--red);
+}
+
+.frame {
+  border: 2px solid var(--line-strong);
+  background: var(--panel);
+  box-shadow: 4px 4px 0 var(--red-dim);
+  line-height: 0;
+}
+.frame img {
+  width: 100%;
+  height: auto;
+}
+figure.frame {
+  margin: 0 0 8px;
+}
+
+.body {
+  max-width: 62rem;
+}
+.section {
+  margin-top: 56px;
+}
+.prose {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.built {
+  list-style: none;
+  max-width: 68ch;
+  margin: 0;
+  padding: 0;
+}
+.built li {
+  position: relative;
+  margin: 0 0 10px;
+  padding-left: 22px;
+  color: var(--ink-dim);
+  line-height: 1.65;
+}
+.built li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.7em;
+  width: 7px;
+  height: 7px;
+  background: var(--red);
+}
+
+.shots {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px 22px;
+}
+@media (max-width: 720px) {
+  .shots {
+    grid-template-columns: 1fr;
+  }
+}
+.shot {
+  margin: 0;
+}
+.shot figcaption {
+  margin-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ink-dim);
+}
+
+.related {
+  display: inline-block;
+  padding: 8px 0;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--red);
+  text-underline-offset: 4px;
+}
+.related:hover {
+  color: var(--red);
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 56px;
+}
+.links :global(.btn) {
+  white-space: nowrap;
+}
+/* The shared icons have no intrinsic size; without this they stretch and
+   squeeze the label onto two lines. */
+.links svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+.next {
+  display: block;
+  margin-top: 72px;
+  padding: 26px 0 0;
+  border-top: 1px solid var(--border-2);
+  text-decoration: none;
+  color: var(--ink);
+}
+.nextLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.nextTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3.4vw, 2.2rem);
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+.next:hover .nextTitle {
+  color: var(--red);
+}
+.next:focus-visible {
+  outline: 3px solid var(--red);
+  outline-offset: 4px;
+}

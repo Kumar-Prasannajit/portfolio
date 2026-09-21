@@ -19,7 +19,7 @@ export default function WeeklyCard({ entry }: { entry: WeeklyEntrySummary }) {
           <span>{formatContentDate(entry.frontmatter.date)}</span>
           <span>{entry.readTimeMinutes} min read</span>
         </div>
-        <h3 className={styles.title}>{entry.frontmatter.title}</h3>
+        <h2 className={styles.title}>{entry.frontmatter.title}</h2>
         <p className={styles.summary}>{entry.frontmatter.summary}</p>
       </div>
     </Link>

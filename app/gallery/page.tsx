@@ -12,7 +12,7 @@ export default function GalleryPage() {
   const images = getGalleryImages();
 
   return (
-    <main>
+    <main id="main" tabIndex={-1}>
       <section className="section band">
         <div className="wrap">
           <div className="eyebrow">

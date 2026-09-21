@@ -15,12 +15,12 @@
   border: 1px solid var(--border-2);
   border-radius: 9px;
   padding: 11px 14px;
+  min-height: 44px;
 }
 .search::placeholder {
   color: var(--ink-faint);
 }
 .search:focus {
-  outline: none;
   border-color: var(--red);
 }
 
@@ -32,10 +32,10 @@
   border: 1px solid var(--border-2);
   border-radius: 9px;
   padding: 11px 14px;
+  min-height: 44px;
   cursor: pointer;
 }
 .select:focus {
-  outline: none;
   border-color: var(--red);
 }
 

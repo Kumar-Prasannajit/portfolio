@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { PROJECTS } from "@/lib/data";
 import { getAllBlogPosts, getAllWeeklyEntries } from "@/lib/content";
 
 const SITE_URL = "https://kumarp.in";
@@ -19,6 +20,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     })
   );
+
+  const workEntries: MetadataRoute.Sitemap = PROJECTS.map((project) => ({
+    url: `${SITE_URL}/work/${project.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly",
+    priority: 0.6,
+  }));
 
   return [
     {
@@ -63,6 +71,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.3,
     },
+    ...workEntries,
     ...blogEntries,
     ...weeklyEntries,
   ];

@@ -1,9 +1,11 @@
+import ScrollLayer from "./ScrollLayer";
+import Magnetic from "./Magnetic";
 import { HERO_BINARY, SOCIAL_LINKS } from "@/lib/data";
 
 export default function Hero() {
   return (
     <section className="hero">
-      <div className="hero-lines" aria-hidden="true">
+      <ScrollLayer className="hero-lines" aria-hidden y={[0, 90]} scale={[1, 1.08]}>
         <svg
           viewBox="0 0 1200 500"
           preserveAspectRatio="none"
@@ -36,7 +38,7 @@ export default function Hero() {
             />
           </g>
         </svg>
-      </div>
+      </ScrollLayer>
       <div className="hero-bin mono" aria-hidden="true">
         {HERO_BINARY}
       </div>
@@ -48,11 +50,11 @@ export default function Hero() {
             · returns: building
           </span>
         </div>
-        <h1>
+        <ScrollLayer as="h1" y={[0, 56]} scale={[1, 0.96]} origin="left top">
           KUMAR
           <br />
           <span className="l2">PRASANNAJIT</span>
-        </h1>
+        </ScrollLayer>
         <p className="hero-sub">
           Backend-leaning <strong>full-stack developer</strong> on the MERN
           stack — I ship REST APIs, booking platforms and the interfaces that
@@ -60,20 +62,26 @@ export default function Hero() {
         </p>
         <div className="meta-row">
           <span className="meta-chip">[ ODISHA, IN ]</span>
-          <a className="btn btn-primary" href={`mailto:${SOCIAL_LINKS.email}`}>
-            Get in touch
-          </a>
-          <a className="btn btn-ghost" href="#work">
-            View work
-          </a>
-          <a
-            className="btn btn-ghost"
-            href={SOCIAL_LINKS.resume}
-            target="_blank"
-            rel="noopener"
-          >
-            Resume
-          </a>
+          <Magnetic>
+            <a className="btn btn-primary" href={`mailto:${SOCIAL_LINKS.email}`}>
+              Get in touch
+            </a>
+          </Magnetic>
+          <Magnetic>
+            <a className="btn btn-ghost" href="#work">
+              View work
+            </a>
+          </Magnetic>
+          <Magnetic>
+            <a
+              className="btn btn-ghost"
+              href={SOCIAL_LINKS.resume}
+              target="_blank"
+              rel="noopener"
+            >
+              Resume
+            </a>
+          </Magnetic>
         </div>
       </div>
     </section>

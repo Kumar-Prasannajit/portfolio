@@ -15,12 +15,33 @@ import {
 } from "./icons";
 import TaglineCycler from "./TaglineCycler";
 import NowPlayingWidget from "./NowPlayingWidget";
-import { NAV_LINKS, NAV_LOGO_MARK, SOCIAL_LINKS } from "@/lib/data";
+import { NAV_LINKS, NAV_LOGO_MARK, SOCIAL_LINKS, type NavLink } from "@/lib/data";
 import { useTheme } from "@/lib/useTheme";
 import { useCommandPalette } from "./CommandPaletteContext";
 
+// In-page sections ("/#work") stay plain anchors: HomeShell's click handler
+// scrolls them inside the right panel, and from another route they load "/"
+// and jump. Separate routes (/blog, /weekly) navigate client-side.
+function NavLinkItem({ link, onClick }: { link: NavLink; onClick?: () => void }) {
+  const content = (
+    <>
+      {link.idx && <span className="nav-link-idx mono">{link.idx}</span>}
+      {link.label}
+    </>
+  );
+  return link.href.startsWith("/#") ? (
+    <a href={link.href} onClick={onClick}>
+      {content}
+    </a>
+  ) : (
+    <Link href={link.href} onClick={onClick}>
+      {content}
+    </Link>
+  );
+}
+
 export default function Nav() {
-  const { isDark, toggleTheme } = useTheme();
+  const { toggleTheme } = useTheme();
   const { isOpen: paletteOpen, toggle: togglePalette } = useCommandPalette();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -62,13 +83,23 @@ export default function Nav() {
         <div className="nav-grid">
           <Link href="/" className="nav-cell nav-cell-logo" aria-label={NAV_LOGO_MARK}>
             <span className="nav-logo-swap">
+              {/* Both theme variants are rendered and CSS shows the right
+                  one (.theme-dark-only / .theme-light-only), so the first
+                  paint already matches data-theme instead of waiting for
+                  useTheme's effect to flip a src. */}
               <Image
-                src={isDark ? "/darkmode.png" : "/lightmode.png"}
+                src="/darkmode.png"
                 alt={NAV_LOGO_MARK}
                 width={140}
                 height={70}
-                priority
-                className="nav-logo-img nav-logo-img-default"
+                className="nav-logo-img nav-logo-img-default theme-dark-only"
+              />
+              <Image
+                src="/lightmode.png"
+                alt={NAV_LOGO_MARK}
+                width={140}
+                height={70}
+                className="nav-logo-img nav-logo-img-default theme-light-only"
               />
               {/* On hover: dark mode reveals the red favicon mark (the
                   cursor's diff-blend box goes white behind it); light
@@ -76,12 +107,20 @@ export default function Nav() {
                   that section goes red-backed with white content instead
                   — see the .cursor-invert-target light-mode rules. */}
               <Image
-                src={isDark ? "/favicon.png" : "/darkmode.png"}
+                src="/favicon.png"
                 alt=""
                 aria-hidden="true"
                 width={140}
                 height={70}
-                className="nav-logo-img nav-logo-img-hover"
+                className="nav-logo-img nav-logo-img-hover theme-dark-only"
+              />
+              <Image
+                src="/darkmode.png"
+                alt=""
+                aria-hidden="true"
+                width={140}
+                height={70}
+                className="nav-logo-img nav-logo-img-hover theme-light-only"
               />
             </span>
           </Link>
@@ -93,10 +132,7 @@ export default function Nav() {
             <ul className="nav-links">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
-                  <a href={link.href}>
-                    <span className="nav-link-idx mono">{link.idx}</span>
-                    {link.label}
-                  </a>
+                  <NavLinkItem link={link} />
                 </li>
               ))}
             </ul>
@@ -171,12 +207,18 @@ export default function Nav() {
         <div className="nav-mobile-bar">
           <Link href="/" className="nav-mobile-logo" aria-label={NAV_LOGO_MARK}>
             <Image
-              src={isDark ? "/darkmode.png" : "/lightmode.png"}
+              src="/darkmode.png"
               alt={NAV_LOGO_MARK}
               width={140}
               height={70}
-              priority
-              className="nav-logo-img"
+              className="nav-logo-img theme-dark-only"
+            />
+            <Image
+              src="/lightmode.png"
+              alt={NAV_LOGO_MARK}
+              width={140}
+              height={70}
+              className="nav-logo-img theme-light-only"
             />
           </Link>
           <div className="nav-mobile-actions">
@@ -221,10 +263,7 @@ export default function Nav() {
                   <ul>
                     {NAV_LINKS.map((link) => (
                       <li key={link.href}>
-                        <a href={link.href} onClick={() => setMobileMenuOpen(false)}>
-                          <span className="nav-link-idx mono">{link.idx}</span>
-                          {link.label}
-                        </a>
+                        <NavLinkItem link={link} onClick={() => setMobileMenuOpen(false)} />
                       </li>
                     ))}
                   </ul>

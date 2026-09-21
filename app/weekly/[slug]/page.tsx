@@ -40,7 +40,7 @@ export default async function WeeklyEntryPage({
   const number = `#${String(entry.number).padStart(3, "0")}`;
 
   return (
-    <main>
+    <main id="main" tabIndex={-1}>
       <section className="section band">
         <div className="wrap">
           <Link href="/weekly" className={styles.back}>

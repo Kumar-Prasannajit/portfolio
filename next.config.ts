@@ -9,12 +9,23 @@ const nextConfig: NextConfig = {
   // `false`) default.
   trailingSlash: false,
 
+  // next/image serves WebP by default; AVIF first (smaller) where supported.
+  images: {
+    formats: ["image/avif", "image/webp"],
+  },
+
   // next-mdx-remote's own README calls this out explicitly for Turbopack
   // (which `next dev`/`next build` use by default here): without it,
   // Turbopack doesn't reliably tell the package's server-only code apart
   // from its client-bundle code, which is exactly the split RSC MDX
   // rendering depends on.
   transpilePackages: ["next-mdx-remote"],
+
+  // Dev only: `next dev` refuses requests to its own /_next/* assets from any
+  // host but localhost, so a page opened through an ngrok tunnel loads its HTML
+  // but no JavaScript (no clock, no animations). Allow the ngrok hostnames.
+  // Has no effect on `next build` / production.
+  allowedDevOrigins: ["*.ngrok-free.app", "*.ngrok-free.dev", "*.ngrok.app", "*.ngrok.io"],
 
   // No `redirects()`/`rewrites()` here and no proxy.ts (Next 16's
   // renamed middleware) in the project — nothing in the app is

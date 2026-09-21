@@ -5,7 +5,7 @@
 // depends on browser-only APIs (canvas, DOMMatrix) that don't exist
 // during server rendering.
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -20,6 +20,18 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url
 ).toString();
 
+// pdf.js overlays each link in the PDF with an empty <a>. Give them a name a
+// screen reader can announce (from where they point).
+function linkLabel(href: string) {
+  try {
+    const url = new URL(href);
+    if (url.protocol === "mailto:") return `Email ${url.pathname}`;
+    return `Open ${url.hostname.replace(/^www\./, "")}`;
+  } catch {
+    return "Open link";
+  }
+}
+
 const MIN_SCALE = 0.5;
 const MAX_SCALE = 2.5;
 const SCALE_STEP = 0.15;
@@ -29,6 +41,13 @@ export default function ResumeViewer() {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [scale, setScale] = useState(DEFAULT_SCALE);
   const [failed, setFailed] = useState(false);
+  const viewportRef = useRef<HTMLDivElement>(null);
+
+  function labelPdfLinks() {
+    viewportRef.current?.querySelectorAll<HTMLAnchorElement>(".annotationLayer a[href]").forEach((a) => {
+      if (!a.getAttribute("aria-label")) a.setAttribute("aria-label", linkLabel(a.href));
+    });
+  }
 
   function zoomIn() {
     setScale((s) => Math.min(MAX_SCALE, Math.round((s + SCALE_STEP) * 100) / 100));
@@ -83,7 +102,7 @@ export default function ResumeViewer() {
         </a>
       </div>
 
-      <div className={styles.viewport}>
+      <div className={styles.viewport} ref={viewportRef}>
         {failed ? (
           <p className={`${styles.status} ${styles.errorStatus}`}>
             Couldn&apos;t load the PDF preview.{" "}
@@ -105,6 +124,7 @@ export default function ResumeViewer() {
                 pageNumber={index + 1}
                 scale={scale}
                 className={styles.page}
+                onRenderAnnotationLayerSuccess={labelPdfLinks}
               />
             ))}
           </Document>

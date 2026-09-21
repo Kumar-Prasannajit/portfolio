@@ -1,3 +1,4 @@
+import { Reveal, RevealGroup, RevealItem } from "./Reveal";
 import { TERM_ROWS } from "@/lib/data";
 
 export default function About() {
@@ -5,31 +6,31 @@ export default function About() {
     <section className="section band" id="about">
       <div className="wrap">
         <div className="eyebrow">
-          <span className="idx">01</span> About
+          <span className="idx">02</span> About
         </div>
         <div className="about-grid">
-          <div className="about-copy">
-            <p>
+          <RevealGroup className="about-copy">
+            <RevealItem as="p">
               I&apos;m a <strong>Full Stack Developer</strong> with a backend
               focus, specializing in the MERN stack — currently a{" "}
               <strong>Junior Software Engineer at Aideas Tech Solutions</strong>{" "}
               in Hyderabad, where I build reusable React components and
               integrate the REST APIs that keep pages fast.
-            </p>
-            <p>
+            </RevealItem>
+            <RevealItem as="p">
               Before that I interned at <strong>Navgyan Innovations</strong>{" "}
               in Gunupur, shipping three production web apps and cleaning up a
               five-person team&apos;s Git workflow along the way. I hold a
               <strong> B.Tech in Electronics &amp; Communication Engineering</strong>{" "}
               from GIET University, Odisha.
-            </p>
-            <p>
+            </RevealItem>
+            <RevealItem as="p">
               Off the clock, I&apos;m usually working DSA problems in
               JavaScript, tuning a Next.js layout until it feels right, or
               turning coffee into commits.
-            </p>
-          </div>
-          <div className="term-card">
+            </RevealItem>
+          </RevealGroup>
+          <Reveal className="term-card" delay={0.25}>
             <div className="term-head">
               <span className="tdot"></span>
               <span className="tdot"></span>
@@ -44,7 +45,7 @@ export default function About() {
                 </div>
               ))}
             </div>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>

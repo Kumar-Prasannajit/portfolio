@@ -35,7 +35,7 @@ export default async function BlogPostPage({
   if (!post) notFound();
 
   return (
-    <main>
+    <main id="main" tabIndex={-1}>
       <section className="section band">
         <div className="wrap">
           <Link href="/blog" className={styles.back}>

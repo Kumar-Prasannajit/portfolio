@@ -7,6 +7,8 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import CommandPalette from "@/components/CommandPalette";
 import { CommandPaletteProvider } from "@/components/CommandPaletteContext";
+import MotionProvider from "@/components/MotionProvider";
+import ViewCounter from "@/components/ViewCounter";
 
 const SITE_URL = "https://kumarp.in";
 
@@ -107,7 +109,10 @@ const PERSON_JSON_LD = {
   sameAs: [SOCIAL_LINKS.github, SOCIAL_LINKS.linkedin],
 };
 
-// Runs before paint to stamp the saved theme, avoiding a flash of the wrong palette.
+// Runs before paint to stamp the saved theme, avoiding a flash of the wrong
+// palette. The server can't know localStorage, so <html> below carries
+// suppressHydrationWarning: this attribute is the one intended difference
+// between server and client HTML (the same approach next-themes takes).
 const THEME_INIT_SCRIPT = `
 (function(){
   try{
@@ -115,6 +120,23 @@ const THEME_INIT_SCRIPT = `
     if(saved === 'light' || saved === 'dark'){
       document.documentElement.setAttribute('data-theme', saved);
     }
+  }catch(e){}
+})();
+`;
+
+// Decides, before first paint, whether the boot overlay (components/Boot.tsx)
+// should be skipped: on repeat visits in this tab's session, when the visitor
+// asked for reduced motion, or when they landed somewhere other than the home
+// page (the boot leads into the hero, so it only makes sense there — landing
+// elsewhere counts as having seen it). data-boot="done" hides the overlay in
+// CSS, so it never renders at all rather than flashing and disappearing.
+const BOOT_INIT_SCRIPT = `
+(function(){
+  try{
+    var d = document.documentElement;
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){ d.setAttribute('data-boot','done'); return; }
+    if(sessionStorage.getItem('kps-booted')){ d.setAttribute('data-boot','done'); return; }
+    if(location.pathname !== '/'){ sessionStorage.setItem('kps-booted','1'); d.setAttribute('data-boot','done'); }
   }catch(e){}
 })();
 `;
@@ -127,10 +149,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${archivoBlack.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: BOOT_INIT_SCRIPT }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -139,6 +163,10 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
+        <a className="skip-link" href="#main" data-skip-link="">
+          Skip to content
+        </a>
+        <MotionProvider>
         <CommandPaletteProvider>
           <div className="site-frame" id="top">
             <Nav />
@@ -147,7 +175,9 @@ export default function RootLayout({
           </div>
           <CommandPalette />
         </CommandPaletteProvider>
+        </MotionProvider>
         <CustomCursor />
+        <ViewCounter />
       </body>
     </html>
   );

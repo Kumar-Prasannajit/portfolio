@@ -22,7 +22,8 @@ export function mdxComponents(): MDXComponents {
     blockquote: (props) => <blockquote className={styles.blockquote} {...props} />,
     hr: () => <hr className={styles.hr} />,
     code: (props) => <code className={styles.code} {...props} />,
-    pre: (props) => <pre className={styles.pre} {...props} />,
+    // Wide code scrolls sideways, so it must be reachable by keyboard.
+    pre: (props) => <pre className={styles.pre} tabIndex={0} {...props} />,
     a: ({ href, children, ...props }: AnchorHTMLAttributes<HTMLAnchorElement>) => {
       if (href && (href.startsWith("/") || href.startsWith("#"))) {
         return (

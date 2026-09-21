@@ -1,4 +1,5 @@
 import { IconGithub, IconLinkedin } from "./icons";
+import Magnetic from "./Magnetic";
 import { SOCIAL_LINKS } from "@/lib/data";
 
 export default function Contact() {
@@ -8,28 +9,32 @@ export default function Contact() {
         <div className="eyebrow">
           <span className="idx">06</span> Contact
         </div>
-        <h1 className="contact-h">
+        <h2 className="contact-h">
           LET&apos;S BUILD
           <br />
           SOMETHING
-        </h1>
+        </h2>
         <p className="contact-sub">
           Open to backend-leaning full-stack work and interesting problems —
           reach out about a role, a freelance build, or just to talk MERN and
           DSA.
         </p>
         <div className="cta-row">
-          <a className="btn btn-primary" href={`mailto:${SOCIAL_LINKS.email}`}>
-            Email me
-          </a>
-          <a
-            className="btn btn-ghost"
-            href={SOCIAL_LINKS.resume}
-            target="_blank"
-            rel="noopener"
-          >
-            Resume
-          </a>
+          <Magnetic>
+            <a className="btn btn-primary" href={`mailto:${SOCIAL_LINKS.email}`}>
+              Email me
+            </a>
+          </Magnetic>
+          <Magnetic>
+            <a
+              className="btn btn-ghost"
+              href={SOCIAL_LINKS.resume}
+              target="_blank"
+              rel="noopener"
+            >
+              Resume
+            </a>
+          </Magnetic>
           <a
             className="btn btn-icon"
             href={SOCIAL_LINKS.github}

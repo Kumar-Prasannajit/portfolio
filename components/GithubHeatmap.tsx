@@ -1,4 +1,5 @@
 import { IconExternalLink } from "./icons";
+import { RevealGroup, RevealItem } from "./Reveal";
 import { GH_COUNTS, GH_START, SOCIAL_LINKS } from "@/lib/data";
 
 const MONTH_NAMES = [
@@ -93,15 +94,10 @@ export default function GithubHeatmap() {
   const total = GH_COUNTS.reduce((a, b) => a + b, 0);
 
   return (
-    <section className="section band" id="activity">
-      <div className="wrap">
-        <div className="eyebrow">
-          <span className="idx">05</span> Activity
-        </div>
-        <h2 className="h2">Shipping log</h2>
-        <div style={{ height: 28 }}></div>
-        <div className="gh-card">
-          <div className="gh-top">
+    <section className="band gh-band" id="activity">
+      <div>
+        <RevealGroup className="gh-card" stagger={0.12}>
+          <RevealItem className="gh-top">
             <div className="gh-total">
               <span>{total.toLocaleString("en-US")}</span> contributions in
               the last year
@@ -115,8 +111,13 @@ export default function GithubHeatmap() {
               github.com/Kumar-Prasannajit
               <IconExternalLink />
             </a>
-          </div>
-          <div className="gh-scroll">
+          </RevealItem>
+          <RevealItem
+            className="gh-scroll"
+            tabIndex={0}
+            role="region"
+            aria-label="Contribution graph, scrolls sideways"
+          >
             <div className="gh-grid-wrap">
               <div className="gh-months mono">
                 {weeks.map((week) => (
@@ -153,8 +154,8 @@ export default function GithubHeatmap() {
                 </div>
               </div>
             </div>
-          </div>
-          <div className="gh-legend">
+          </RevealItem>
+          <RevealItem className="gh-legend">
             Less
             <span className="gh-cell" style={{ background: "var(--heat-0)" }}></span>
             <span className="gh-cell" style={{ background: "var(--heat-1)" }}></span>
@@ -162,8 +163,8 @@ export default function GithubHeatmap() {
             <span className="gh-cell" style={{ background: "var(--heat-3)" }}></span>
             <span className="gh-cell" style={{ background: "var(--heat-4)" }}></span>
             More
-          </div>
-        </div>
+          </RevealItem>
+        </RevealGroup>
       </div>
     </section>
   );
