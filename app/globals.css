@@ -2530,6 +2530,18 @@ html.lenis {
   color: var(--ink-dim);
   white-space: nowrap;
 }
+/* The right-hand header text (e.g. "Watching from Kolkata") gives way with an
+   ellipsis before it can collide with the label on a narrow panel. */
+.stat-meta {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* The place name itself is the one red word in the header. */
+.stat-place {
+  color: var(--red);
+  font-weight: 700;
+}
 .stat-label::before {
   content: "";
   display: inline-block;

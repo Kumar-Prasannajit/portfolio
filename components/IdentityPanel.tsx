@@ -14,6 +14,7 @@ import Image from "next/image";
 import { useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { PANEL_TIME_ZONE, PANEL_TIME_ZONE_LABEL } from "@/lib/data";
 import { useViews } from "@/lib/views";
+import { useLocation } from "@/lib/location";
 
 const ODOMETER_DIGITS = 5;
 
@@ -153,6 +154,10 @@ function Stat({
 export default function IdentityPanel() {
   const now = useNow();
   const views = useViews();
+  const place = useLocation();
+  const watchingFrom = place
+    ? [place.city, place.country].filter(Boolean).join(", ")
+    : "";
 
   const time = now ? `${now.hh}:${now.mm}` : "--:--";
   const seconds = now ? now.ss : "--";
@@ -161,7 +166,9 @@ export default function IdentityPanel() {
   // An odometer: zero-padded to five digits, the leading zeros dimmed.
   let viewers = "·····";
   let viewersDim = viewers.length;
-  let viewersMeta = "UNIQUE BROWSERS";
+  // Set only when the counter itself is broken; otherwise the header's
+  // right-hand text is where the visitor is watching from (viewersHeader).
+  let viewersMeta = "";
   if (views.status === "ok") {
     viewers = String(views.count).padStart(ODOMETER_DIGITS, "0");
     viewersDim = views.count === 0 ? viewers.length - 1 : viewers.length - String(views.count).length;
@@ -174,6 +181,13 @@ export default function IdentityPanel() {
     viewersDim = viewers.length;
     viewersMeta = "COUNTER OFFLINE";
   }
+  const viewersHeader: ReactNode =
+    viewersMeta ||
+    (watchingFrom ? (
+      <>
+        WATCHING FROM <span className="stat-place">{watchingFrom}</span>
+      </>
+    ) : undefined);
 
   return (
     <div className="ident">
@@ -213,13 +227,15 @@ export default function IdentityPanel() {
 
         <Stat
           label="VIEWERS"
-          meta={viewersMeta}
+          meta={viewersHeader}
           width={viewers.length * 0.7}
           tone="red"
           spoken={
             views.status === "ok"
               ? `${views.count.toLocaleString("en-US")} ${views.count === 1 ? "viewer" : "viewers"}`
-              : `Viewers: ${viewersMeta.toLowerCase()}`
+              : views.status === "loading"
+                ? "Viewers: loading"
+                : `Viewers: ${viewersMeta.toLowerCase()}`
           }
         >
           <Digits text={viewers} dim={viewersDim} />
