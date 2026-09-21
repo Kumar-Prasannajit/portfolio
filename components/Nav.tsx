@@ -23,12 +23,7 @@ import { useCommandPalette } from "./CommandPaletteContext";
 // scrolls them inside the right panel, and from another route they load "/"
 // and jump. Separate routes (/blog, /weekly) navigate client-side.
 function NavLinkItem({ link, onClick }: { link: NavLink; onClick?: () => void }) {
-  const content = (
-    <>
-      {link.idx && <span className="nav-link-idx mono">{link.idx}</span>}
-      {link.label}
-    </>
-  );
+  const content = link.label;
   return link.href.startsWith("/#") ? (
     <a href={link.href} onClick={onClick}>
       {content}

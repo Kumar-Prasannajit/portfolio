@@ -605,15 +605,6 @@ header.site-nav {
 .nav-links a:hover {
   color: var(--ink);
 }
-/* Echoes the "01 About" eyebrow index used as each target section's own
-   heading (see About.tsx etc.) — the link's own color is currentColor's
-   dim/ink swap above; the index stays red always. */
-.nav-link-idx {
-  color: var(--red);
-  font-weight: 600;
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-}
 
 /* ⌘ hint, right-aligned in the nav-links row — one bordered container,
    the divider stretching the full row height (parent's default
@@ -863,8 +854,7 @@ header.site-nav {
    back out to true red (|255 - (255 - x)| = x) instead of drifting
    off-palette — same trick as .cursor-invert-target .nav-logo-img-hover
    above. */
-.cursor-invert-target .nav-cmd-kbd,
-.cursor-invert-target .nav-link-idx {
+.cursor-invert-target .nav-cmd-kbd {
   filter: invert(1);
 }
 
@@ -1077,9 +1067,6 @@ header.site-nav {
   color: var(--ink);
   background: var(--panel-2);
 }
-.nav-mobile-links .nav-link-idx {
-  font-size: 1.52rem;
-}
 .nav-mobile-gif {
   height: 160px;
   flex-shrink: 0;
@@ -1141,8 +1128,7 @@ header.site-nav {
     );
     transition: clip-path 380ms cubic-bezier(0.22, 1, 0.36, 1);
   }
-  :root:not([data-theme="dark"]) .cursor-invert-target .nav-cmd-kbd,
-  :root:not([data-theme="dark"]) .cursor-invert-target .nav-link-idx {
+  :root:not([data-theme="dark"]) .cursor-invert-target .nav-cmd-kbd {
     color: var(--red-ink);
     filter: none;
   }
@@ -1190,8 +1176,7 @@ header.site-nav {
   );
   transition: clip-path 380ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-:root[data-theme="light"] .cursor-invert-target .nav-cmd-kbd,
-:root[data-theme="light"] .cursor-invert-target .nav-link-idx {
+:root[data-theme="light"] .cursor-invert-target .nav-cmd-kbd {
   color: var(--red-ink);
   filter: none;
 }

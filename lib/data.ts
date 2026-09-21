@@ -1,20 +1,16 @@
-// Numbers appear only on entries that scroll within the home page, and match
-// the eyebrow index on the target section (01 Activity, 02 About, 03 Stack,
-// 04 Experience, 05 Work, 06 Contact). Blogs and Weekly are separate routes, so
-// they carry no number. Stack, Experience and Activity have no top-nav link
-// (they're reachable by scroll or the command palette), hence the gaps.
-//
-// Home-section links are root-relative ("/#about") rather than bare
-// hashes so they still work when Nav is rendered on a non-home route
-// (e.g. clicking "About" from /blog navigates to / and jumps there).
-export type NavLink = { href: string; label: string; idx?: string };
+// Home-section links are root-relative ("/#about") rather than bare hashes so
+// they still work when Nav is rendered on a non-home route (e.g. clicking
+// "About" from /blog navigates to / and jumps there). Blogs, Weekly and Gallery
+// are separate routes, and "/" is the home page.
+export type NavLink = { href: string; label: string };
 
 export const NAV_LINKS: readonly NavLink[] = [
-  { href: "/#about", label: "About", idx: "02" },
+  { href: "/", label: "Home" },
+  { href: "/#about", label: "About" },
   { href: "/blog", label: "Blogs" },
   { href: "/weekly", label: "Weekly" },
-  { href: "/#work", label: "Work", idx: "05" },
-  { href: "/#contact", label: "Contact", idx: "06" },
+  { href: "/#work", label: "Work" },
+  { href: "/gallery", label: "Gallery" },
 ];
 
 // Rotates in the nav's tagline slot via a GSAP letter-scatter transition
