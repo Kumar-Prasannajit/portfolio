@@ -179,7 +179,7 @@ export default function IdentityPanel() {
     <div className="ident">
       <figure className="ident-photo">
         <Image
-          src="/kumar-portrait.jpg"
+          src="/kumar-portrait-v2.jpg"
           alt="Portrait of Kumar Prasannajit Sahu: a motion-blurred silhouette in profile against an orange wall."
           fill
           sizes="(min-width: 1280px) 460px, 340px"
