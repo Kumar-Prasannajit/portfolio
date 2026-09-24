@@ -12,7 +12,7 @@ const LABEL_SELECTOR = "[data-cursor]";
 const HOVER_SELECTOR = 'a, button, [role="button"], input, textarea, summary';
 
 // Inside the nav specifically, hovering a section morphs the cursor to
-// that section's own rect and reveals a --red-solid fill (red in light,
+// that section's own rect and reveals a --inverse fill (red in light,
 // white in dark) on the section itself via a clip-path circle — see the
 // "Red/white-on-hover nav sections" block in globals.css. Both themes share
 // the same non-blended reveal, driven by the --morph-x/-y/-r geometry

@@ -11,7 +11,7 @@ export default function Hero() {
           preserveAspectRatio="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <g fill="none" stroke="var(--red)" strokeWidth="1">
+          <g fill="none" stroke="var(--ink)" strokeWidth="1">
             <path
               d="M-50,60 C 200,20 300,140 500,90 S 900,40 1250,110"
               opacity="0.35"

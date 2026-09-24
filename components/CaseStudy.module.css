@@ -35,11 +35,12 @@
 .meta a {
   color: var(--ink);
   text-decoration: underline;
-  text-decoration-color: var(--red);
+  text-decoration-color: var(--ink);
   text-underline-offset: 3px;
 }
 .meta a:hover {
-  color: var(--red);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
 }
 
 .frame {
@@ -90,7 +91,7 @@ figure.frame {
   top: 0.7em;
   width: 7px;
   height: 7px;
-  background: var(--red);
+  background: var(--ink);
 }
 
 .shots {
@@ -119,11 +120,12 @@ figure.frame {
   padding: 8px 0;
   color: var(--ink);
   text-decoration: underline;
-  text-decoration-color: var(--red);
+  text-decoration-color: var(--ink);
   text-underline-offset: 4px;
 }
 .related:hover {
-  color: var(--red);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
 }
 
 .links {
@@ -168,9 +170,10 @@ figure.frame {
   letter-spacing: -0.01em;
 }
 .next:hover .nextTitle {
-  color: var(--red);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
 }
 .next:focus-visible {
-  outline: 3px solid var(--red);
+  outline: 3px solid var(--ink);
   outline-offset: 4px;
 }

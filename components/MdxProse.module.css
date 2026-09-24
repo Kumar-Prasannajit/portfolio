@@ -53,11 +53,11 @@
   margin-bottom: 0.5em;
 }
 .li::marker {
-  color: var(--red);
+  color: var(--ink);
 }
 
 .blockquote {
-  border-left: var(--bw-thick) solid var(--red);
+  border-left: var(--bw-thick) solid var(--ink);
   color: var(--ink);
   margin: 1.4em 0;
   padding: 0.2em 0 0.2em 1.2em;
@@ -77,8 +77,9 @@
   transition: color 0.15s, border-color 0.15s;
 }
 .link:hover {
-  color: var(--red);
-  border-color: var(--red);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
+  border-background: var(--inverse);color: var(--inverse-foreground);
 }
 
 .code {

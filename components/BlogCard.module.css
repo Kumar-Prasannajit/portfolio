@@ -76,6 +76,7 @@
   transition: color 0.15s, border-color 0.15s;
 }
 .card:hover .readMore {
-  color: var(--red);
-  border-color: var(--red);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
+  border-background: var(--inverse);color: var(--inverse-foreground);
 }

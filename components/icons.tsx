@@ -135,7 +135,7 @@ export function IconThemeCircle(props: SVGProps<SVGSVGElement>) {
       {/* Solid half is always brand red — the button's `color` (currentColor)
           only drives the outline, so this reads as an accent at rest, not
           just on hover. */}
-      <path d="M12 2a10 10 0 0 0 0 20V2Z" fill="var(--red)" />
+      <path d="M12 2a10 10 0 0 0 0 20V2Z" fill="var(--ink)" />
       <circle cx="12" cy="12" r="9.25" fill="none" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   );

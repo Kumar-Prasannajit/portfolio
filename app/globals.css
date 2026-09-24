@@ -1,7 +1,7 @@
 /* ============ TOKENS ============ */
-/* Neubrutalism in red + white only. Geometry is shared by both themes; only
-   colour changes. Light = white page, dark-red borders and hard shadows.
-   Dark = deep-red page, white ink, darker-red borders and hard shadows.
+/* Neubrutalism, two palettes. Geometry is shared by both themes; only colour
+   changes. Light = white + black. Dark = red + black (black text, borders and
+   hard shadows on a red page).
    --ink is TEXT, --line is every border/rule, --shadow-color the hard shadow,
    --panel the surface, --ink-dim the "muted" text tone. The stroke shorthand
    is --nb-border. No hard-coded colours outside this block. */
@@ -31,94 +31,98 @@
 /* Palettes. Dark is the default; light applies for an explicit
    data-theme="light", or with no explicit choice when the system prefers
    light. Declared twice (media query + attribute) so the first paint is right
-   before React hydrates — no flash. Only two colour families exist: red and
-   white. */
+   before React hydrates — no flash. Light = white + black. Dark = red + black.
+   Black is the secondary colour in both: text, borders, hard shadows and the
+   inverted emphasis block (--inverse on --inverse-foreground). */
 :root,
 :root[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #5c0a12;
-  --panel: #450810;
-  --panel-2: #3a060d;
-  --ink: #ffffff;
-  --ink-dim: rgba(255, 255, 255, 0.7);
-  --ink-faint: rgba(255, 255, 255, 0.7);
-  --line: #2a0508; /* every border and rule */
-  --line-soft: rgba(255, 255, 255, 0.25); /* decorative dashes only */
-  --focus: #ffffff;
-  --hatch: #560910;
-  --shadow-color: #2a0508;
-  --accent: #ff3b3b; /* fills and large shapes */
-  --accent-foreground: #5c0a12;
-  --red: #ff6b6b; /* red TEXT: #ff3b3b is only 3.7:1 on --bg */
-  --red-solid: #ffffff; /* inverted block: white bg, dark red text */
-  --red-ink: #5c0a12;
-  --tint: #7a1420;
-  --scrim: rgba(42, 5, 8, 0.7);
-  --scan: rgba(42, 5, 8, 0.18);
-  --photo-frame: #ffffff;
-  --graph-0: rgba(255, 255, 255, 0.1);
-  --graph-1: rgba(255, 255, 255, 0.3);
-  --graph-2: rgba(255, 255, 255, 0.55);
-  --graph-3: rgba(255, 255, 255, 0.8);
-  --graph-4: rgba(255, 255, 255, 1);
+  color-scheme: light;
+  --bg: #ff5757; /* #ff3b3b is 4.2:1 for 70% black text; this is 4.6:1 */
+  --panel: #ff5757;
+  --panel-2: #ff5757;
+  --ink: #000000;
+  --ink-dim: rgba(0, 0, 0, 0.7);
+  --ink-faint: rgba(0, 0, 0, 0.7);
+  --line: #000000;
+  --line-soft: rgba(0, 0, 0, 0.3);
+  --focus: #000000;
+  --hatch: rgba(0, 0, 0, 0.1);
+  --shadow-color: #000000;
+  --inverse: #000000; /* inverted emphasis block: black bg... */
+  --inverse-foreground: #ff5757; /* ...red text */
+  --inverse-dim: #ff5757;
+  --stat-bg: var(--inverse); /* clock, date and viewers tiles are all black */
+  --stat-fg: var(--inverse-foreground);
+  --stat-dim: var(--inverse-dim);
+  --scrim: rgba(0, 0, 0, 0.5);
+  --scan: rgba(0, 0, 0, 0.18);
+  --photo-frame: #000000;
+  --photo-filter: none; /* keeps the red duotone */
+  --graph-0: rgba(0, 0, 0, 0.1);
+  --graph-1: rgba(0, 0, 0, 0.3);
+  --graph-2: rgba(0, 0, 0, 0.55);
+  --graph-3: rgba(0, 0, 0, 0.8);
+  --graph-4: rgba(0, 0, 0, 1);
 }
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     color-scheme: light;
-    --bg: #fff8f8;
+    --bg: #ffffff;
     --panel: #ffffff;
-    --panel-2: #fff2f2;
-    --ink: #2a0508; /* main text: very dark red */
-    --ink-dim: rgba(42, 5, 8, 0.7); /* secondary text */
-    --ink-faint: rgba(42, 5, 8, 0.7); /* small text, same 70% */
-    --line: #5c0a12; /* every border and rule */
-    --line-soft: rgba(92, 10, 18, 0.3); /* decorative dashes only */
-    --focus: #e11d2e;
-    --hatch: #fcedee;
-    --shadow-color: #5c0a12;
-    --accent: #e11d2e;
-    --accent-foreground: #ffffff;
-    --red: #e11d2e; /* red TEXT on white / --bg */
-    --red-solid: #e11d2e; /* red SURFACES; carry --red-ink */
-    --red-ink: #ffffff;
-    --tint: #fbd3d6; /* soft red block for card strips */
-    --scrim: rgba(42, 5, 8, 0.55);
-    --scan: rgba(42, 5, 8, 0.18);
-    --photo-frame: var(--line);
-    --graph-0: rgba(225, 29, 46, 0.12);
-    --graph-1: rgba(225, 29, 46, 0.3);
-    --graph-2: rgba(225, 29, 46, 0.55);
-    --graph-3: rgba(225, 29, 46, 0.8);
-    --graph-4: rgba(225, 29, 46, 1);
+    --panel-2: #ffffff;
+    --ink: #000000; /* main text */
+    --ink-dim: rgba(0, 0, 0, 0.65); /* secondary text */
+    --ink-faint: rgba(0, 0, 0, 0.65);
+    --line: #000000; /* every border and rule */
+    --line-soft: rgba(0, 0, 0, 0.25); /* decorative dashes only */
+    --focus: #000000;
+    --hatch: rgba(0, 0, 0, 0.06);
+    --shadow-color: #000000;
+    --inverse: #000000; /* inverted emphasis block: black bg... */
+    --inverse-foreground: #ffffff; /* ...white text */
+    --inverse-dim: rgba(255, 255, 255, 0.7);
+    --stat-bg: var(--panel); /* clock / date tiles; the viewers tile is inverted */
+    --stat-fg: var(--ink);
+    --stat-dim: var(--ink-dim);
+    --scrim: rgba(0, 0, 0, 0.5);
+    --scan: rgba(0, 0, 0, 0.18);
+    --photo-frame: #000000;
+    --photo-filter: grayscale(1); /* no red in the light theme */
+    --graph-0: rgba(0, 0, 0, 0.08);
+    --graph-1: rgba(0, 0, 0, 0.25);
+    --graph-2: rgba(0, 0, 0, 0.5);
+    --graph-3: rgba(0, 0, 0, 0.75);
+    --graph-4: rgba(0, 0, 0, 1);
   }
 }
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #fff8f8;
+  --bg: #ffffff;
   --panel: #ffffff;
-  --panel-2: #fdebec;
-  --ink: #2a0508; /* main text: very dark red */
-  --ink-dim: rgba(42, 5, 8, 0.7); /* secondary text */
-  --ink-faint: rgba(42, 5, 8, 0.7); /* small text, same 70% */
-  --line: #5c0a12; /* every border and rule */
-  --line-soft: rgba(92, 10, 18, 0.3); /* decorative dashes only */
-  --focus: #e11d2e;
-  --hatch: #fcedee;
-  --shadow-color: #5c0a12;
-  --accent: #e11d2e;
-  --accent-foreground: #ffffff;
-  --red: #e11d2e; /* red TEXT on white / --bg */
-  --red-solid: #e11d2e; /* red SURFACES; carry --red-ink */
-  --red-ink: #ffffff;
-  --tint: #fbd3d6; /* soft red block for card strips */
-  --scrim: rgba(42, 5, 8, 0.55);
-  --scan: rgba(42, 5, 8, 0.18);
-  --photo-frame: var(--line);
-  --graph-0: rgba(225, 29, 46, 0.12);
-  --graph-1: rgba(225, 29, 46, 0.3);
-  --graph-2: rgba(225, 29, 46, 0.55);
-  --graph-3: rgba(225, 29, 46, 0.8);
-  --graph-4: rgba(225, 29, 46, 1);
+  --panel-2: #ffffff;
+  --ink: #000000; /* main text */
+  --ink-dim: rgba(0, 0, 0, 0.65); /* secondary text */
+  --ink-faint: rgba(0, 0, 0, 0.65);
+  --line: #000000; /* every border and rule */
+  --line-soft: rgba(0, 0, 0, 0.25); /* decorative dashes only */
+  --focus: #000000;
+  --hatch: rgba(0, 0, 0, 0.06);
+  --shadow-color: #000000;
+  --inverse: #000000; /* inverted emphasis block: black bg... */
+  --inverse-foreground: #ffffff; /* ...white text */
+  --inverse-dim: rgba(255, 255, 255, 0.7);
+  --stat-bg: var(--panel); /* clock / date tiles; the viewers tile is inverted */
+  --stat-fg: var(--ink);
+  --stat-dim: var(--ink-dim);
+  --scrim: rgba(0, 0, 0, 0.5);
+  --scan: rgba(0, 0, 0, 0.18);
+  --photo-frame: #000000;
+  --photo-filter: grayscale(1); /* no red in the light theme */
+  --graph-0: rgba(0, 0, 0, 0.08);
+  --graph-1: rgba(0, 0, 0, 0.25);
+  --graph-2: rgba(0, 0, 0, 0.5);
+  --graph-3: rgba(0, 0, 0, 0.75);
+  --graph-4: rgba(0, 0, 0, 1);
 }
 /* Semantic aliases (shadcn-style names) over the tokens above. */
 :root {
@@ -130,13 +134,8 @@
   --border: var(--line);
   --border-2: var(--line);
   --line-strong: var(--line);
-  --primary: var(--red-solid);
-  --primary-foreground: var(--red-ink);
-  --red-dim: var(--red);
-  --dot-1: #ffffff; /* terminal window dots: white, light red, bright red */
-  --dot-2: #ffb3b8;
-  --dot-3: #ff3b3b;
-  --deep: #2a0508; /* borders on the red/white contact band, both themes */
+  --primary: var(--inverse);
+  --primary-foreground: var(--inverse-foreground);
 }
 /* Composite tokens. Shadow blur is ALWAYS 0. */
 :root {
@@ -161,6 +160,7 @@
   box-sizing: border-box;
 }
 html {
+  scrollbar-color: var(--ink) var(--bg);
   scroll-behavior: smooth;
   /* The full-bleed divider lines below use width:100vw, which can be a
      hair wider than the viewport when a scrollbar is present. */
@@ -194,14 +194,14 @@ body {
 
 /* ============ FOCUS + SKIP LINK ============ */
 /* Keyboard focus is always visible: one ring for everything. The custom cursor
-   only hides the mouse pointer (cursor: none), never focus. Red on the red
-   Contact band would vanish, so it switches to the light ink there. */
+   only hides the mouse pointer (cursor: none), never focus. On the inverted
+   Contact band it switches to the block's own text colour. */
 :focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 3px;
 }
 .contact-band :focus-visible {
-  outline-color: var(--deep);
+  outline-color: var(--inverse-foreground);
 }
 main:focus {
   outline: none; /* the skip link's target; not a control */
@@ -212,8 +212,8 @@ main:focus {
   left: 8px;
   z-index: 10000;
   padding: 13px 16px;
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
   font-family: var(--font-mono);
   font-size: 0.85rem;
   font-weight: 600;
@@ -280,8 +280,8 @@ html.custom-cursor-active * {
   padding: 6px 10px;
   border: var(--bw-thin) solid var(--line);
   border-radius: 0;
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
   box-shadow: var(--shadow-sm);
   font-family: var(--font-mono);
   font-size: 0.68rem;
@@ -354,8 +354,8 @@ img {
   display: block;
 }
 ::selection {
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
 }
 
 .wrap {
@@ -380,8 +380,8 @@ img {
   margin-bottom: 18px;
 }
 .eyebrow .idx {
-  color: var(--red-ink);
-  background: var(--red-solid);
+  color: var(--inverse-foreground);
+  background: var(--inverse);
   border: var(--bw-thin) solid var(--line);
   padding: 1px 7px;
   font-weight: 700;
@@ -510,6 +510,18 @@ header.site-nav {
   height: 30.6px;
   width: auto;
 }
+/* The logo PNGs carry a red dot and (dark-theme asset) off-white letters, so
+   they are flattened to pure black here to stay inside the palette. The hover
+   marks sit on the inverted block: white in light (--inverse-foreground),
+   the red favicon mark in dark. */
+.nav-logo-img-default,
+.nav-logo-img.theme-dark-only:not(.nav-logo-img-hover),
+.nav-logo-img.theme-light-only:not(.nav-logo-img-hover) {
+  filter: brightness(0);
+}
+.nav-logo-img-hover.theme-light-only {
+  filter: brightness(0) invert(1);
+}
 .nav-logo-img-hover {
   position: absolute;
   inset: 0;
@@ -550,11 +562,9 @@ header.site-nav {
   text-align: left;
   white-space: nowrap;
 }
-/* A slim bar caret. It doesn't fade in/out; it hard-cuts (steps(1))
-   between two solid colors, like a retro terminal cursor: ink↔red while
-   idle, and while a line is actively being typed/deleted it holds solid
-   red — a little "recording" cue that reads the same in either theme,
-   since --red is itself theme-aware. */
+/* A slim bar caret. It doesn't fade in/out; it hard-cuts (steps(1)) like a
+   retro terminal cursor: blinking while idle, and holding solid while a line
+   is actively being typed/deleted. */
 .typewriter-cursor {
   display: inline-block;
   width: 0.16em;
@@ -577,9 +587,9 @@ header.site-nav {
 }
 .typewriter-cursor.is-typing {
   animation: none;
-  background: var(--red);
+  background: var(--ink);
 }
-/* Dark theme: cycles white (--ink) ↔ red. */
+/* Blinks: --ink ↔ nothing (hard cut, no fade). */
 @keyframes cursor-cycle-dark {
   0%,
   49.9% {
@@ -587,10 +597,10 @@ header.site-nav {
   }
   50%,
   100% {
-    background: var(--red);
+    background: transparent;
   }
 }
-/* Light theme: cycles dark red (--ink) ↔ red. */
+/* Same blink; kept as its own name for the per-theme animation rules. */
 @keyframes cursor-cycle-light {
   0%,
   49.9% {
@@ -598,7 +608,7 @@ header.site-nav {
   }
   50%,
   100% {
-    background: var(--red);
+    background: transparent;
   }
 }
 /* Links row shares its cell with the command trigger, pinned to the
@@ -641,8 +651,8 @@ header.site-nav {
     color 0.1s;
 }
 .nav-links a:hover {
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
   border-color: var(--line);
 }
 /* Current page: a solid inverted block, not just a colour change. */
@@ -673,14 +683,14 @@ header.site-nav {
   transition: background 0.1s;
 }
 .nav-cmd-trigger:hover {
-  background: var(--red-solid);
+  background: var(--inverse);
 }
 .nav-cmd-trigger:hover .nav-cmd-kbd {
-  color: var(--red-ink);
+  color: var(--inverse-foreground);
 }
 .nav-cmd-kbd {
   font-size: 0.95rem;
-  color: var(--red);
+  color: var(--ink);
 }
 
 /* Now-playing (NowPlayingWidget.tsx): a music-icon button in the nav that
@@ -728,7 +738,7 @@ header.site-nav {
   right: -4px;
   width: 5px;
   height: 5px;
-  background: var(--red);
+  background: var(--ink);
   animation: blink 1.1s steps(1) infinite;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -781,8 +791,8 @@ header.site-nav {
   letter-spacing: 0.08em;
 }
 .np-pop.live .np-tag {
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
 }
 
 /* Four pixel bars that jump between heights; frozen and dim when nothing
@@ -800,7 +810,7 @@ header.site-nav {
   background: var(--ink-faint);
 }
 .np-pop.live .np-eq i {
-  background: var(--red);
+  background: var(--ink);
   animation: np-bar 0.9s steps(1, end) infinite;
 }
 .np-pop.live .np-eq i:nth-child(2) {
@@ -890,9 +900,9 @@ header.site-nav {
 .np-link {
   align-self: flex-start;
   font-size: 0.74rem;
-  color: var(--red);
+  color: var(--ink);
   text-decoration: none;
-  border-bottom: 2px solid var(--red-dim);
+  border-bottom: 2px solid var(--ink);
 }
 .np-fallback p {
   margin: 0;
@@ -919,8 +929,8 @@ header.site-nav {
   transition: background 0.1s;
 }
 .theme-toggle-btn:hover {
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
 }
 .theme-toggle-btn svg {
   width: 26px;
@@ -952,8 +962,8 @@ header.site-nav {
   border-left: none;
 }
 .nav-cell-top.nav-cell-social a:hover {
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
 }
 .nav-cell-top.nav-cell-social svg {
   width: 20px;
@@ -976,6 +986,21 @@ header.site-nav {
 .np-btn-mobile:focus-visible,
 .nav-cell-top.nav-cell-social a:focus-visible {
   outline-offset: -6px;
+}
+/* nav-eyes.webp is full colour: flatten it to greys, then multiply by the
+   page colour so it reads as black on white (light) / black on red (dark). */
+.nav-hatch,
+.nav-mobile-gif {
+  position: relative;
+  filter: grayscale(1) contrast(1.15);
+}
+.nav-hatch::after,
+.nav-mobile-gif::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  mix-blend-mode: multiply;
 }
 .nav-hatch {
   height: 100%;
@@ -1033,8 +1058,8 @@ header.site-nav {
   transition: background 0.1s;
 }
 .nav-hamburger-btn:hover {
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
 }
 .nav-hamburger-btn svg {
   width: 22px;
@@ -1108,8 +1133,8 @@ header.site-nav {
     background 0.15s ease;
 }
 .nav-mobile-links a:hover {
-  color: var(--red-ink);
-  background: var(--red-solid);
+  color: var(--inverse-foreground);
+  background: var(--inverse);
 }
 .nav-mobile-gif {
   height: 160px;
@@ -1125,12 +1150,12 @@ header.site-nav {
   }
 }
 
-/* Red/white-on-hover nav sections (both themes). A difference blend against a
-   red page lands on off-palette cyan, so the cursor's own box is switched off
-   and the fill instead comes from a ::before layer on the real section —
-   --red-solid (red in light, white in dark) clip-path circle-grown from the
+/* Inverted-on-hover nav sections (both themes). A difference blend against a
+   coloured page lands on off-palette hues, so the cursor's own box is switched
+   off and the fill instead comes from a ::before layer on the real section —
+   --inverse (black) clip-path circle-grown from the
    --morph-x/-y/-r geometry JS sets on the global cursor (see enterMorph in
-   CustomCursor.tsx). Content (color: var(--red-ink), or the swapped logo
+   CustomCursor.tsx). Content (color: var(--inverse-foreground), or the swapped logo
    asset — see Nav.tsx) is real page content painted after the pseudo-element
    in source order, so it sits on top; the pseudo gets z-index: -1 only to
    stay below it. */
@@ -1145,7 +1170,7 @@ header.site-nav {
      (header.site-nav's sticky one) and paints behind .nav-grid's own opaque
      background instead of just behind this element's own icon/text. */
   isolation: isolate;
-  color: var(--red-ink);
+  color: var(--inverse-foreground);
   opacity: 1;
 }
 .cursor-invert-target::before {
@@ -1153,26 +1178,23 @@ header.site-nav {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: var(--red-solid);
+  background: var(--inverse);
   clip-path: circle(
     var(--morph-r, 0px) at var(--morph-x, 50%) var(--morph-y, 50%)
   );
   transition: clip-path 380ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .cursor-invert-target .nav-cmd-kbd {
-  color: var(--red-ink);
+  color: var(--inverse-foreground);
   filter: none;
 }
 .theme-toggle-btn.cursor-invert-target {
   filter: none;
 }
 .theme-toggle-btn.cursor-invert-target svg path {
-  fill: var(--red-ink);
+  fill: var(--inverse-foreground);
 }
 .nav-cell-top.nav-cell-social a.cursor-invert-target svg {
-  filter: none;
-}
-.cursor-invert-target .nav-logo-img-hover {
   filter: none;
 }
 
@@ -1217,7 +1239,7 @@ header.site-nav {
   z-index: 9000; /* over the nav (50) and panels, under the custom cursor (9999) */
   overflow: hidden;
   background: var(--bg);
-  border-top: 3px solid var(--red);
+  border-top: 3px solid var(--ink);
   color: var(--ink-dim);
   will-change: transform;
   animation: boot-wipe 0.3s steps(8, end) 1.15s forwards;
@@ -1263,7 +1285,7 @@ html[data-boot="done"] .boot {
     forwards;
 }
 .boot-ok {
-  color: var(--red);
+  color: var(--ink);
   font-weight: 600;
 }
 .boot-bar {
@@ -1275,7 +1297,7 @@ html[data-boot="done"] .boot {
 .boot-bar span {
   display: block;
   height: 100%;
-  background: var(--red);
+  background: var(--ink);
   transform-origin: left;
   transform: scaleX(0);
   animation: boot-fill 0.9s steps(16, end) 0.1s forwards;
@@ -1291,7 +1313,7 @@ html[data-boot="done"] .boot {
   height: 1.1em;
   margin-left: 6px;
   vertical-align: text-bottom;
-  background: var(--red);
+  background: var(--ink);
   animation: blink 1.1s steps(1) infinite;
 }
 @keyframes boot-type {
@@ -1376,7 +1398,7 @@ html[data-boot="done"] .boot {
   display: inline-block;
   width: 8px;
   height: 1.1em;
-  background: var(--red);
+  background: var(--ink);
   animation: blink 1.1s steps(1) infinite;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1403,7 +1425,11 @@ html[data-boot="done"] .boot {
 }
 
 .hero h1 .l2 {
-  color: var(--red);
+  /* Name highlight: an inverted block (black + white text; red text in dark). */
+  display: inline-block;
+  padding: 0.04em 0.12em 0;
+  background: var(--inverse);
+  color: var(--inverse-foreground);
 }
 
 .hero-sub {
@@ -1434,8 +1460,8 @@ html[data-boot="done"] .boot {
   border: var(--bw-thin) solid var(--line);
   border-radius: var(--radius);
   padding: 6px 12px;
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
   box-shadow: var(--shadow-sm);
   transform: rotate(-1.5deg);
 }
@@ -1496,8 +1522,8 @@ html[data-boot="done"] .boot {
   }
 }
 .btn-primary {
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
 }
 .btn-ghost {
   background: var(--panel);
@@ -1519,8 +1545,8 @@ html[data-boot="done"] .boot {
 /* ============ MARQUEE ============ */
 .marquee-band {
   position: relative;
-  background: var(--red-solid); /* inverted block; thick rules above and below */
-  color: var(--red-ink);
+  background: var(--inverse); /* inverted block; thick rules above and below */
+  color: var(--inverse-foreground);
 }
 .marquee-clip {
   overflow: hidden;
@@ -1597,7 +1623,7 @@ html[data-boot="done"] .boot {
   /* A thick underline block in the accent colour, hugging the words. */
   display: inline-block;
   padding-bottom: 6px;
-  border-bottom: var(--bw-thick) solid var(--red-solid);
+  border-bottom: var(--bw-thick) solid var(--inverse);
 }
 
 /* ============ ABOUT ============ */
@@ -1637,30 +1663,34 @@ html[data-boot="done"] .boot {
   gap: 8px;
   padding: 12px 16px;
   border-bottom: var(--nb-border);
-  background: var(--red-solid);
+  background: var(--inverse);
 }
 /* The traffic-light dots are one of the few round things left. */
 .term-head .tdot {
   width: 12px;
   height: 12px;
-  border: var(--bw-thin) solid var(--line);
+  border: var(--bw-thin) solid var(--inverse-foreground);
   border-radius: 50%;
 }
 .term-head .tdot:nth-child(1) {
-  background: var(--dot-1);
+  background: var(--inverse-foreground);
 }
 .term-head .tdot:nth-child(2) {
-  background: var(--dot-2);
+  background: var(--inverse);
 }
 .term-head .tdot:nth-child(3) {
-  background: var(--dot-3);
+  background: linear-gradient(
+    90deg,
+    var(--inverse-foreground) 50%,
+    var(--inverse) 50%
+  );
 }
 .term-head span.path {
   margin-left: 8px;
   font-family: var(--font-mono);
   font-size: 0.74rem;
   font-weight: 600;
-  color: var(--red-ink);
+  color: var(--inverse-foreground);
 }
 .term-body {
   padding: 20px 20px 22px;
@@ -1679,7 +1709,7 @@ html[data-boot="done"] .boot {
   border-bottom: none;
 }
 .term-row .k {
-  color: var(--red);
+  color: var(--ink);
 }
 .term-row .v {
   color: var(--ink-dim);
@@ -1724,8 +1754,8 @@ html[data-boot="done"] .boot {
   transform: translate(-2px, -2px);
   box-shadow: calc(var(--off-sm) + 2px) calc(var(--off-sm) + 2px) 0 0
     var(--shadow-color);
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
 }
 @media (prefers-reduced-motion: reduce) {
   .pill:hover {
@@ -1766,7 +1796,7 @@ html[data-boot="done"] .boot {
   top: 22px;
   width: 16px;
   height: 16px;
-  background: var(--red-solid);
+  background: var(--inverse);
   border: var(--bw) solid var(--line);
 }
 .tl-top {
@@ -1823,7 +1853,7 @@ html[data-boot="done"] .boot {
   }
 }
 .card {
-  --strip: var(--red-solid);
+  --strip: var(--inverse);
   position: relative;
   border: var(--nb-border);
   border-radius: var(--radius);
@@ -1846,8 +1876,8 @@ html[data-boot="done"] .boot {
     transform: none;
   }
 }
-/* Each project card carries its own header strip (red block, ink block, soft
-   red block, cycling); the hard shadow stays the theme's shadow colour. */
+/* Each project card carries its own header strip (inverted block / blank,
+   cycling); the hard shadow stays the theme's shadow colour. */
 .work-card {
   padding-top: 44px;
 }
@@ -1863,15 +1893,15 @@ html[data-boot="done"] .boot {
 }
 .work-grid > :nth-child(3n + 1),
 .pcard:nth-of-type(3n + 1) {
-  --strip: var(--red-solid);
+  --strip: var(--inverse);
 }
 .work-grid > :nth-child(3n + 2),
 .pcard:nth-of-type(3n + 2) {
-  --strip: var(--ink);
+  --strip: var(--bg);
 }
 .work-grid > :nth-child(3n + 3),
 .pcard:nth-of-type(3n + 3) {
-  --strip: var(--tint);
+  --strip: var(--inverse);
 }
 .card-top {
   display: flex;
@@ -1932,8 +1962,9 @@ html[data-boot="done"] .boot {
   padding: 8px 0 4px;
 }
 .card-links a:hover {
-  color: var(--red);
-  border-color: var(--red);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
+  border-background: var(--inverse);color: var(--inverse-foreground);
 }
 .card-links svg {
   width: 12px;
@@ -1954,8 +1985,8 @@ html[data-boot="done"] .boot {
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.06em;
-  color: var(--red-ink);
-  background: var(--red-solid);
+  color: var(--inverse-foreground);
+  background: var(--inverse);
   border: var(--bw-thin) solid var(--line);
   border-radius: var(--radius);
   padding: 3px 9px;
@@ -1987,7 +2018,7 @@ html[data-boot="done"] .boot {
   white-space: pre-wrap;
 }
 .term-line-prompt {
-  color: var(--red);
+  color: var(--ink);
 }
 
 /* ============ GALLERY ============ */
@@ -2058,7 +2089,7 @@ html[data-boot="done"] .boot {
 .place-idx {
   font-family: var(--font-mono);
   font-size: 0.74rem;
-  color: var(--red);
+  color: var(--ink);
   margin-bottom: 8px;
 }
 .place-card h2 {
@@ -2101,7 +2132,7 @@ html[data-boot="done"] .boot {
   font-weight: 700;
 }
 .gh-total span {
-  color: var(--red);
+  color: var(--ink);
 }
 .gh-link {
   font-family: var(--font-mono);
@@ -2117,8 +2148,9 @@ html[data-boot="done"] .boot {
   min-height: 44px;
 }
 .gh-link:hover {
-  color: var(--red);
-  border-color: var(--red);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
+  border-background: var(--inverse);color: var(--inverse-foreground);
 }
 .gh-link svg {
   width: 12px;
@@ -2221,18 +2253,18 @@ html[data-boot="done"] .boot {
 
 /* ============ CONTACT ============ */
 .contact-band {
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
 }
 .contact-band .eyebrow {
-  color: var(--red-ink);
+  color: var(--inverse-foreground);
 }
 .contact-band .eyebrow::after {
-  background: var(--deep);
+  background: var(--inverse-foreground);
 }
 .contact-band .eyebrow .idx {
-  background: var(--red-ink);
-  color: var(--red-solid);
+  background: var(--inverse-foreground);
+  color: var(--inverse);
 }
 .contact-h {
   font-family: var(--font-display);
@@ -2249,21 +2281,22 @@ html[data-boot="done"] .boot {
   margin-bottom: 28px;
   line-height: 1.6;
 }
-/* On the band the borders and shadows go deepest red in BOTH themes (a
-   same-colour shadow would vanish), the primary button is the band inverted
-   (--ink on --bg) and the others sit on the panel colour. */
+/* The band is an inverted block, so its borders and hard shadows take the
+   block's text colour (white in light, red in dark) — black would vanish on
+   it. The primary button flips back to the page colours, the others stay on
+   the block. */
 .contact-band {
-  --line: var(--deep);
-  --shadow-color: var(--deep);
+  --line: var(--inverse-foreground);
+  --shadow-color: var(--inverse-foreground);
 }
 .contact-band .btn-primary {
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--inverse-foreground);
+  color: var(--inverse);
 }
 .contact-band .btn-ghost,
 .contact-band .btn-icon {
-  background: var(--panel);
-  color: var(--ink);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
 }
 .contact-email {
   font-family: var(--font-mono);
@@ -2416,9 +2449,9 @@ html.lenis {
   cursor: pointer;
 }
 .panel-tabs button[aria-selected="true"] {
-  border-color: var(--red);
-  background: var(--red-solid);
-  color: var(--red-ink);
+  border-color: var(--ink);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
 }
 .panel-status {
   margin-left: auto;
@@ -2547,6 +2580,7 @@ html.lenis {
   box-shadow: var(--shadow);
 }
 .ident-img {
+  filter: var(--photo-filter);
   object-fit: cover;
   object-position: 55% 38%;
 }
@@ -2592,12 +2626,20 @@ html.lenis {
   overflow: hidden;
   padding: 0 12px;
   border: var(--nb-border);
-  background: var(--panel);
+  background: var(--stat-bg);
   box-shadow: var(--shadow);
+  /* Everything inside reads from the tile's own text colours. */
+  --ink: var(--stat-fg);
+  --ink-dim: var(--stat-dim);
+  --ink-faint: var(--stat-dim);
 }
+/* The viewers tile is inverted in both themes. */
 .stat-red {
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
+  --ink: var(--inverse-foreground);
+  --ink-dim: var(--inverse-dim);
+  --ink-faint: var(--inverse-dim);
 }
 .stat-head {
   position: absolute;
@@ -2622,7 +2664,7 @@ html.lenis {
 }
 /* The place name itself is the one red word in the header. */
 .stat-place {
-  color: var(--red);
+  color: var(--ink);
   font-weight: 700;
 }
 .stat-label::before {
@@ -2631,7 +2673,7 @@ html.lenis {
   width: 6px;
   height: 6px;
   margin-right: 7px;
-  background: var(--red);
+  background: var(--ink);
 }
 .stat-value {
   position: absolute;
@@ -2650,13 +2692,13 @@ html.lenis {
 .stat-red .stat-sec,
 .stat-red .stat-label::before,
 .stat-red .cl {
-  color: var(--red-ink);
+  color: var(--inverse-foreground);
 }
 .stat-red .stat-label::before {
-  background: var(--red-ink);
+  background: var(--inverse-foreground);
 }
 .stat-red .dim {
-  color: var(--red-ink);
+  color: var(--inverse-foreground);
   opacity: 0.4; /* decorative leading zeros */
 }
 /* Fixed-width digits so a ticking clock doesn't jitter. */
@@ -2674,7 +2716,7 @@ html.lenis {
   display: inline-block;
   width: 0.34em;
   text-align: center;
-  color: var(--red);
+  color: var(--ink);
   animation: blink 1s steps(1) infinite;
 }
 .sp {
@@ -2683,7 +2725,7 @@ html.lenis {
 }
 /* The seconds live in the tile's header, in red. */
 .stat-sec {
-  color: var(--red);
+  color: var(--ink);
   font-weight: 700;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -2811,7 +2853,8 @@ html.lenis {
   inset: 0;
 }
 .work-card:hover .work-card-link {
-  color: var(--red);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
   text-decoration: underline;
   text-decoration-thickness: var(--bw-thin);
   text-underline-offset: 4px;
@@ -2831,7 +2874,7 @@ html.lenis {
   position: relative;
   overflow: hidden;
   container-type: inline-size; /* the name sizes off the card, not the viewport */
-  --strip: var(--red-solid);
+  --strip: var(--inverse);
   border: var(--nb-border);
   border-top: var(--off-xl) solid var(--strip);
   border-radius: var(--radius);
@@ -2881,14 +2924,14 @@ html.lenis {
   text-align: center;
   color: var(--ink);
   /* Hard, un-blurred shadow: reads as a pixel drop-shadow. */
-  text-shadow: 2px 2px 0 var(--red-dim);
+  text-shadow: 2px 2px 0 var(--ink);
 }
 .pcard-cta {
   padding: 9px 16px;
   border: var(--bw-thin) solid var(--line);
   border-radius: var(--radius);
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--inverse);
+  color: var(--inverse-foreground);
   box-shadow: var(--shadow-sm);
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -2927,8 +2970,8 @@ html.lenis {
     box-shadow: var(--shadow-lg);
   }
   .pcard:hover .pcard-cta {
-    background: var(--red-solid);
-    color: var(--red-ink);
+    background: var(--inverse);
+    color: var(--inverse-foreground);
   }
   .pcard:hover .pcard-overlay {
     clip-path: inset(0);

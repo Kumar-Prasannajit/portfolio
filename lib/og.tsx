@@ -1,5 +1,6 @@
 // Shared layout for the generated Open Graph images (app/**/opengraph-image.tsx).
-// Colors mirror the dark theme tokens in app/globals.css. The site's fonts come
+// Colors mirror the dark (red + black) theme tokens in app/globals.css; the
+// accent is black, since red text would vanish on the red page. The site's fonts come
 // from next/font/google, so there are no local font files to load here and the
 // renderer's default font is used.
 
@@ -8,10 +9,10 @@ import { ImageResponse } from "next/og";
 export const OG_SIZE = { width: 1200, height: 630 };
 export const OG_CONTENT_TYPE = "image/png";
 
-const BG = "#5c0a12";
-const INK = "#ffffff";
-const INK_DIM = "rgba(255, 255, 255, 0.7)";
-const RED = "#ff6b6b";
+const BG = "#ff5757";
+const INK = "#000000";
+const INK_DIM = "rgba(0, 0, 0, 0.7)";
+const RED = "#000000";
 
 type OgImageProps = {
   title: string;
