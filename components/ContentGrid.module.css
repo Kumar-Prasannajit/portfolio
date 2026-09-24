@@ -17,8 +17,8 @@
   color: var(--ink-faint);
   font-family: var(--font-mono);
   font-size: 0.9rem;
-  border: 1px dashed var(--border-2);
-  border-radius: 12px;
+  border: var(--bw-thin) dashed var(--ink);
+  border-radius: var(--radius);
   padding: 32px;
   text-align: center;
 }

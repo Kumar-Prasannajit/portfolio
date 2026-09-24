@@ -6,8 +6,7 @@
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: color-mix(in srgb, var(--bg) 70%, transparent);
-  backdrop-filter: blur(4px);
+  background: color-mix(in srgb, var(--bg) 70%, transparent); /* flat scrim, no blur */
   animation: overlay-in 0.15s ease-out;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -26,7 +25,7 @@
   /* Both .overlay and .content are direct positioned siblings from
      Radix's Portal — without an explicit z-index here, .content stacks
      at the implicit z-index:0 while .overlay sits at 100, so the dimmed
-     blur backdrop painted OVER the palette panel instead of behind it
+     backdrop painted OVER the palette panel instead of behind it
      (the whole reason it looked like "the screen blurs and the list
      never shows"). Has to be strictly above .overlay's z-index. */
   z-index: 101;
@@ -38,9 +37,9 @@
   display: flex;
   flex-direction: column;
   background: var(--panel);
-  border: 1px solid var(--border-2);
-  border-radius: 14px;
-  box-shadow: var(--shadow);
+  border: var(--nb-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
   animation: content-in 0.15s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -82,7 +81,7 @@
   align-items: center;
   gap: 10px;
   padding: 4px 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: var(--bw-thin) solid var(--ink);
 }
 .inputIcon {
   display: flex;
@@ -109,7 +108,7 @@
 .input:focus {
   outline: none;
   /* borderless field: a red underline is the focus indicator */
-  box-shadow: inset 0 -2px 0 var(--red);
+  box-shadow: inset 0 calc(-1 * var(--bw-thin)) 0 var(--red);
 }
 
 /* Footer-style hint bar: ↑↓ Navigate · ↵ Open · esc Close. Each key is
@@ -119,7 +118,7 @@
   align-items: center;
   gap: 16px;
   padding: 8px 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: var(--bw-thin) solid var(--ink);
   color: var(--ink-faint);
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -136,8 +135,8 @@
   min-width: 20px;
   height: 20px;
   padding: 0 5px;
-  border: 1px solid var(--border-2);
-  border-radius: 5px;
+  border: var(--bw-thin) solid var(--ink);
+  border-radius: var(--radius);
   background: var(--panel-2);
   color: var(--ink-dim);
 }
@@ -171,7 +170,7 @@
 }
 .list::-webkit-scrollbar-thumb {
   background: var(--red);
-  border-radius: 999px;
+  border-radius: var(--radius);
   border: 2px solid transparent;
   background-clip: padding-box;
 }
@@ -199,7 +198,7 @@
   align-items: center;
   gap: 12px;
   padding: 9px 10px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   cursor: pointer;
   scroll-margin: 8px;
 }
@@ -210,7 +209,7 @@
   flex: none;
   width: 30px;
   height: 30px;
-  border-radius: 7px;
+  border-radius: var(--radius);
   background: var(--panel-2);
   color: var(--ink-faint);
 }
@@ -246,20 +245,22 @@
   text-transform: uppercase;
   color: var(--ink-faint);
   font-size: 0.66rem;
-  border: 1px solid var(--border-2);
-  border-radius: 5px;
+  border: var(--bw-thin) solid var(--ink);
+  border-radius: var(--radius);
   padding: 3px 7px;
 }
 
 .item[data-selected="true"] {
   background: var(--panel-2);
+  outline: var(--bw-thin) solid var(--ink);
+  outline-offset: -2px;
 }
 .item[data-selected="true"] .itemIcon {
   background: var(--red-solid);
   color: var(--red-ink);
 }
 .item[data-selected="true"] .itemType {
-  border-color: var(--red-dim);
+  border-color: var(--ink);
   /* pure red is only 4.2:1 on the selected row; mixing in ink lifts it past 4.5 */
   color: color-mix(in srgb, var(--red) 65%, var(--ink));
 }

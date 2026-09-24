@@ -1668,23 +1668,25 @@ html[data-boot="done"] .boot {
 }
 
 .term-card {
-  border: 1px solid var(--border-2);
-  border-radius: 14px;
+  border: var(--nb-border);
+  border-radius: var(--radius);
   background: var(--panel);
   overflow: hidden;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-lg);
 }
 .term-head {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--panel-2);
+  border-bottom: var(--nb-border);
+  background: var(--yellow);
 }
+/* The traffic-light dots are one of the few round things left. */
 .term-head .tdot {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
+  border: var(--bw-thin) solid #000;
   border-radius: 50%;
 }
 .term-head .tdot:nth-child(1) {
@@ -1700,7 +1702,8 @@ html[data-boot="done"] .boot {
   margin-left: 8px;
   font-family: var(--font-mono);
   font-size: 0.74rem;
-  color: var(--ink-faint);
+  font-weight: 600;
+  color: #000;
 }
 .term-body {
   padding: 20px 20px 22px;
@@ -1712,7 +1715,7 @@ html[data-boot="done"] .boot {
   grid-template-columns: 84px 1fr;
   gap: 14px;
   padding: 7px 0;
-  border-bottom: 1px dashed var(--border);
+  border-bottom: var(--bw-thin) dashed var(--line-soft);
   line-height: 1.5;
 }
 .term-row:last-child {
@@ -1748,19 +1751,29 @@ html[data-boot="done"] .boot {
 .pill {
   font-family: var(--font-mono);
   font-size: 0.8rem;
-  border: 1px solid var(--border-2);
-  border-radius: 8px;
+  font-weight: 600;
+  border: var(--bw-thin) solid var(--ink);
+  border-radius: var(--radius);
   padding: 8px 13px;
   background: var(--panel);
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
   transition:
-    border-color 0.15s ease,
-    transform 0.15s ease,
-    color 0.15s ease;
+    transform 0.1s,
+    box-shadow 0.1s,
+    background 0.1s;
 }
 .pill:hover {
-  border-color: var(--red);
-  transform: translateY(-2px);
-  color: var(--ink);
+  transform: translate(-2px, -2px);
+  box-shadow: calc(var(--off-sm) + 2px) calc(var(--off-sm) + 2px) 0 0
+    var(--shadow-color);
+  background: var(--yellow);
+  color: #000;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pill:hover {
+    transform: none;
+  }
 }
 
 /* ============ EXPERIENCE ============ */
@@ -1848,22 +1861,65 @@ html[data-boot="done"] .boot {
   }
 }
 .card {
-  border: 1px solid var(--border-2);
-  border-radius: 16px;
+  --accent: var(--yellow);
+  position: relative;
+  border: var(--nb-border);
+  border-radius: var(--radius);
   background: var(--panel);
   padding: 26px;
   display: flex;
   flex-direction: column;
   height: 100%;
+  box-shadow: var(--shadow);
   transition:
-    border-color 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+    transform 0.1s,
+    box-shadow 0.1s;
 }
 .card:hover {
-  border-color: var(--red);
-  transform: translateY(-4px);
-  box-shadow: var(--shadow);
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-lg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .card:hover {
+    transform: none;
+  }
+}
+/* Each project card carries its own accent: a coloured header strip in both
+   themes, and (dark theme) the hard shadow takes that colour too. */
+.work-card {
+  padding-top: 44px;
+}
+.work-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 16px;
+  background: var(--accent);
+  border-bottom: var(--bw) solid var(--ink);
+}
+.work-grid > :nth-child(3n + 1),
+.pcard:nth-of-type(3n + 1) {
+  --accent: var(--yellow);
+}
+.work-grid > :nth-child(3n + 2),
+.pcard:nth-of-type(3n + 2) {
+  --accent: var(--blue);
+}
+.work-grid > :nth-child(3n + 3),
+.pcard:nth-of-type(3n + 3) {
+  --accent: var(--green);
+}
+:root[data-theme="dark"] .work-card,
+:root[data-theme="dark"] .pcard {
+  --shadow-color: var(--accent);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .work-card,
+  :root:not([data-theme="light"]) .pcard {
+    --shadow-color: var(--accent);
+  }
 }
 .card-top {
   display: flex;
@@ -1892,11 +1948,14 @@ html[data-boot="done"] .boot {
 .tag {
   font-family: var(--font-mono);
   font-size: 0.7rem;
+  font-weight: 600;
   letter-spacing: 0.02em;
-  color: var(--ink-dim);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  color: var(--ink);
+  background: var(--panel);
+  border: var(--bw-thin) solid var(--ink);
+  border-radius: var(--radius);
   padding: 4px 8px;
+  box-shadow: var(--shadow-sm);
 }
 .card-links {
   display: flex;
@@ -1912,7 +1971,7 @@ html[data-boot="done"] .boot {
   font-weight: 500;
   text-decoration: none;
   color: var(--ink);
-  border-bottom: 1px solid var(--border-2);
+  border-bottom: var(--bw-thin) solid var(--ink);
   /* Vertical padding instead of just padding-bottom for the underline
      offset — a plain inline text link like this otherwise has a tap
      target no taller than its own line-height (~20px), well under the
@@ -1935,15 +1994,28 @@ html[data-boot="done"] .boot {
   color: var(--ink-faint);
   padding: 8px 0 4px;
 }
-.card-badge {
+/* LIVE: flat green stamp, black text, slightly tilted. Text carries the
+   state, colour only reinforces it. */
+.card-badge,
+.card-top .tag {
   font-family: var(--font-mono);
   font-size: 0.68rem;
+  font-weight: 700;
   letter-spacing: 0.06em;
-  color: var(--red);
-  border: 1px solid var(--red-dim);
-  border-radius: 999px;
+  color: #000;
+  background: var(--green);
+  border: var(--bw-thin) solid var(--ink);
+  border-radius: var(--radius);
   padding: 3px 9px;
   white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+  transform: rotate(2deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-badge,
+  .card-top .tag {
+    transform: none;
+  }
 }
 
 /* ============ PAGE INTRO (Gallery / Specs / Places) ============ */
@@ -1986,9 +2058,10 @@ html[data-boot="done"] .boot {
   position: relative;
   aspect-ratio: 4 / 5;
   overflow: hidden;
-  border-radius: 14px;
-  border: 1px solid var(--border-2);
+  border-radius: var(--radius);
+  border: var(--nb-border);
   background: var(--panel);
+  box-shadow: var(--shadow);
 }
 .gallery-item img {
   width: 100%;
@@ -2012,19 +2085,23 @@ html[data-boot="done"] .boot {
   }
 }
 .place-card {
-  border: 1px solid var(--border-2);
-  border-radius: 16px;
+  border: var(--nb-border);
+  border-radius: var(--radius);
   background: var(--panel);
   padding: 22px 26px;
+  box-shadow: var(--shadow);
   transition:
-    border-color 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+    transform 0.1s,
+    box-shadow 0.1s;
 }
 .place-card:hover {
-  border-color: var(--red);
-  transform: translateY(-4px);
-  box-shadow: var(--shadow);
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-lg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .place-card:hover {
+    transform: none;
+  }
 }
 .place-idx {
   font-family: var(--font-mono);
@@ -2507,7 +2584,9 @@ html.lenis {
   margin: 0;
   overflow: hidden;
   background: #8a3d0b; /* the photo's orange, while it loads */
-  border-bottom: 2px solid var(--border);
+  margin: 16px 18px 8px 16px;
+  border: var(--nb-border);
+  box-shadow: var(--shadow);
 }
 .ident-img {
   object-fit: cover;
@@ -2533,8 +2612,9 @@ html.lenis {
   bottom: 12px;
   z-index: 1;
   padding: 5px 8px;
-  border: 2px solid var(--line-strong);
-  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  border: var(--bw-thin) solid var(--ink);
+  background: var(--bg);
+  box-shadow: var(--shadow-sm);
   color: var(--ink);
   font-size: 0.62rem;
   font-weight: 600;
@@ -2544,6 +2624,8 @@ html.lenis {
 .ident-stats {
   display: grid;
   grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  padding: 10px 18px 20px 16px;
   min-height: 0;
 }
 .stat {
@@ -2551,9 +2633,13 @@ html.lenis {
   container-type: size;
   overflow: hidden;
   padding: 0 12px;
+  border: var(--nb-border);
+  background: var(--panel);
+  box-shadow: var(--shadow);
 }
-.stat + .stat {
-  border-top: 2px solid var(--border);
+.stat-red {
+  background: var(--red-solid);
+  color: var(--red-ink);
 }
 .stat-head {
   position: absolute;
@@ -2600,8 +2686,16 @@ html.lenis {
   color: var(--ink);
   white-space: nowrap;
 }
-.stat-red .stat-value {
-  color: var(--red);
+.stat-red .stat-value,
+.stat-red .stat-head,
+.stat-red .stat-place,
+.stat-red .stat-sec,
+.stat-red .stat-label::before,
+.stat-red .cl {
+  color: var(--red-ink);
+}
+.stat-red .stat-label::before {
+  background: var(--red-ink);
 }
 /* Fixed-width digits so a ticking clock doesn't jitter. */
 .dg {
@@ -2756,9 +2850,12 @@ html.lenis {
 }
 .work-card:hover .work-card-link {
   color: var(--red);
+  text-decoration: underline;
+  text-decoration-thickness: var(--bw-thin);
+  text-underline-offset: 4px;
 }
 .work-card:has(.work-card-link:focus-visible) {
-  outline: 3px solid var(--red);
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -2772,15 +2869,21 @@ html.lenis {
   position: relative;
   overflow: hidden;
   container-type: inline-size; /* the name sizes off the card, not the viewport */
-  border: 2px solid var(--line-strong);
-  border-radius: 0;
+  --accent: var(--yellow);
+  border: var(--nb-border);
+  border-top: var(--off-xl) solid var(--accent);
+  border-radius: var(--radius);
   background: var(--panel);
-  box-shadow: 4px 4px 0 var(--red-dim);
+  box-shadow: var(--shadow);
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
   /* Taps toggle the card — don't flash a tap highlight or start a selection. */
   -webkit-tap-highlight-color: transparent;
 }
 .pcard-media {
   aspect-ratio: 4 / 3;
+  border-top: var(--bw) solid var(--ink);
 }
 .pcard-media img {
   width: 100%;
@@ -2820,11 +2923,11 @@ html.lenis {
 }
 .pcard-cta {
   padding: 9px 16px;
-  border: 2px solid var(--red-ink);
-  border-radius: 0;
+  border: var(--bw-thin) solid var(--ink);
+  border-radius: var(--radius);
   background: var(--red-solid);
   color: var(--red-ink);
-  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+  box-shadow: var(--shadow-sm);
   font-family: var(--font-mono);
   font-size: 0.72rem;
   font-weight: 700;
@@ -2839,7 +2942,7 @@ html.lenis {
   z-index: 2;
 }
 .pcard-link:focus-visible {
-  outline: 3px solid var(--red);
+  outline: 3px solid var(--focus);
   outline-offset: -6px;
 }
 /* Touch: the first tap only reveals the overlay (ProjectCard's onClick), so
@@ -2858,10 +2961,12 @@ html.lenis {
    state. The link is focusable while the overlay is hidden so focusing it reveals it. */
 @media (hover: hover) {
   .pcard:hover {
-    border-color: var(--red);
+    transform: translate(-3px, -3px);
+    box-shadow: var(--shadow-lg);
   }
   .pcard:hover .pcard-cta {
-    background: var(--red-dim);
+    background: var(--yellow);
+    color: #000;
   }
   .pcard:hover .pcard-overlay {
     clip-path: inset(0);
@@ -2872,10 +2977,16 @@ html.lenis {
   clip-path: inset(0);
 }
 .pcard.is-revealed {
-  border-color: var(--red);
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-lg);
 }
 @media (prefers-reduced-motion: reduce) {
   .pcard-overlay {
     transition: none;
+  }
+  .pcard,
+  .pcard:hover,
+  .pcard.is-revealed {
+    transform: none;
   }
 }
