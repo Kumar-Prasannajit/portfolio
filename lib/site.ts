@@ -8,7 +8,7 @@ export const SITE_NAME = "Kumar Prasannajit Sahu";
 export const SITE_TITLE =
   "Kumar Prasannajit Sahu | Full-Stack Developer";
 export const SITE_DESCRIPTION =
-  "Full-stack developer building web applications and AI-powered products. Based in Hyderabad, India.";
+  "Full-stack developer building web applications and AI-powered products with React, Next.js and Node.js. Based in Hyderabad, India.";
 export const SITE_KEYWORDS = [
   "Kumar Prasannajit Sahu",
   "full-stack developer",
