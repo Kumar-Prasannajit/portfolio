@@ -1,10 +1,10 @@
 /* ============ TOKENS ============ */
-/* Neubrutalism. Geometry is shared by both themes; only colour and texture
-   change. Light = textbook (cream, black ink, black hard shadows). Dark =
-   cyber-neubrutalism (near-black, off-white ink, RED hard shadows).
-   Existing names are kept where they map cleanly: --border/--border-2/
-   --line-strong are now colours equal to --ink, --panel is the surface,
-   --ink-dim is the "muted" text tone. The stroke shorthand is --nb-border. */
+/* Neubrutalism in red + white only. Geometry is shared by both themes; only
+   colour changes. Light = white page, dark-red borders and hard shadows.
+   Dark = deep-red page, white ink, darker-red borders and hard shadows.
+   --ink is TEXT, --line is every border/rule, --shadow-color the hard shadow,
+   --panel the surface, --ink-dim the "muted" text tone. The stroke shorthand
+   is --nb-border. No hard-coded colours outside this block. */
 :root {
   /* shared geometry */
   --radius: 0px;
@@ -16,12 +16,6 @@
   --off-lg: 8px;
   --off-xl: 12px;
 
-  /* flat accents */
-  --red: #e8404a;
-  --yellow: #ffd23f;
-  --blue: #74b9ff;
-  --green: #88d498;
-  --lavender: #b8a9fa;
 
   --font-display: var(--font-archivo-black), "Arial Black", sans-serif;
   --font-body: var(--font-ibm-plex-sans), -apple-system, "Segoe UI", sans-serif;
@@ -37,83 +31,116 @@
 /* Palettes. Dark is the default; light applies for an explicit
    data-theme="light", or with no explicit choice when the system prefers
    light. Declared twice (media query + attribute) so the first paint is right
-   before React hydrates — no flash. */
+   before React hydrates — no flash. Only two colour families exist: red and
+   white. */
 :root,
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0b0d10;
-  --panel: #14171c;
-  --panel-2: #191d23;
-  --ink: #f1f1ee;
-  --ink-dim: #b5bac1; /* muted text: 9:1 on --panel */
-  --ink-faint: #9ba1a8; /* small text: 6.5:1 on --bg */
-  --border: var(--ink);
-  --border-2: var(--ink);
-  --line-strong: var(--ink);
-  --line-soft: #4a5058; /* decorative dashes only */
-  --focus: var(--blue); /* 8:1 on --bg */
-  --hatch: #1a1e24;
-  --shadow-color: var(--red);
-  --red: #ec4a53; /* spec #e8404a is 4.50:1 on --panel; this is 4.85 */
-  --red-solid: #ec4a53; /* red SURFACES; carry --red-ink (black, 5.7:1) */
-  --red-dim: #ec4a53;
-  --red-ink: #000000;
-  --heat-0: #1c2027;
-  --heat-1: #45151b;
-  --heat-2: #7a1b23;
-  --heat-3: #b01c26;
-  --heat-4: #e8404a;
+  --bg: #5c0a12;
+  --panel: #450810;
+  --panel-2: #3a060d;
+  --ink: #ffffff;
+  --ink-dim: rgba(255, 255, 255, 0.7);
+  --ink-faint: rgba(255, 255, 255, 0.7);
+  --line: #2a0508; /* every border and rule */
+  --line-soft: rgba(255, 255, 255, 0.25); /* decorative dashes only */
+  --focus: #ffffff;
+  --hatch: #560910;
+  --shadow-color: #2a0508;
+  --accent: #ff3b3b; /* fills and large shapes */
+  --accent-foreground: #5c0a12;
+  --red: #ff6b6b; /* red TEXT: #ff3b3b is only 3.7:1 on --bg */
+  --red-solid: #ffffff; /* inverted block: white bg, dark red text */
+  --red-ink: #5c0a12;
+  --tint: #7a1420;
+  --scrim: rgba(42, 5, 8, 0.7);
+  --scan: rgba(42, 5, 8, 0.18);
+  --photo-frame: #ffffff;
+  --graph-0: rgba(255, 255, 255, 0.1);
+  --graph-1: rgba(255, 255, 255, 0.3);
+  --graph-2: rgba(255, 255, 255, 0.55);
+  --graph-3: rgba(255, 255, 255, 0.8);
+  --graph-4: rgba(255, 255, 255, 1);
 }
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     color-scheme: light;
-    --bg: #fffdf5;
+    --bg: #fff8f8;
     --panel: #ffffff;
-    --panel-2: #f6f1e0;
-    --ink: #000000;
-    --ink-dim: #3a3a3a; /* muted text: 11:1 on cream */
-    --ink-faint: #4d4d4d;
-    --line-soft: #b9b4a0;
-    --focus: #0b5cd5; /* the brief's blue is 1.9:1 on cream; this is 6:1 */
-    --hatch: #f0ebd6;
-    --shadow-color: #000000;
-    --red: #c81e28; /* red TEXT on cream/white: 5.7:1 */
-    --red-dim: #c81e28;
-    --heat-0: #ece8d8;
-    --heat-1: #f3b4b8;
-    --heat-2: #e5737a;
-    --heat-3: #d13842;
-    --heat-4: #9e141d;
+    --panel-2: #fff2f2;
+    --ink: #2a0508; /* main text: very dark red */
+    --ink-dim: rgba(42, 5, 8, 0.7); /* secondary text */
+    --ink-faint: rgba(42, 5, 8, 0.7); /* small text, same 70% */
+    --line: #5c0a12; /* every border and rule */
+    --line-soft: rgba(92, 10, 18, 0.3); /* decorative dashes only */
+    --focus: #e11d2e;
+    --hatch: #fcedee;
+    --shadow-color: #5c0a12;
+    --accent: #e11d2e;
+    --accent-foreground: #ffffff;
+    --red: #e11d2e; /* red TEXT on white / --bg */
+    --red-solid: #e11d2e; /* red SURFACES; carry --red-ink */
+    --red-ink: #ffffff;
+    --tint: #fbd3d6; /* soft red block for card strips */
+    --scrim: rgba(42, 5, 8, 0.55);
+    --scan: rgba(42, 5, 8, 0.18);
+    --photo-frame: var(--line);
+    --graph-0: rgba(225, 29, 46, 0.12);
+    --graph-1: rgba(225, 29, 46, 0.3);
+    --graph-2: rgba(225, 29, 46, 0.55);
+    --graph-3: rgba(225, 29, 46, 0.8);
+    --graph-4: rgba(225, 29, 46, 1);
   }
 }
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #fffdf5;
+  --bg: #fff8f8;
   --panel: #ffffff;
-  --panel-2: #f6f1e0;
-  --ink: #000000;
-  --ink-dim: #3a3a3a;
-  --ink-faint: #4d4d4d;
-  --border: var(--ink);
-  --border-2: var(--ink);
-  --line-strong: var(--ink);
-  --line-soft: #b9b4a0;
-  --focus: #0b5cd5;
-  --hatch: #f0ebd6;
-  --shadow-color: #000000;
-  --red: #c81e28;
-  --red-solid: #e8404a;
-  --red-dim: #c81e28;
-  --red-ink: #000000;
-  --heat-0: #ece8d8;
-  --heat-1: #f3b4b8;
-  --heat-2: #e5737a;
-  --heat-3: #d13842;
-  --heat-4: #9e141d;
+  --panel-2: #fdebec;
+  --ink: #2a0508; /* main text: very dark red */
+  --ink-dim: rgba(42, 5, 8, 0.7); /* secondary text */
+  --ink-faint: rgba(42, 5, 8, 0.7); /* small text, same 70% */
+  --line: #5c0a12; /* every border and rule */
+  --line-soft: rgba(92, 10, 18, 0.3); /* decorative dashes only */
+  --focus: #e11d2e;
+  --hatch: #fcedee;
+  --shadow-color: #5c0a12;
+  --accent: #e11d2e;
+  --accent-foreground: #ffffff;
+  --red: #e11d2e; /* red TEXT on white / --bg */
+  --red-solid: #e11d2e; /* red SURFACES; carry --red-ink */
+  --red-ink: #ffffff;
+  --tint: #fbd3d6; /* soft red block for card strips */
+  --scrim: rgba(42, 5, 8, 0.55);
+  --scan: rgba(42, 5, 8, 0.18);
+  --photo-frame: var(--line);
+  --graph-0: rgba(225, 29, 46, 0.12);
+  --graph-1: rgba(225, 29, 46, 0.3);
+  --graph-2: rgba(225, 29, 46, 0.55);
+  --graph-3: rgba(225, 29, 46, 0.8);
+  --graph-4: rgba(225, 29, 46, 1);
+}
+/* Semantic aliases (shadcn-style names) over the tokens above. */
+:root {
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --muted-foreground: var(--ink-dim);
+  --card: var(--panel);
+  --card-foreground: var(--ink);
+  --border: var(--line);
+  --border-2: var(--line);
+  --line-strong: var(--line);
+  --primary: var(--red-solid);
+  --primary-foreground: var(--red-ink);
+  --red-dim: var(--red);
+  --dot-1: #ffffff; /* terminal window dots: white, light red, bright red */
+  --dot-2: #ffb3b8;
+  --dot-3: #ff3b3b;
+  --deep: #2a0508; /* borders on the red/white contact band, both themes */
 }
 /* Composite tokens. Shadow blur is ALWAYS 0. */
 :root {
-  --nb-border: var(--bw) solid var(--ink);
+  --nb-border: var(--bw) solid var(--line);
   --shadow-sm: var(--off-sm) var(--off-sm) 0 0 var(--shadow-color);
   --shadow: var(--off) var(--off) 0 0 var(--shadow-color);
   --shadow-lg: var(--off-lg) var(--off-lg) 0 0 var(--shadow-color);
@@ -174,7 +201,7 @@ body {
   outline-offset: 3px;
 }
 .contact-band :focus-visible {
-  outline-color: #000;
+  outline-color: var(--deep);
 }
 main:focus {
   outline: none; /* the skip link's target; not a control */
@@ -251,7 +278,7 @@ html.custom-cursor-active * {
   width: auto;
   height: auto;
   padding: 6px 10px;
-  border: var(--bw-thin) solid var(--ink);
+  border: var(--bw-thin) solid var(--line);
   border-radius: 0;
   background: var(--red-solid);
   color: var(--red-ink);
@@ -285,30 +312,17 @@ html.custom-cursor-active * {
   }
 }
 
-/* Nav sections (dark mode): the cursor snaps onto the hovered section's
-   own rect (left/top/width/height set from JS, instantly — no transition
-   on those) and clip-reveals it with a circle that grows from wherever
-   the pointer actually entered the section out to its farthest corner
-   (--morph-x/--morph-y/--morph-r, set from JS), same idea as the theme
-   toggle's wave transition. A plain white fill under
-   mix-blend-mode: difference inverts whatever's under it, so the
-   icon/text stays fully legible (contrast is preserved by the invert)
-   instead of being covered up. Against this site's near-black/near-white
-   palette that resolves back to black or white on its own; red content
-   is pre-inverted instead (see the .cursor-invert-target rules below) so
-   the diff blend cancels back out to true red rather than drifting
-   off-palette to cyan.
-
-   Light mode uses a different, non-blended look instead (see the
-   "Light mode: red-on-hover nav sections" block further down): the
-   difference blend can't be made to land on a clean white from a red
-   source, so there the cursor box itself is switched off and the real
-   section underneath is painted red directly. */
+/* Nav sections: the cursor's box snaps onto the hovered section's own rect
+   (left/top/width/height set from JS, instantly — no transition on those).
+   The visible fill is the section's own ::before layer, clip-revealed with a
+   circle that grows from wherever the pointer entered out to its farthest
+   corner (--morph-x/--morph-y/--morph-r, set from JS) — see the
+   "Red/white-on-hover nav sections" block further down. Here the box itself
+   is only geometry. */
 .custom-cursor.is-morphed {
   border: none;
   border-radius: 0;
-  background: #ffffff;
-  mix-blend-mode: difference;
+  background: transparent;
   animation: none;
   transform: none;
   clip-path: circle(var(--morph-r, 0px) at var(--morph-x, 50%) var(--morph-y, 50%));
@@ -323,8 +337,8 @@ html.custom-cursor-active * {
   min-height: 100vh;
   margin: 0 auto;
   background: var(--bg);
-  border-left: var(--bw-thin) solid var(--ink);
-  border-right: var(--bw-thin) solid var(--ink);
+  border-left: var(--bw-thin) solid var(--line);
+  border-right: var(--bw-thin) solid var(--line);
 }
 h1,
 h2,
@@ -368,7 +382,7 @@ img {
 .eyebrow .idx {
   color: var(--red-ink);
   background: var(--red-solid);
-  border: var(--bw-thin) solid var(--ink);
+  border: var(--bw-thin) solid var(--line);
   padding: 1px 7px;
   font-weight: 700;
 }
@@ -376,7 +390,7 @@ img {
   content: "";
   flex: 1;
   height: var(--bw-thin);
-  background: var(--ink);
+  background: var(--line);
 }
 section {
   position: relative;
@@ -401,7 +415,7 @@ footer::before {
   width: 100vw;
   height: var(--bw-thick);
   transform: translateX(-50%);
-  background: var(--ink);
+  background: var(--line);
   pointer-events: none;
 }
 .band::before,
@@ -437,7 +451,7 @@ header.site-nav {
   background: var(--panel);
 }
 .nav-cell {
-  border-right: var(--bw-thin) solid var(--ink);
+  border-right: var(--bw-thin) solid var(--line);
 }
 /* Pinned explicitly — relying on auto-placement here put these in the
    wrong track (the theme/logo cells' fixed row-span shifts the
@@ -447,7 +461,7 @@ header.site-nav {
 }
 .nav-cell-bottom {
   grid-row: 2;
-  border-top: var(--bw-thin) solid var(--ink);
+  border-top: var(--bw-thin) solid var(--line);
 }
 
 /* "KP." mark — its own full-height column, first in reading order. */
@@ -507,15 +521,6 @@ header.site-nav {
 .nav-cell-logo:hover .nav-logo-img-hover {
   opacity: 1;
 }
-/* While the morphed cursor's white, difference-blended box sits over the
-   logo, pre-invert the favicon so the blend cancels back out to its true
-   red (|255 - (255 - x)| = x) instead of drifting off-palette like an
-   un-compensated red would — see MORPH_SELECTOR's comment in
-   CustomCursor.tsx. Unaffected by theme: the cell's own background still
-   flips white/black around it from the diff blend as usual. */
-.cursor-invert-target .nav-logo-img-hover {
-  filter: invert(1);
-}
 
 .nav-cell-main {
   grid-column: 2;
@@ -574,7 +579,7 @@ header.site-nav {
   animation: none;
   background: var(--red);
 }
-/* Dark theme: cycles white (--ink resolves near-white here) ↔ red. */
+/* Dark theme: cycles white (--ink) ↔ red. */
 @keyframes cursor-cycle-dark {
   0%,
   49.9% {
@@ -585,8 +590,7 @@ header.site-nav {
     background: var(--red);
   }
 }
-/* Light theme: cycles black (--ink resolves near-black here) ↔ red —
-   mirrors the dark theme's ink/red pairing instead of black/white. */
+/* Light theme: cycles dark red (--ink) ↔ red. */
 @keyframes cursor-cycle-light {
   0%,
   49.9% {
@@ -637,16 +641,16 @@ header.site-nav {
     color 0.1s;
 }
 .nav-links a:hover {
-  background: var(--yellow);
-  color: #000;
-  border-color: var(--ink);
+  background: var(--red-solid);
+  color: var(--red-ink);
+  border-color: var(--line);
 }
 /* Current page: a solid inverted block, not just a colour change. */
 .nav-links a[aria-current="page"],
 .nav-mobile-links a[aria-current="page"] {
   background: var(--ink);
   color: var(--bg);
-  border-color: var(--ink);
+  border-color: var(--line);
 }
 
 /* ⌘ hint, right-aligned in the nav-links row — one bordered container,
@@ -656,7 +660,7 @@ header.site-nav {
   position: relative;
   flex: none;
   display: flex;
-  border-left: var(--bw-thin) solid var(--ink);
+  border-left: var(--bw-thin) solid var(--line);
 }
 .nav-cmd-trigger {
   display: flex;
@@ -669,10 +673,10 @@ header.site-nav {
   transition: background 0.1s;
 }
 .nav-cmd-trigger:hover {
-  background: var(--yellow);
+  background: var(--red-solid);
 }
 .nav-cmd-trigger:hover .nav-cmd-kbd {
-  color: #000;
+  color: var(--red-ink);
 }
 .nav-cmd-kbd {
   font-size: 0.95rem;
@@ -686,7 +690,7 @@ header.site-nav {
 .np-nav {
   flex: none;
   display: flex;
-  border-left: var(--bw-thin) solid var(--ink);
+  border-left: var(--bw-thin) solid var(--line);
 }
 /* Center the icon on both axes: the button is a fixed square with no side
    padding, the wrapper has no line box of its own (line-height: 0) and the
@@ -739,7 +743,7 @@ header.site-nav {
 .np-btn-mobile {
   width: 54px;
   border: none;
-  border-right: var(--bw-thin) solid var(--ink);
+  border-right: var(--bw-thin) solid var(--line);
   background: none;
   cursor: pointer;
   color: var(--ink);
@@ -770,7 +774,7 @@ header.site-nav {
 }
 .np-tag {
   padding: 2px 6px;
-  background: var(--line-strong);
+  background: var(--ink);
   color: var(--bg);
   font-size: 0.62rem;
   font-weight: 700;
@@ -793,7 +797,7 @@ header.site-nav {
 .np-eq i {
   flex: 1;
   height: 4px;
-  background: var(--line-strong);
+  background: var(--ink-faint);
 }
 .np-pop.live .np-eq i {
   background: var(--red);
@@ -842,7 +846,7 @@ header.site-nav {
   width: 72px;
   height: 72px;
   object-fit: cover;
-  border: var(--bw-thin) solid var(--ink);
+  border: var(--bw-thin) solid var(--line);
   border-radius: 0;
   /* Snap the album art to visible pixels instead of smoothing it. */
   image-rendering: pixelated;
@@ -895,14 +899,6 @@ header.site-nav {
   font-size: 0.78rem;
   line-height: 1.5;
 }
-/* See CustomCursor.tsx: while the morphed cursor's white diff-blend box
-   sits over an element, red content is pre-inverted so the blend cancels
-   back out to true red (|255 - (255 - x)| = x) instead of drifting
-   off-palette — same trick as .cursor-invert-target .nav-logo-img-hover
-   above. */
-.cursor-invert-target .nav-cmd-kbd {
-  filter: invert(1);
-}
 
 /* Half-filled circle, spanning both rows like a single stamped icon. */
 .nav-cell-theme {
@@ -923,15 +919,8 @@ header.site-nav {
   transition: background 0.1s;
 }
 .theme-toggle-btn:hover {
-  background: var(--yellow);
-  color: #000;
-}
-/* Under the morphed cursor, pre-invert instead of neutralizing — same
-   trick as .cursor-invert-target near .nav-cmd-kbd — so both the ring
-   (currentColor, red via :hover above) and the always-red solid half
-   cancel back to true red under the diff blend. */
-.theme-toggle-btn.cursor-invert-target {
-  filter: invert(1);
+  background: var(--red-solid);
+  color: var(--red-ink);
 }
 .theme-toggle-btn svg {
   width: 26px;
@@ -956,24 +945,15 @@ header.site-nav {
   align-items: center;
   justify-content: center;
   color: var(--ink);
-  border-left: var(--bw-thin) solid var(--ink);
+  border-left: var(--bw-thin) solid var(--line);
   transition: background 0.1s;
 }
 .nav-cell-top.nav-cell-social a:first-child {
   border-left: none;
 }
 .nav-cell-top.nav-cell-social a:hover {
-  background: var(--yellow);
-  color: #000;
-}
-/* Pre-invert just the icon under the morphed cursor — same reasoning as
-   the theme toggle's rule near it — so the hover-red icon cancels back
-   to true red under the diff blend instead of drifting to cyan.
-   Scoped to the svg, not the whole link: the link's own hover background
-   (above) must stay un-inverted, or the cursor's white diff-blend would
-   read it as light and render black instead of white. */
-.nav-cell-top.nav-cell-social a.cursor-invert-target svg {
-  filter: invert(1);
+  background: var(--red-solid);
+  color: var(--red-ink);
 }
 .nav-cell-top.nav-cell-social svg {
   width: 20px;
@@ -987,7 +967,7 @@ header.site-nav {
 .np-btn:active,
 .np-btn-mobile:active,
 .nav-cell-top.nav-cell-social a:active {
-  box-shadow: inset var(--off-sm) var(--off-sm) 0 0 var(--ink);
+  box-shadow: inset var(--off-sm) var(--off-sm) 0 0 var(--shadow-color);
 }
 .nav-cmd-trigger:focus-visible,
 .theme-toggle-btn:focus-visible,
@@ -1031,7 +1011,7 @@ header.site-nav {
   display: flex;
   align-items: stretch;
   margin-left: auto;
-  border-left: var(--bw-thin) solid var(--ink);
+  border-left: var(--bw-thin) solid var(--line);
 }
 /* Reuses .theme-toggle-btn's own look (color, hover, invert-under-cursor)
    but pins it to a fixed column instead of the grid cell's flex: 1 —
@@ -1039,7 +1019,7 @@ header.site-nav {
 .nav-mobile-actions .theme-toggle-btn {
   flex: none;
   width: 54px;
-  border-right: var(--bw-thin) solid var(--ink);
+  border-right: var(--bw-thin) solid var(--line);
 }
 .nav-hamburger-btn {
   width: 54px;
@@ -1053,8 +1033,8 @@ header.site-nav {
   transition: background 0.1s;
 }
 .nav-hamburger-btn:hover {
-  background: var(--yellow);
-  color: #000;
+  background: var(--red-solid);
+  color: var(--red-ink);
 }
 .nav-hamburger-btn svg {
   width: 22px;
@@ -1064,7 +1044,7 @@ header.site-nav {
 .nav-mobile-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--scrim);
   z-index: 60;
   animation: nav-overlay-in 200ms ease;
 }
@@ -1101,7 +1081,7 @@ header.site-nav {
   /* Breathing room above the first link — otherwise it sits flush against
      the drawer's top edge. */
   padding-top: 18px;
-  border-bottom: var(--bw-thin) solid var(--ink);
+  border-bottom: var(--bw-thin) solid var(--line);
 }
 .nav-mobile-links ul {
   list-style: none;
@@ -1109,7 +1089,7 @@ header.site-nav {
   padding: 0;
 }
 .nav-mobile-links li + li {
-  border-top: var(--bw-thin) solid var(--ink);
+  border-top: var(--bw-thin) solid var(--line);
 }
 .nav-mobile-links a {
   display: flex;
@@ -1128,8 +1108,8 @@ header.site-nav {
     background 0.15s ease;
 }
 .nav-mobile-links a:hover {
-  color: #000;
-  background: var(--yellow);
+  color: var(--red-ink);
+  background: var(--red-solid);
 }
 .nav-mobile-gif {
   height: 160px;
@@ -1145,118 +1125,54 @@ header.site-nav {
   }
 }
 
-/* Light mode: red-on-hover nav sections. The difference blend above
-   can't be tuned to land on a clean white from a red cursor (there's no
-   backdrop value that diffs a red source to pure white), so the cursor's
-   own box is switched off here, and the red instead comes from a
-   ::before layer on the real section itself — clip-path circle-grown
-   from the same --morph-x/-y/-r JS sets on the global cursor for the
-   dark-mode reveal (see enterMorph in CustomCursor.tsx), so both themes
-   get the identical fluid, entry-point-anchored wipe. Content (color:
-   var(--red-ink), or the white-mark logo asset — see Nav.tsx) is real
-   page content painted after the pseudo-element in source order, so it
-   sits on top with no z-index juggling — the pseudo gets z-index: -1
-   only to stay below it. Dark mode is untouched and keeps the
-   diff-blend look above. */
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .custom-cursor.is-morphed {
-    background: transparent;
-    mix-blend-mode: normal;
-  }
-  :root:not([data-theme="dark"]) .nav-cell-logo.cursor-invert-target,
-  :root:not([data-theme="dark"]) .nav-cmd-trigger.cursor-invert-target,
-  :root:not([data-theme="dark"]) .theme-toggle-btn.cursor-invert-target,
-  :root:not([data-theme="dark"]) .nav-links a.cursor-invert-target,
-  :root:not([data-theme="dark"])
-    .nav-cell-top.nav-cell-social
-    a.cursor-invert-target {
-    position: relative;
-    /* Contains the ::before's z-index: -1 to just this element — without
-       it, "auto" z-index on a merely-relative ancestor doesn't form a
-       stacking context, so the negative z-index escapes to the nearest
-       one that does (header.site-nav's sticky context) and paints behind
-       .nav-grid's own opaque background instead of just behind this
-       element's own icon/text. */
-    isolation: isolate;
-    color: var(--red-ink);
-    opacity: 1;
-  }
-  :root:not([data-theme="dark"]) .cursor-invert-target::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: var(--red);
-    clip-path: circle(
-      var(--morph-r, 0px) at var(--morph-x, 50%) var(--morph-y, 50%)
-    );
-    transition: clip-path 380ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  :root:not([data-theme="dark"]) .cursor-invert-target .nav-cmd-kbd {
-    color: var(--red-ink);
-    filter: none;
-  }
-  :root:not([data-theme="dark"]) .theme-toggle-btn.cursor-invert-target {
-    filter: none;
-  }
-  :root:not([data-theme="dark"])
-    .theme-toggle-btn.cursor-invert-target
-    svg
-    path {
-    fill: var(--red-ink);
-  }
-  :root:not([data-theme="dark"])
-    .nav-cell-top.nav-cell-social
-    a.cursor-invert-target
-    svg {
-    filter: none;
-  }
-  :root:not([data-theme="dark"]) .cursor-invert-target .nav-logo-img-hover {
-    filter: none;
-  }
-}
-:root[data-theme="light"] .custom-cursor.is-morphed {
-  background: transparent;
-  mix-blend-mode: normal;
-}
-:root[data-theme="light"] .nav-cell-logo.cursor-invert-target,
-:root[data-theme="light"] .nav-cmd-trigger.cursor-invert-target,
-:root[data-theme="light"] .theme-toggle-btn.cursor-invert-target,
-:root[data-theme="light"] .nav-links a.cursor-invert-target,
-:root[data-theme="light"] .nav-cell-top.nav-cell-social a.cursor-invert-target {
+/* Red/white-on-hover nav sections (both themes). A difference blend against a
+   red page lands on off-palette cyan, so the cursor's own box is switched off
+   and the fill instead comes from a ::before layer on the real section —
+   --red-solid (red in light, white in dark) clip-path circle-grown from the
+   --morph-x/-y/-r geometry JS sets on the global cursor (see enterMorph in
+   CustomCursor.tsx). Content (color: var(--red-ink), or the swapped logo
+   asset — see Nav.tsx) is real page content painted after the pseudo-element
+   in source order, so it sits on top; the pseudo gets z-index: -1 only to
+   stay below it. */
+.nav-cell-logo.cursor-invert-target,
+.nav-cmd-trigger.cursor-invert-target,
+.theme-toggle-btn.cursor-invert-target,
+.nav-links a.cursor-invert-target,
+.nav-cell-top.nav-cell-social a.cursor-invert-target {
   position: relative;
+  /* Contains the ::before's z-index: -1 to just this element — without it the
+     negative z-index escapes to the nearest stacking context
+     (header.site-nav's sticky one) and paints behind .nav-grid's own opaque
+     background instead of just behind this element's own icon/text. */
   isolation: isolate;
   color: var(--red-ink);
   opacity: 1;
 }
-:root[data-theme="light"] .cursor-invert-target::before {
+.cursor-invert-target::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: var(--red);
+  background: var(--red-solid);
   clip-path: circle(
     var(--morph-r, 0px) at var(--morph-x, 50%) var(--morph-y, 50%)
   );
   transition: clip-path 380ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-:root[data-theme="light"] .cursor-invert-target .nav-cmd-kbd {
+.cursor-invert-target .nav-cmd-kbd {
   color: var(--red-ink);
   filter: none;
 }
-:root[data-theme="light"] .theme-toggle-btn.cursor-invert-target {
+.theme-toggle-btn.cursor-invert-target {
   filter: none;
 }
-:root[data-theme="light"] .theme-toggle-btn.cursor-invert-target svg path {
+.theme-toggle-btn.cursor-invert-target svg path {
   fill: var(--red-ink);
 }
-:root[data-theme="light"]
-  .nav-cell-top.nav-cell-social
-  a.cursor-invert-target
-  svg {
+.nav-cell-top.nav-cell-social a.cursor-invert-target svg {
   filter: none;
 }
-:root[data-theme="light"] .cursor-invert-target .nav-logo-img-hover {
+.cursor-invert-target .nav-logo-img-hover {
   filter: none;
 }
 
@@ -1354,7 +1270,7 @@ html[data-boot="done"] .boot {
   width: 100%;
   height: 10px;
   margin-top: 10px;
-  border: var(--bw-thin) solid var(--ink);
+  border: var(--bw-thin) solid var(--line);
 }
 .boot-bar span {
   display: block;
@@ -1515,11 +1431,11 @@ html[data-boot="done"] .boot {
   font-family: var(--font-mono);
   font-size: 0.74rem;
   font-weight: 600;
-  border: var(--bw-thin) solid var(--ink);
+  border: var(--bw-thin) solid var(--line);
   border-radius: var(--radius);
   padding: 6px 12px;
-  background: var(--yellow);
-  color: #000;
+  background: var(--red-solid);
+  color: var(--red-ink);
   box-shadow: var(--shadow-sm);
   transform: rotate(-1.5deg);
 }
@@ -1603,8 +1519,8 @@ html[data-boot="done"] .boot {
 /* ============ MARQUEE ============ */
 .marquee-band {
   position: relative;
-  background: var(--yellow); /* flat accent; thick ink rules above and below */
-  color: #000;
+  background: var(--red-solid); /* inverted block; thick rules above and below */
+  color: var(--red-ink);
 }
 .marquee-clip {
   overflow: hidden;
@@ -1721,30 +1637,30 @@ html[data-boot="done"] .boot {
   gap: 8px;
   padding: 12px 16px;
   border-bottom: var(--nb-border);
-  background: var(--yellow);
+  background: var(--red-solid);
 }
 /* The traffic-light dots are one of the few round things left. */
 .term-head .tdot {
   width: 12px;
   height: 12px;
-  border: var(--bw-thin) solid #000;
+  border: var(--bw-thin) solid var(--line);
   border-radius: 50%;
 }
 .term-head .tdot:nth-child(1) {
-  background: #ff5f56;
+  background: var(--dot-1);
 }
 .term-head .tdot:nth-child(2) {
-  background: #ffbd2e;
+  background: var(--dot-2);
 }
 .term-head .tdot:nth-child(3) {
-  background: #27c93f;
+  background: var(--dot-3);
 }
 .term-head span.path {
   margin-left: 8px;
   font-family: var(--font-mono);
   font-size: 0.74rem;
   font-weight: 600;
-  color: #000;
+  color: var(--red-ink);
 }
 .term-body {
   padding: 20px 20px 22px;
@@ -1793,7 +1709,7 @@ html[data-boot="done"] .boot {
   font-family: var(--font-mono);
   font-size: 0.8rem;
   font-weight: 600;
-  border: var(--bw-thin) solid var(--ink);
+  border: var(--bw-thin) solid var(--line);
   border-radius: var(--radius);
   padding: 8px 13px;
   background: var(--panel);
@@ -1808,8 +1724,8 @@ html[data-boot="done"] .boot {
   transform: translate(-2px, -2px);
   box-shadow: calc(var(--off-sm) + 2px) calc(var(--off-sm) + 2px) 0 0
     var(--shadow-color);
-  background: var(--yellow);
-  color: #000;
+  background: var(--red-solid);
+  color: var(--red-ink);
 }
 @media (prefers-reduced-motion: reduce) {
   .pill:hover {
@@ -1830,7 +1746,7 @@ html[data-boot="done"] .boot {
   top: 0;
   bottom: 0;
   width: var(--bw);
-  background: var(--ink);
+  background: var(--line);
 }
 .tl-item {
   position: relative;
@@ -1851,7 +1767,7 @@ html[data-boot="done"] .boot {
   width: 16px;
   height: 16px;
   background: var(--red-solid);
-  border: var(--bw) solid var(--ink);
+  border: var(--bw) solid var(--line);
 }
 .tl-top {
   display: flex;
@@ -1907,7 +1823,7 @@ html[data-boot="done"] .boot {
   }
 }
 .card {
-  --accent: var(--yellow);
+  --strip: var(--red-solid);
   position: relative;
   border: var(--nb-border);
   border-radius: var(--radius);
@@ -1930,8 +1846,8 @@ html[data-boot="done"] .boot {
     transform: none;
   }
 }
-/* Each project card carries its own accent: a coloured header strip in both
-   themes, and (dark theme) the hard shadow takes that colour too. */
+/* Each project card carries its own header strip (red block, ink block, soft
+   red block, cycling); the hard shadow stays the theme's shadow colour. */
 .work-card {
   padding-top: 44px;
 }
@@ -1942,30 +1858,20 @@ html[data-boot="done"] .boot {
   left: 0;
   right: 0;
   height: 16px;
-  background: var(--accent);
-  border-bottom: var(--bw) solid var(--ink);
+  background: var(--strip);
+  border-bottom: var(--bw) solid var(--line);
 }
 .work-grid > :nth-child(3n + 1),
 .pcard:nth-of-type(3n + 1) {
-  --accent: var(--yellow);
+  --strip: var(--red-solid);
 }
 .work-grid > :nth-child(3n + 2),
 .pcard:nth-of-type(3n + 2) {
-  --accent: var(--blue);
+  --strip: var(--ink);
 }
 .work-grid > :nth-child(3n + 3),
 .pcard:nth-of-type(3n + 3) {
-  --accent: var(--green);
-}
-:root[data-theme="dark"] .work-card,
-:root[data-theme="dark"] .pcard {
-  --shadow-color: var(--accent);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .work-card,
-  :root:not([data-theme="light"]) .pcard {
-    --shadow-color: var(--accent);
-  }
+  --strip: var(--tint);
 }
 .card-top {
   display: flex;
@@ -1998,7 +1904,7 @@ html[data-boot="done"] .boot {
   letter-spacing: 0.02em;
   color: var(--ink);
   background: var(--panel);
-  border: var(--bw-thin) solid var(--ink);
+  border: var(--bw-thin) solid var(--line);
   border-radius: var(--radius);
   padding: 4px 8px;
   box-shadow: var(--shadow-sm);
@@ -2017,7 +1923,7 @@ html[data-boot="done"] .boot {
   font-weight: 500;
   text-decoration: none;
   color: var(--ink);
-  border-bottom: var(--bw-thin) solid var(--ink);
+  border-bottom: var(--bw-thin) solid var(--line);
   /* Vertical padding instead of just padding-bottom for the underline
      offset — a plain inline text link like this otherwise has a tap
      target no taller than its own line-height (~20px), well under the
@@ -2040,7 +1946,7 @@ html[data-boot="done"] .boot {
   color: var(--ink-faint);
   padding: 8px 0 4px;
 }
-/* LIVE: flat green stamp, black text, slightly tilted. Text carries the
+/* LIVE: inverted red/white stamp, slightly tilted. Text carries the
    state, colour only reinforces it. */
 .card-badge,
 .card-top .tag {
@@ -2048,9 +1954,9 @@ html[data-boot="done"] .boot {
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.06em;
-  color: #000;
-  background: var(--green);
-  border: var(--bw-thin) solid var(--ink);
+  color: var(--red-ink);
+  background: var(--red-solid);
+  border: var(--bw-thin) solid var(--line);
   border-radius: var(--radius);
   padding: 3px 9px;
   white-space: nowrap;
@@ -2205,7 +2111,7 @@ html[data-boot="done"] .boot {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border-bottom: var(--bw-thin) solid var(--ink);
+  border-bottom: var(--bw-thin) solid var(--line);
   /* See .card-links a's comment — same tap-target fix. */
   padding: 8px 0 4px;
   min-height: 44px;
@@ -2232,13 +2138,13 @@ html[data-boot="done"] .boot {
   border-radius: 0;
 }
 .gh-scroll::-webkit-scrollbar-thumb {
-  background: var(--line-strong);
+  background: var(--ink-faint);
   border-radius: 0;
 }
 @supports not selector(::-webkit-scrollbar) {
   .gh-scroll {
     scrollbar-width: thin;
-    scrollbar-color: var(--line-strong) var(--panel-2);
+    scrollbar-color: var(--ink-faint) var(--panel-2);
   }
 }
 .gh-grid-wrap {
@@ -2297,7 +2203,7 @@ html[data-boot="done"] .boot {
   width: var(--cell, 11px);
   height: var(--cell, 11px);
   border-radius: 0; /* pixel theme: square cells */
-  background: var(--heat-0);
+  background: var(--graph-0);
 }
 .gh-legend {
   display: flex;
@@ -2322,11 +2228,11 @@ html[data-boot="done"] .boot {
   color: var(--red-ink);
 }
 .contact-band .eyebrow::after {
-  background: #000;
+  background: var(--deep);
 }
 .contact-band .eyebrow .idx {
-  background: #000;
-  color: #fff;
+  background: var(--red-ink);
+  color: var(--red-solid);
 }
 .contact-h {
   font-family: var(--font-display);
@@ -2343,20 +2249,21 @@ html[data-boot="done"] .boot {
   margin-bottom: 28px;
   line-height: 1.6;
 }
-/* On the red band the borders and shadows go black in BOTH themes (a red
-   shadow would vanish on red), and the buttons take flat accent fills. */
+/* On the band the borders and shadows go deepest red in BOTH themes (a
+   same-colour shadow would vanish), the primary button is the band inverted
+   (--ink on --bg) and the others sit on the panel colour. */
 .contact-band {
-  --ink: #000;
-  --shadow-color: #000;
+  --line: var(--deep);
+  --shadow-color: var(--deep);
 }
 .contact-band .btn-primary {
-  background: var(--yellow);
-  color: #000;
+  background: var(--ink);
+  color: var(--bg);
 }
 .contact-band .btn-ghost,
 .contact-band .btn-icon {
-  background: #fff;
-  color: #000;
+  background: var(--panel);
+  color: var(--ink);
 }
 .contact-email {
   font-family: var(--font-mono);
@@ -2498,7 +2405,7 @@ html.lenis {
 }
 .panel-tabs button {
   padding: 4px 8px;
-  border: var(--bw-thin) solid var(--ink);
+  border: var(--bw-thin) solid var(--line);
   border-radius: 0;
   background: transparent;
   color: var(--ink-dim);
@@ -2516,7 +2423,7 @@ html.lenis {
 .panel-status {
   margin-left: auto;
   padding: 2px 6px;
-  border: var(--bw-thin) solid var(--ink);
+  border: var(--bw-thin) solid var(--line);
   color: var(--ink-dim);
   font-size: 0.62rem;
   font-weight: 700;
@@ -2546,11 +2453,11 @@ html.lenis {
   }
   .side-left {
     right: calc(50% + var(--frame-w) / 2);
-    border-left: var(--bw-thin) solid var(--ink);
+    border-left: var(--bw-thin) solid var(--line);
   }
   .side-right {
     left: calc(50% + var(--frame-w) / 2);
-    border-right: var(--bw-thin) solid var(--ink);
+    border-right: var(--bw-thin) solid var(--line);
   }
 
   /* Same height as the nav, with the same 2px rule under it, so the three
@@ -2563,7 +2470,7 @@ html.lenis {
     height: var(--nav-h, 87px);
     padding-top: 0;
     padding-bottom: 0;
-    border-bottom: var(--bw) solid var(--ink);
+    border-bottom: var(--bw) solid var(--line);
   }
   .panel-scroll {
     flex: 1;
@@ -2632,9 +2539,11 @@ html.lenis {
   position: relative;
   margin: 0;
   overflow: hidden;
-  background: #8a3d0b; /* the photo's orange, while it loads */
+  background: var(--panel-2); /* while the photo loads */
   margin: 16px 18px 8px 16px;
-  border: var(--nb-border);
+  /* Dark theme: a thick white frame so the red-toned photo does not blend
+     into the red page. */
+  border: var(--bw-thick) solid var(--photo-frame);
   box-shadow: var(--shadow);
 }
 .ident-img {
@@ -2648,8 +2557,8 @@ html.lenis {
   inset: 0;
   background: repeating-linear-gradient(
     0deg,
-    rgba(0, 0, 0, 0.18) 0,
-    rgba(0, 0, 0, 0.18) 1px,
+    var(--scan) 0,
+    var(--scan) 1px,
     transparent 1px,
     transparent 3px
   );
@@ -2661,7 +2570,7 @@ html.lenis {
   bottom: 12px;
   z-index: 1;
   padding: 5px 8px;
-  border: var(--bw-thin) solid var(--ink);
+  border: var(--bw-thin) solid var(--line);
   background: var(--bg);
   box-shadow: var(--shadow-sm);
   color: var(--ink);
@@ -2807,7 +2716,7 @@ html.lenis {
   .side-right {
     left: auto;
     right: 0;
-    border-left: var(--bw-thin) solid var(--ink);
+    border-left: var(--bw-thin) solid var(--line);
     border-right: none;
   }
   .home-shell[data-tab="profile"] .side-right,
@@ -2922,9 +2831,9 @@ html.lenis {
   position: relative;
   overflow: hidden;
   container-type: inline-size; /* the name sizes off the card, not the viewport */
-  --accent: var(--yellow);
+  --strip: var(--red-solid);
   border: var(--nb-border);
-  border-top: var(--off-xl) solid var(--accent);
+  border-top: var(--off-xl) solid var(--strip);
   border-radius: var(--radius);
   background: var(--panel);
   box-shadow: var(--shadow);
@@ -2936,7 +2845,7 @@ html.lenis {
 }
 .pcard-media {
   aspect-ratio: 4 / 3;
-  border-top: var(--bw) solid var(--ink);
+  border-top: var(--bw) solid var(--line);
 }
 .pcard-media img {
   width: 100%;
@@ -2976,7 +2885,7 @@ html.lenis {
 }
 .pcard-cta {
   padding: 9px 16px;
-  border: var(--bw-thin) solid var(--ink);
+  border: var(--bw-thin) solid var(--line);
   border-radius: var(--radius);
   background: var(--red-solid);
   color: var(--red-ink);
@@ -3018,8 +2927,8 @@ html.lenis {
     box-shadow: var(--shadow-lg);
   }
   .pcard:hover .pcard-cta {
-    background: var(--yellow);
-    color: #000;
+    background: var(--red-solid);
+    color: var(--red-ink);
   }
   .pcard:hover .pcard-overlay {
     clip-path: inset(0);

@@ -16,8 +16,8 @@
   gap: 12px 40px;
   margin: 0 0 32px;
   padding: 16px 0;
-  border-top: var(--bw-thin) solid var(--ink);
-  border-bottom: var(--bw-thin) solid var(--ink);
+  border-top: var(--bw-thin) solid var(--line);
+  border-bottom: var(--bw-thin) solid var(--line);
 }
 .meta dt {
   margin-bottom: 4px;
@@ -147,7 +147,7 @@ figure.frame {
   display: block;
   margin-top: 72px;
   padding: 26px 0 0;
-  border-top: var(--bw-thin) solid var(--ink);
+  border-top: var(--bw-thin) solid var(--line);
   text-decoration: none;
   color: var(--ink);
 }

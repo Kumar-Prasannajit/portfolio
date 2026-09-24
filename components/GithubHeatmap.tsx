@@ -26,7 +26,7 @@ function levelFor(count: number) {
 }
 
 function heatVar(level: number) {
-  return `var(--heat-${level})`;
+  return `var(--graph-${level})`;
 }
 
 type Cell = {
@@ -157,11 +157,11 @@ export default function GithubHeatmap() {
           </RevealItem>
           <RevealItem className="gh-legend">
             Less
-            <span className="gh-cell" style={{ background: "var(--heat-0)" }}></span>
-            <span className="gh-cell" style={{ background: "var(--heat-1)" }}></span>
-            <span className="gh-cell" style={{ background: "var(--heat-2)" }}></span>
-            <span className="gh-cell" style={{ background: "var(--heat-3)" }}></span>
-            <span className="gh-cell" style={{ background: "var(--heat-4)" }}></span>
+            <span className="gh-cell" style={{ background: "var(--graph-0)" }}></span>
+            <span className="gh-cell" style={{ background: "var(--graph-1)" }}></span>
+            <span className="gh-cell" style={{ background: "var(--graph-2)" }}></span>
+            <span className="gh-cell" style={{ background: "var(--graph-3)" }}></span>
+            <span className="gh-cell" style={{ background: "var(--graph-4)" }}></span>
             More
           </RevealItem>
         </RevealGroup>

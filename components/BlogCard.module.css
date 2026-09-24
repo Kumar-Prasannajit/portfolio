@@ -69,7 +69,7 @@
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--ink);
-  border-bottom: var(--bw-thin) solid var(--ink);
+  border-bottom: var(--bw-thin) solid var(--line);
   padding: 8px 0 4px;
   margin-top: auto;
   align-self: flex-start;

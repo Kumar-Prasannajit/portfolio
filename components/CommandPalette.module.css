@@ -81,7 +81,7 @@
   align-items: center;
   gap: 10px;
   padding: 4px 16px;
-  border-bottom: var(--bw-thin) solid var(--ink);
+  border-bottom: var(--bw-thin) solid var(--line);
 }
 .inputIcon {
   display: flex;
@@ -118,7 +118,7 @@
   align-items: center;
   gap: 16px;
   padding: 8px 16px;
-  border-bottom: var(--bw-thin) solid var(--ink);
+  border-bottom: var(--bw-thin) solid var(--line);
   color: var(--ink-faint);
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -135,7 +135,7 @@
   min-width: 20px;
   height: 20px;
   padding: 0 5px;
-  border: var(--bw-thin) solid var(--ink);
+  border: var(--bw-thin) solid var(--line);
   border-radius: var(--radius);
   background: var(--panel-2);
   color: var(--ink-dim);
@@ -245,14 +245,14 @@
   text-transform: uppercase;
   color: var(--ink-faint);
   font-size: 0.66rem;
-  border: var(--bw-thin) solid var(--ink);
+  border: var(--bw-thin) solid var(--line);
   border-radius: var(--radius);
   padding: 3px 7px;
 }
 
 .item[data-selected="true"] {
   background: var(--panel-2);
-  outline: var(--bw-thin) solid var(--ink);
+  outline: var(--bw-thin) solid var(--line);
   outline-offset: -2px;
 }
 .item[data-selected="true"] .itemIcon {
@@ -260,7 +260,7 @@
   color: var(--red-ink);
 }
 .item[data-selected="true"] .itemType {
-  border-color: var(--ink);
+  border-color: var(--line);
   /* pure red is only 4.2:1 on the selected row; mixing in ink lifts it past 4.5 */
   color: color-mix(in srgb, var(--red) 65%, var(--ink));
 }

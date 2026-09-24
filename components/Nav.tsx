@@ -108,11 +108,11 @@ export default function Nav() {
                 height={70}
                 className="nav-logo-img nav-logo-img-default theme-light-only"
               />
-              {/* On hover: dark mode reveals the red favicon mark (the
-                  cursor's diff-blend box goes white behind it); light
-                  mode instead swaps to the dark-theme logo asset, since
-                  that section goes red-backed with white content instead
-                  — see the .cursor-invert-target light-mode rules. */}
+              {/* On hover: dark mode reveals the red favicon mark on the
+                  white block that fills the section; light mode swaps to
+                  the dark-theme logo asset, since that section goes
+                  red-backed with white content — see the
+                  .cursor-invert-target rules. */}
               <Image
                 src="/favicon.png"
                 alt=""

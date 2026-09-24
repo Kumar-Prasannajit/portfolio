@@ -66,13 +66,13 @@
 
 .hr {
   border: none;
-  border-top: var(--bw-thin) solid var(--ink);
+  border-top: var(--bw-thin) solid var(--line);
   margin: 2.4em 0;
 }
 
 .link {
   color: var(--ink);
-  border-bottom: var(--bw-thin) solid var(--ink);
+  border-bottom: var(--bw-thin) solid var(--line);
   text-decoration: none;
   transition: color 0.15s, border-color 0.15s;
 }
@@ -85,7 +85,7 @@
   font-family: var(--font-mono);
   font-size: 0.86em;
   background: var(--panel-2);
-  border: var(--bw-thin) solid var(--ink);
+  border: var(--bw-thin) solid var(--line);
   border-radius: var(--radius);
   padding: 0.15em 0.4em;
 }
@@ -95,7 +95,7 @@
   font-size: 0.82rem;
   line-height: 1.6;
   background: var(--panel);
-  border: var(--bw-thin) solid var(--ink);
+  border: var(--bw-thin) solid var(--line);
   border-radius: var(--radius);
   padding: 16px 18px;
   margin: 0 0 1.4em;

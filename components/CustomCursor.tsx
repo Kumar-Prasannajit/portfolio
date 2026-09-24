@@ -12,18 +12,11 @@ const LABEL_SELECTOR = "[data-cursor]";
 const HOVER_SELECTOR = 'a, button, [role="button"], input, textarea, summary';
 
 // Inside the nav specifically, hovering a section morphs the cursor to
-// that section's own shape and clip-reveals it via mix-blend-mode,
-// instead of just growing — see the CSS for .custom-cursor.is-morphed.
-// The logo cell's favicon-on-hover mark is meant to stay red under that
-// white diff-blend (unlike other red content, which gets neutralized to
-// ink — see .cursor-invert-target below); it's pre-inverted in CSS
-// (.cursor-invert-target .nav-logo-img-hover) so the blend cancels back
-// to its true red instead of drifting off-palette.
-//
-// Light mode can't get a clean white out of that same diff-blend math
-// (see the "Light mode: red-on-hover nav sections" block in globals.css),
-// so it uses a different, non-blended reveal there — but driven by the
-// exact same --morph-x/-y/-r geometry computed once in enterMorph below.
+// that section's own rect and reveals a --red-solid fill (red in light,
+// white in dark) on the section itself via a clip-path circle — see the
+// "Red/white-on-hover nav sections" block in globals.css. Both themes share
+// the same non-blended reveal, driven by the --morph-x/-y/-r geometry
+// computed once in enterMorph below.
 //
 // :not(.nav-command-menu *) excludes the ⌘K dropdown's own menu items.
 // They're technically inside .nav-grid too (the dropdown mounts inside
@@ -114,10 +107,8 @@ export default function CustomCursor() {
       const rect = el.getBoundingClientRect();
       morphed = true;
       morphedEl = el;
-      // Difference-blending white against this design's red accents lands
-      // on an off-palette cyan (255-224≈31, 255-48≈207, 255-58≈197) — so
-      // while the cursor is over them, neutralize red to ink first, which
-      // keeps the invert strictly within black/white/red.
+      // Marks the section so its red/white reveal layer and inverted content
+      // colours apply (see .cursor-invert-target in globals.css).
       el.classList.add("cursor-invert-target");
       dot.classList.add("is-morphed", "is-hovering");
 
@@ -140,12 +131,10 @@ export default function CustomCursor() {
         Math.hypot(localX, rect.height - localY),
         Math.hypot(rect.width - localX, rect.height - localY)
       );
-      // Same geometry drives two different reveals: the global cursor's
-      // own diff-blend circle (dark mode), and — since custom properties
-      // inherit into pseudo-elements — the hovered element's own
-      // ::before wipe (light mode; see the .cursor-invert-target::before
-      // rules in globals.css). Both get set here so either can pick it
-      // up depending on theme.
+      // The cursor's own clip-path circle and — since custom properties
+      // inherit into pseudo-elements — the hovered element's ::before wipe
+      // (see .cursor-invert-target::before in globals.css) both read this
+      // geometry.
       const x = localX + "px";
       const y = localY + "px";
       dot.style.setProperty("--morph-x", x);

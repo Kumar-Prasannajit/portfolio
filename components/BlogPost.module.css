@@ -6,7 +6,7 @@
   font-size: 0.8rem;
   color: var(--ink-dim);
   text-decoration: none;
-  border-bottom: var(--bw-thin) solid var(--ink);
+  border-bottom: var(--bw-thin) solid var(--line);
   padding: 4px 0;
   min-height: 44px; /* touch target */
   margin-bottom: 12px;
@@ -45,7 +45,7 @@
 .meta span + span::before {
   content: "·";
   margin-right: 10px;
-  color: var(--border-2);
+  color: var(--ink-faint);
 }
 
 .tags {

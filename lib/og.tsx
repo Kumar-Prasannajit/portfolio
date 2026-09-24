@@ -8,10 +8,10 @@ import { ImageResponse } from "next/og";
 export const OG_SIZE = { width: 1200, height: 630 };
 export const OG_CONTENT_TYPE = "image/png";
 
-const BG = "#0b0d10";
-const INK = "#ecedef";
-const INK_DIM = "#8b929b";
-const RED = "#e8404a";
+const BG = "#5c0a12";
+const INK = "#ffffff";
+const INK_DIM = "rgba(255, 255, 255, 0.7)";
+const RED = "#ff6b6b";
 
 type OgImageProps = {
   title: string;
