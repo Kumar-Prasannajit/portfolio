@@ -57,7 +57,7 @@
 }
 
 .blockquote {
-  border-left: 2px solid var(--red);
+  border-left: var(--bw-thick) solid var(--red);
   color: var(--ink);
   margin: 1.4em 0;
   padding: 0.2em 0 0.2em 1.2em;

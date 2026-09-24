@@ -54,8 +54,9 @@
   --focus: var(--blue); /* 8:1 on --bg */
   --hatch: #1a1e24;
   --shadow-color: var(--red);
-  --red-solid: #e8404a; /* red SURFACES; carry --red-ink (black, 5.3:1) */
-  --red-dim: #e8404a;
+  --red: #ec4a53; /* spec #e8404a is 4.50:1 on --panel; this is 4.85 */
+  --red-solid: #ec4a53; /* red SURFACES; carry --red-ink (black, 5.7:1) */
+  --red-dim: #ec4a53;
   --red-ink: #000000;
   --heat-0: #1c2027;
   --heat-1: #45151b;
@@ -358,21 +359,24 @@ img {
   font-size: 0.78rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ink-dim);
+  color: var(--ink);
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 18px;
 }
 .eyebrow .idx {
-  color: var(--red);
-  font-weight: 600;
+  color: var(--red-ink);
+  background: var(--red-solid);
+  border: var(--bw-thin) solid var(--ink);
+  padding: 1px 7px;
+  font-weight: 700;
 }
 .eyebrow::after {
   content: "";
   flex: 1;
-  height: 1px;
-  background: var(--border-2);
+  height: var(--bw-thin);
+  background: var(--ink);
 }
 section {
   position: relative;
@@ -1599,8 +1603,8 @@ html[data-boot="done"] .boot {
 /* ============ MARQUEE ============ */
 .marquee-band {
   position: relative;
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--yellow); /* flat accent; thick ink rules above and below */
+  color: #000;
 }
 .marquee-clip {
   overflow: hidden;
@@ -1674,6 +1678,10 @@ html[data-boot="done"] .boot {
   line-height: 1.05;
   letter-spacing: -0.01em;
   margin-bottom: 18px;
+  /* A thick underline block in the accent colour, hugging the words. */
+  display: inline-block;
+  padding-bottom: 6px;
+  border-bottom: var(--bw-thick) solid var(--red-solid);
 }
 
 /* ============ ABOUT ============ */
@@ -1812,34 +1820,38 @@ html[data-boot="done"] .boot {
 /* ============ EXPERIENCE ============ */
 .tl {
   position: relative;
-  padding-left: 28px;
+  padding-left: 30px;
 }
+/* The timeline: a solid ink rule with square markers. */
 .tl::before {
   content: "";
   position: absolute;
-  left: 5px;
-  top: 6px;
-  bottom: 6px;
-  width: 1px;
-  background: var(--border-2);
+  left: 4px;
+  top: 0;
+  bottom: 0;
+  width: var(--bw);
+  background: var(--ink);
 }
 .tl-item {
   position: relative;
-  padding-bottom: 40px;
+  margin-bottom: 28px;
+  padding: 20px 22px 22px;
+  border: var(--nb-border);
+  background: var(--panel);
+  box-shadow: var(--shadow);
 }
 .tl-item:last-child {
-  padding-bottom: 0;
+  margin-bottom: var(--off);
 }
 .tl-item::before {
   content: "";
   position: absolute;
-  left: -28px;
-  top: 5px;
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: var(--bg);
-  border: 2px solid var(--red);
+  left: -33px;
+  top: 22px;
+  width: 16px;
+  height: 16px;
+  background: var(--red-solid);
+  border: var(--bw) solid var(--ink);
 }
 .tl-top {
   display: flex;
@@ -1856,23 +1868,24 @@ html[data-boot="done"] .boot {
 .tl-date {
   font-family: var(--font-mono);
   font-size: 0.78rem;
-  color: var(--ink-faint);
+  font-weight: 600;
+  color: var(--ink);
   white-space: nowrap;
 }
 .tl-org {
-  color: var(--red);
-  font-weight: 600;
+  color: var(--ink);
+  font-weight: 700;
   font-size: 0.95rem;
   margin-bottom: 12px;
 }
 .tl-org span {
-  color: var(--ink-faint);
+  color: var(--ink-dim);
   font-weight: 400;
 }
 .tl-bullets {
   margin: 0;
   padding-left: 18px;
-  color: var(--ink-dim);
+  color: var(--ink-dim); /* 9:1 dark, 11:1 light, on the card */
   line-height: 1.7;
 }
 .tl-bullets li {
@@ -2307,13 +2320,13 @@ html[data-boot="done"] .boot {
 }
 .contact-band .eyebrow {
   color: var(--red-ink);
-  opacity: 0.92;
 }
 .contact-band .eyebrow::after {
-  background: rgba(255, 255, 255, 0.35);
+  background: #000;
 }
 .contact-band .eyebrow .idx {
-  color: var(--red-ink);
+  background: #000;
+  color: #fff;
 }
 .contact-h {
   font-family: var(--font-display);
@@ -2385,7 +2398,10 @@ footer {
   margin: -8px 0;
 }
 .foot-inner a:hover {
-  color: var(--red);
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: var(--bw-thin);
+  text-underline-offset: 4px;
 }
 
 @media (max-width: 880px) {
