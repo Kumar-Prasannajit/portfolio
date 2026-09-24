@@ -322,8 +322,8 @@ html.custom-cursor-active * {
   min-height: 100vh;
   margin: 0 auto;
   background: var(--bg);
-  border-left: 1px solid var(--border);
-  border-right: 1px solid var(--border);
+  border-left: var(--bw-thin) solid var(--ink);
+  border-right: var(--bw-thin) solid var(--ink);
 }
 h1,
 h2,
@@ -395,9 +395,9 @@ footer::before {
   position: absolute;
   left: 50%;
   width: 100vw;
-  height: 2px;
+  height: var(--bw-thick);
   transform: translateX(-50%);
-  background: var(--border);
+  background: var(--ink);
   pointer-events: none;
 }
 .band::before,
@@ -419,8 +419,7 @@ header.site-nav {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: blur(10px);
+  background: var(--bg); /* solid: no transparency, no blur */
 }
 .nav-inner {
   position: relative;
@@ -430,11 +429,11 @@ header.site-nav {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto auto;
   grid-template-rows: auto auto;
-  border: 1px solid var(--border-2);
+  border: var(--nb-border);
   background: var(--panel);
 }
 .nav-cell {
-  border-right: 1px solid var(--border-2);
+  border-right: var(--bw-thin) solid var(--ink);
 }
 /* Pinned explicitly — relying on auto-placement here put these in the
    wrong track (the theme/logo cells' fixed row-span shifts the
@@ -444,7 +443,7 @@ header.site-nav {
 }
 .nav-cell-bottom {
   grid-row: 2;
-  border-top: 1px solid var(--border-2);
+  border-top: var(--bw-thin) solid var(--ink);
 }
 
 /* "KP." mark — its own full-height column, first in reading order. */
@@ -538,7 +537,7 @@ header.site-nav {
   word-spacing: 0.08em;
   /* No text-transform — case is authored per line (see NAV_TAGLINES),
      since "sudo make it happen" is deliberately lowercase. */
-  color: var(--ink-dim);
+  color: var(--ink);
   text-align: left;
   white-space: nowrap;
 }
@@ -623,14 +622,27 @@ header.site-nav {
   gap: 6px;
   padding: 4px 8px;
   text-decoration: none;
-  color: var(--ink-dim);
+  color: var(--ink);
   font-family: var(--font-body);
   font-size: 0.88rem;
-  font-weight: 500;
-  transition: color 0.15s ease;
+  font-weight: 600;
+  min-height: 28px;
+  border: var(--bw-thin) solid transparent;
+  transition:
+    background 0.1s,
+    color 0.1s;
 }
 .nav-links a:hover {
-  color: var(--ink);
+  background: var(--yellow);
+  color: #000;
+  border-color: var(--ink);
+}
+/* Current page: a solid inverted block, not just a colour change. */
+.nav-links a[aria-current="page"],
+.nav-mobile-links a[aria-current="page"] {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
 }
 
 /* ⌘ hint, right-aligned in the nav-links row — one bordered container,
@@ -640,7 +652,7 @@ header.site-nav {
   position: relative;
   flex: none;
   display: flex;
-  border-left: 1px solid var(--border-2);
+  border-left: var(--bw-thin) solid var(--ink);
 }
 .nav-cmd-trigger {
   display: flex;
@@ -649,11 +661,14 @@ header.site-nav {
   border: none;
   background: none;
   cursor: pointer;
-  color: var(--ink-dim);
-  transition: color 0.15s ease;
+  color: var(--ink);
+  transition: background 0.1s;
 }
 .nav-cmd-trigger:hover {
-  color: var(--ink);
+  background: var(--yellow);
+}
+.nav-cmd-trigger:hover .nav-cmd-kbd {
+  color: #000;
 }
 .nav-cmd-kbd {
   font-size: 0.95rem;
@@ -667,7 +682,7 @@ header.site-nav {
 .np-nav {
   flex: none;
   display: flex;
-  border-left: 1px solid var(--border-2);
+  border-left: var(--bw-thin) solid var(--ink);
 }
 /* Center the icon on both axes: the button is a fixed square with no side
    padding, the wrapper has no line box of its own (line-height: 0) and the
@@ -720,10 +735,10 @@ header.site-nav {
 .np-btn-mobile {
   width: 54px;
   border: none;
-  border-right: 1px solid var(--border-2);
+  border-right: var(--bw-thin) solid var(--ink);
   background: none;
   cursor: pointer;
-  color: var(--ink-dim);
+  color: var(--ink);
 }
 .np-btn-mobile .np-icon {
   width: 20px;
@@ -737,10 +752,10 @@ header.site-nav {
   flex-direction: column;
   gap: 12px;
   padding: 12px;
-  border: 2px solid var(--line-strong);
+  border: var(--nb-border);
   border-radius: 0;
   background: var(--panel);
-  box-shadow: 4px 4px 0 var(--red-dim);
+  box-shadow: var(--shadow);
   font-family: var(--font-mono);
   color: var(--ink-dim);
 }
@@ -823,7 +838,7 @@ header.site-nav {
   width: 72px;
   height: 72px;
   object-fit: cover;
-  border: 2px solid var(--line-strong);
+  border: var(--bw-thin) solid var(--ink);
   border-radius: 0;
   /* Snap the album art to visible pixels instead of smoothing it. */
   image-rendering: pixelated;
@@ -900,11 +915,12 @@ header.site-nav {
   border: none;
   background: none;
   cursor: pointer;
-  color: var(--ink-dim);
-  transition: color 0.15s ease;
+  color: var(--ink);
+  transition: background 0.1s;
 }
 .theme-toggle-btn:hover {
-  color: var(--red);
+  background: var(--yellow);
+  color: #000;
 }
 /* Under the morphed cursor, pre-invert instead of neutralizing — same
    trick as .cursor-invert-target near .nav-cmd-kbd — so both the ring
@@ -935,18 +951,16 @@ header.site-nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ink-dim);
-  border-left: 1px solid var(--border-2);
-  transition:
-    background 0.15s ease,
-    color 0.15s ease;
+  color: var(--ink);
+  border-left: var(--bw-thin) solid var(--ink);
+  transition: background 0.1s;
 }
 .nav-cell-top.nav-cell-social a:first-child {
   border-left: none;
 }
 .nav-cell-top.nav-cell-social a:hover {
-  background: var(--panel-2);
-  color: var(--red);
+  background: var(--yellow);
+  color: #000;
 }
 /* Pre-invert just the icon under the morphed cursor — same reasoning as
    the theme toggle's rule near it — so the hover-red icon cancels back
@@ -960,6 +974,24 @@ header.site-nav {
 .nav-cell-top.nav-cell-social svg {
   width: 20px;
   height: 20px;
+}
+/* Press feedback for the nav's icon cells: a hard inset shadow (they sit in a
+   ruled grid, so they can't translate like .btn does). */
+.nav-cmd-trigger:active,
+.theme-toggle-btn:active,
+.nav-hamburger-btn:active,
+.np-btn:active,
+.np-btn-mobile:active,
+.nav-cell-top.nav-cell-social a:active {
+  box-shadow: inset var(--off-sm) var(--off-sm) 0 0 var(--ink);
+}
+.nav-cmd-trigger:focus-visible,
+.theme-toggle-btn:focus-visible,
+.nav-hamburger-btn:focus-visible,
+.np-btn:focus-visible,
+.np-btn-mobile:focus-visible,
+.nav-cell-top.nav-cell-social a:focus-visible {
+  outline-offset: -6px;
 }
 .nav-hatch {
   height: 100%;
@@ -977,8 +1009,8 @@ header.site-nav {
 .nav-mobile-bar {
   display: none;
   align-items: stretch;
-  min-height: 46px; /* 44px of content + the 1px border each side: its buttons stretch to 44px touch targets */
-  border: 1px solid var(--border-2);
+  min-height: 50px; /* 44px of content + the 3px border each side: its buttons stretch to 44px touch targets */
+  border: var(--nb-border);
   background: var(--panel);
 }
 .nav-mobile-logo {
@@ -995,7 +1027,7 @@ header.site-nav {
   display: flex;
   align-items: stretch;
   margin-left: auto;
-  border-left: 1px solid var(--border-2);
+  border-left: var(--bw-thin) solid var(--ink);
 }
 /* Reuses .theme-toggle-btn's own look (color, hover, invert-under-cursor)
    but pins it to a fixed column instead of the grid cell's flex: 1 —
@@ -1003,7 +1035,7 @@ header.site-nav {
 .nav-mobile-actions .theme-toggle-btn {
   flex: none;
   width: 54px;
-  border-right: 1px solid var(--border-2);
+  border-right: var(--bw-thin) solid var(--ink);
 }
 .nav-hamburger-btn {
   width: 54px;
@@ -1013,11 +1045,12 @@ header.site-nav {
   border: none;
   background: none;
   cursor: pointer;
-  color: var(--ink-dim);
-  transition: color 0.15s ease;
+  color: var(--ink);
+  transition: background 0.1s;
 }
 .nav-hamburger-btn:hover {
-  color: var(--red);
+  background: var(--yellow);
+  color: #000;
 }
 .nav-hamburger-btn svg {
   width: 22px;
@@ -1049,7 +1082,7 @@ header.site-nav {
   display: flex;
   flex-direction: column;
   background: var(--panel);
-  border-left: 1px solid var(--border-2);
+  border-left: var(--nb-border);
   box-shadow: var(--shadow);
   animation: nav-drawer-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -1064,7 +1097,7 @@ header.site-nav {
   /* Breathing room above the first link — otherwise it sits flush against
      the drawer's top edge. */
   padding-top: 18px;
-  border-bottom: 1px solid var(--border-2);
+  border-bottom: var(--bw-thin) solid var(--ink);
 }
 .nav-mobile-links ul {
   list-style: none;
@@ -1072,7 +1105,7 @@ header.site-nav {
   padding: 0;
 }
 .nav-mobile-links li + li {
-  border-top: 1px solid var(--border-2);
+  border-top: var(--bw-thin) solid var(--ink);
 }
 .nav-mobile-links a {
   display: flex;
@@ -1082,7 +1115,7 @@ header.site-nav {
   gap: 4px;
   padding: 16px 22px;
   text-decoration: none;
-  color: var(--ink-dim);
+  color: var(--ink);
   font-family: var(--font-body);
   font-size: 0.92rem;
   font-weight: 500;
@@ -1091,8 +1124,8 @@ header.site-nav {
     background 0.15s ease;
 }
 .nav-mobile-links a:hover {
-  color: var(--ink);
-  background: var(--panel-2);
+  color: #000;
+  background: var(--yellow);
 }
 .nav-mobile-gif {
   height: 160px;
@@ -1317,7 +1350,7 @@ html[data-boot="done"] .boot {
   width: 100%;
   height: 10px;
   margin-top: 10px;
-  border: 2px solid var(--line-strong);
+  border: var(--bw-thin) solid var(--ink);
 }
 .boot-bar span {
   display: block;
@@ -2159,7 +2192,7 @@ html[data-boot="done"] .boot {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border-bottom: 1px solid var(--border-2);
+  border-bottom: var(--bw-thin) solid var(--ink);
   /* See .card-links a's comment — same tap-target fix. */
   padding: 8px 0 4px;
   min-height: 44px;
@@ -2449,7 +2482,7 @@ html.lenis {
 }
 .panel-tabs button {
   padding: 4px 8px;
-  border: 2px solid var(--line-strong);
+  border: var(--bw-thin) solid var(--ink);
   border-radius: 0;
   background: transparent;
   color: var(--ink-dim);
@@ -2467,7 +2500,7 @@ html.lenis {
 .panel-status {
   margin-left: auto;
   padding: 2px 6px;
-  border: 2px solid var(--line-strong);
+  border: var(--bw-thin) solid var(--ink);
   color: var(--ink-dim);
   font-size: 0.62rem;
   font-weight: 700;
@@ -2497,11 +2530,11 @@ html.lenis {
   }
   .side-left {
     right: calc(50% + var(--frame-w) / 2);
-    border-left: 1px solid var(--border);
+    border-left: var(--bw-thin) solid var(--ink);
   }
   .side-right {
     left: calc(50% + var(--frame-w) / 2);
-    border-right: 1px solid var(--border);
+    border-right: var(--bw-thin) solid var(--ink);
   }
 
   /* Same height as the nav, with the same 2px rule under it, so the three
@@ -2514,7 +2547,7 @@ html.lenis {
     height: var(--nav-h, 87px);
     padding-top: 0;
     padding-bottom: 0;
-    border-bottom: 2px solid var(--border);
+    border-bottom: var(--bw) solid var(--ink);
   }
   .panel-scroll {
     flex: 1;
@@ -2754,7 +2787,7 @@ html.lenis {
   .side-right {
     left: auto;
     right: 0;
-    border-left: 1px solid var(--border);
+    border-left: var(--bw-thin) solid var(--ink);
     border-right: none;
   }
   .home-shell[data-tab="profile"] .side-right,

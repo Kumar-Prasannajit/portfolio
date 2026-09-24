@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   IconClose,
   IconGithub,
@@ -23,13 +24,24 @@ import { useCommandPalette } from "./CommandPaletteContext";
 // scrolls them inside the right panel, and from another route they load "/"
 // and jump. Separate routes (/blog, /weekly) navigate client-side.
 function NavLinkItem({ link, onClick }: { link: NavLink; onClick?: () => void }) {
+  const pathname = usePathname();
   const content = link.label;
-  return link.href.startsWith("/#") ? (
-    <a href={link.href} onClick={onClick}>
-      {content}
-    </a>
-  ) : (
-    <Link href={link.href} onClick={onClick}>
+  if (link.href.startsWith("/#")) {
+    return (
+      <a href={link.href} onClick={onClick}>
+        {content}
+      </a>
+    );
+  }
+  // The current route (or a page under it, e.g. /blog/some-post) is marked
+  // with aria-current, which the stylesheet turns into an inverted block.
+  const current = pathname === link.href || pathname.startsWith(`${link.href}/`);
+  return (
+    <Link
+      href={link.href}
+      onClick={onClick}
+      aria-current={current ? "page" : undefined}
+    >
       {content}
     </Link>
   );
@@ -241,11 +253,10 @@ export default function Nav() {
 
         {mobileMenuOpen &&
           // Portaled to <body> instead of rendered in place: header.site-nav
-          // has backdrop-filter (for the sticky blur), which — per spec —
-          // makes it a containing block for its position:fixed descendants,
-          // the same as position:relative would. Left in place, the drawer
-          // sized and positioned itself against the ~40px nav bar instead
-          // of the viewport. Rendering outside that subtree sidesteps it.
+          // used to have backdrop-filter, which — per spec — makes it a
+          // containing block for its position:fixed descendants. The blur is
+          // gone, but the portal stays: it keeps the drawer out of the
+          // sticky header's stacking context and layout.
           createPortal(
             <>
               <div

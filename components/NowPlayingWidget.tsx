@@ -9,11 +9,9 @@
 // now gates even keyless search behind the app owner having Premium.
 //
 // The popover is portaled to <body> and positioned with fixed coordinates
-// taken from the button's rect: header.site-nav has backdrop-filter, which
-// (per spec) makes it the containing block for position:fixed descendants,
-// so rendering in place would size and place it against the nav bar. The
-// same trick as the mobile drawer in Nav.tsx. Measuring the button also
-// lets one popover work for both the desktop and mobile buttons.
+// taken from the button's rect, so it isn't sized or clipped by the sticky
+// nav bar (the same approach as the mobile drawer in Nav.tsx). Measuring the
+// button also lets one popover work for both the desktop and mobile buttons.
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
