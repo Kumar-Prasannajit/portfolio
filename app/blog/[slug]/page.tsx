@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { pageMetadata } from "@/lib/site";
+import { blogPostingJsonLd, pageMetadata } from "@/lib/site";
+import JsonLd from "@/components/JsonLd";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
@@ -24,6 +25,10 @@ export async function generateMetadata({
     title: `${post.frontmatter.title} | Kumar Prasannajit Sahu`,
     description: post.frontmatter.excerpt,
     path: `/blog/${slug}`,
+    article: {
+      publishedTime: post.frontmatter.date,
+      modifiedTime: post.frontmatter.updated,
+    },
   });
 }
 
@@ -38,6 +43,15 @@ export default async function BlogPostPage({
 
   return (
     <>
+      <JsonLd
+        data={blogPostingJsonLd({
+          headline: post.frontmatter.title,
+          description: post.frontmatter.excerpt,
+          path: `/blog/${slug}`,
+          datePublished: post.frontmatter.date,
+          dateModified: post.frontmatter.updated,
+        })}
+      />
       <section className="section band">
         <div className="wrap">
           <Link href="/blog" className={styles.back}>

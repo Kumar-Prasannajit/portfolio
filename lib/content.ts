@@ -76,6 +76,7 @@ function sortByDateDesc<T extends { frontmatter: { date: string } }>(
 export type BlogFrontmatter = {
   title: string;
   date: string; // ISO yyyy-mm-dd
+  updated?: string; // optional ISO yyyy-mm-dd of the last edit
   tags: string[];
   excerpt: string;
 };
@@ -147,6 +148,7 @@ export function getAllBlogTags(): string[] {
 export type WeeklyFrontmatter = {
   title: string;
   date: string;
+  updated?: string;
   summary: string;
   cover?: string; // optional short label the CSS-drawn placeholder cover displays
 };

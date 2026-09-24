@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { pageMetadata } from "@/lib/site";
+import { blogPostingJsonLd, pageMetadata } from "@/lib/site";
+import JsonLd from "@/components/JsonLd";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
@@ -27,6 +28,10 @@ export async function generateMetadata({
     title: `#${String(entry.number).padStart(3, "0")} — ${entry.frontmatter.title} | Kumar Prasannajit Sahu`,
     description: entry.frontmatter.summary,
     path: `/weekly/${slug}`,
+    article: {
+      publishedTime: entry.frontmatter.date,
+      modifiedTime: entry.frontmatter.updated,
+    },
   });
 }
 
@@ -43,6 +48,15 @@ export default async function WeeklyEntryPage({
 
   return (
     <>
+      <JsonLd
+        data={blogPostingJsonLd({
+          headline: entry.frontmatter.title,
+          description: entry.frontmatter.summary,
+          path: `/weekly/${slug}`,
+          datePublished: entry.frontmatter.date,
+          dateModified: entry.frontmatter.updated,
+        })}
+      />
       <section className="section band">
         <div className="wrap">
           <Link href="/weekly" className={styles.back}>
