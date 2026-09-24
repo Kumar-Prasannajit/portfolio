@@ -1,25 +1,28 @@
 /* ============ TOKENS ============ */
+/* Neubrutalism. Geometry is shared by both themes; only colour and texture
+   change. Light = textbook (cream, black ink, black hard shadows). Dark =
+   cyber-neubrutalism (near-black, off-white ink, RED hard shadows).
+   Existing names are kept where they map cleanly: --border/--border-2/
+   --line-strong are now colours equal to --ink, --panel is the surface,
+   --ink-dim is the "muted" text tone. The stroke shorthand is --nb-border. */
 :root {
-  color-scheme: dark;
-  --bg: #0b0d10;
-  --panel: #14171c;
-  --panel-2: #191d23;
-  --border: #262b32;
-  --border-2: #33393f;
-  --ink: #ecedef;
-  --ink-dim: #8b929b;
-  --ink-faint: #80878f; /* text: 5.4:1 on --bg */
-  --line-strong: #565c64; /* the old faint grey: borders and pixel fills only */
-  --red: #e8404a; /* accent: red text/lines on dark surfaces */
-  --red-solid: #b01c26; /* red SURFACES that carry light text (buttons, bands) */
-  --red-dim: #a92329;
-  --red-ink: #fff4f1;
-  --heat-0: #1c2027;
-  --heat-1: #45151b;
-  --heat-2: #7a1b23;
-  --heat-3: #b01c26;
-  --heat-4: #e8404a;
-  --shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
+  /* shared geometry */
+  --radius: 0px;
+  --bw: 3px; /* default stroke */
+  --bw-thin: 2px; /* tags, dividers */
+  --bw-thick: 4px; /* hero, section dividers, nav */
+  --off-sm: 3px;
+  --off: 5px;
+  --off-lg: 8px;
+  --off-xl: 12px;
+
+  /* flat accents */
+  --red: #e8404a;
+  --yellow: #ffd23f;
+  --blue: #74b9ff;
+  --green: #88d498;
+  --lavender: #b8a9fa;
+
   --font-display: var(--font-archivo-black), "Arial Black", sans-serif;
   --font-body: var(--font-ibm-plex-sans), -apple-system, "Segoe UI", sans-serif;
   --font-mono: var(--font-ibm-plex-mono), "SFMono-Regular", Consolas, monospace;
@@ -31,73 +34,97 @@
   /* The nav's typewriter tagline — same plain face as nav links now. */
   --font-tagline: var(--font-body);
 }
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    color-scheme: light;
-    --bg: #f1f1ee;
-    --panel: #ffffff;
-    --panel-2: #f7f7f4;
-    --border: #dcdcd6;
-    --border-2: #c9c9c1;
-    --ink: #14161a;
-    --ink-dim: #565c63;
-    --ink-faint: #5f656b; /* text: 5.2:1 on --bg */
-    --line-strong: #8b9096;
-    --red: #c81e28;
-    --red-solid: #c81e28;
-    --red-dim: #a3161f;
-    --red-ink: #fff7f5;
-    --heat-0: #e9ebed;
-    --heat-1: #f3b4b8;
-    --heat-2: #e5737a;
-    --heat-3: #d13842;
-    --heat-4: #9e141d;
-    --shadow: 0 20px 50px -24px rgba(20, 20, 20, 0.25);
-  }
-}
-:root[data-theme="light"] {
-  color-scheme: light;
-  --bg: #f1f1ee;
-  --panel: #ffffff;
-  --panel-2: #f7f7f4;
-  --border: #dcdcd6;
-  --border-2: #c9c9c1;
-  --ink: #14161a;
-  --ink-dim: #565c63;
-  --ink-faint: #5f656b; /* text: 5.2:1 on --bg */
-  --line-strong: #8b9096;
-  --red: #c81e28;
-  --red-solid: #c81e28;
-  --red-dim: #a3161f;
-  --red-ink: #fff7f5;
-  --heat-0: #e9ebed;
-  --heat-1: #f3b4b8;
-  --heat-2: #e5737a;
-  --heat-3: #d13842;
-  --heat-4: #9e141d;
-  --shadow: 0 20px 50px -24px rgba(20, 20, 20, 0.25);
-}
+/* Palettes. Dark is the default; light applies for an explicit
+   data-theme="light", or with no explicit choice when the system prefers
+   light. Declared twice (media query + attribute) so the first paint is right
+   before React hydrates — no flash. */
+:root,
 :root[data-theme="dark"] {
   color-scheme: dark;
   --bg: #0b0d10;
   --panel: #14171c;
   --panel-2: #191d23;
-  --border: #262b32;
-  --border-2: #33393f;
-  --ink: #ecedef;
-  --ink-dim: #8b929b;
-  --ink-faint: #80878f; /* text: 5.4:1 on --bg */
-  --line-strong: #565c64; /* the old faint grey: borders and pixel fills only */
-  --red: #e8404a; /* accent: red text/lines on dark surfaces */
-  --red-solid: #b01c26; /* red SURFACES that carry light text (buttons, bands) */
-  --red-dim: #a92329;
-  --red-ink: #fff4f1;
+  --ink: #f1f1ee;
+  --ink-dim: #b5bac1; /* muted text: 9:1 on --panel */
+  --ink-faint: #9ba1a8; /* small text: 6.5:1 on --bg */
+  --border: var(--ink);
+  --border-2: var(--ink);
+  --line-strong: var(--ink);
+  --line-soft: #4a5058; /* decorative dashes only */
+  --focus: var(--blue); /* 8:1 on --bg */
+  --hatch: #1a1e24;
+  --shadow-color: var(--red);
+  --red-solid: #e8404a; /* red SURFACES; carry --red-ink (black, 5.3:1) */
+  --red-dim: #e8404a;
+  --red-ink: #000000;
   --heat-0: #1c2027;
   --heat-1: #45151b;
   --heat-2: #7a1b23;
   --heat-3: #b01c26;
   --heat-4: #e8404a;
-  --shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg: #fffdf5;
+    --panel: #ffffff;
+    --panel-2: #f6f1e0;
+    --ink: #000000;
+    --ink-dim: #3a3a3a; /* muted text: 11:1 on cream */
+    --ink-faint: #4d4d4d;
+    --line-soft: #b9b4a0;
+    --focus: #0b5cd5; /* the brief's blue is 1.9:1 on cream; this is 6:1 */
+    --hatch: #f0ebd6;
+    --shadow-color: #000000;
+    --red: #c81e28; /* red TEXT on cream/white: 5.7:1 */
+    --red-dim: #c81e28;
+    --heat-0: #ece8d8;
+    --heat-1: #f3b4b8;
+    --heat-2: #e5737a;
+    --heat-3: #d13842;
+    --heat-4: #9e141d;
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #fffdf5;
+  --panel: #ffffff;
+  --panel-2: #f6f1e0;
+  --ink: #000000;
+  --ink-dim: #3a3a3a;
+  --ink-faint: #4d4d4d;
+  --border: var(--ink);
+  --border-2: var(--ink);
+  --line-strong: var(--ink);
+  --line-soft: #b9b4a0;
+  --focus: #0b5cd5;
+  --hatch: #f0ebd6;
+  --shadow-color: #000000;
+  --red: #c81e28;
+  --red-solid: #e8404a;
+  --red-dim: #c81e28;
+  --red-ink: #000000;
+  --heat-0: #ece8d8;
+  --heat-1: #f3b4b8;
+  --heat-2: #e5737a;
+  --heat-3: #d13842;
+  --heat-4: #9e141d;
+}
+/* Composite tokens. Shadow blur is ALWAYS 0. */
+:root {
+  --nb-border: var(--bw) solid var(--ink);
+  --shadow-sm: var(--off-sm) var(--off-sm) 0 0 var(--shadow-color);
+  --shadow: var(--off) var(--off) 0 0 var(--shadow-color);
+  --shadow-lg: var(--off-lg) var(--off-lg) 0 0 var(--shadow-color);
+}
+/* Phones: smaller offsets so nothing overflows horizontally. */
+@media (max-width: 640px) {
+  :root {
+    --off-sm: 2px;
+    --off: 3px;
+    --off-lg: 5px;
+    --off-xl: 8px;
+  }
 }
 
 *,
@@ -126,9 +153,9 @@ body {
   background-color: var(--bg);
   background-image: repeating-linear-gradient(
     -45deg,
-    var(--border) 0,
-    var(--border) 1px,
-    transparent 1px,
+    var(--hatch) 0,
+    var(--hatch) 2px,
+    transparent 2px,
     transparent 13px
   );
   color: var(--ink);
@@ -142,11 +169,11 @@ body {
    only hides the mouse pointer (cursor: none), never focus. Red on the red
    Contact band would vanish, so it switches to the light ink there. */
 :focus-visible {
-  outline: 3px solid var(--red);
+  outline: 3px solid var(--focus);
   outline-offset: 3px;
 }
 .contact-band :focus-visible {
-  outline-color: var(--red-ink);
+  outline-color: #000;
 }
 main:focus {
   outline: none; /* the skip link's target; not a control */
