@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Archivo_Black, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 import { SOCIAL_LINKS } from "@/lib/data";
 import {
+  FEED_ALTERNATES,
   SITE_DESCRIPTION,
   SITE_KEYWORDS,
   SITE_NAME,
@@ -48,6 +51,7 @@ export const metadata: Metadata = {
   keywords: SITE_KEYWORDS,
   authors: [{ name: SITE_NAME, url: SITE_URL }],
   creator: SITE_NAME,
+  alternates: { types: FEED_ALTERNATES },
   robots: {
     index: true,
     follow: true,
@@ -185,6 +189,8 @@ export default function RootLayout({
         </MotionProvider>
         <CustomCursor />
         <ViewCounter />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
