@@ -9,17 +9,17 @@
   flex-direction: column;
   height: 100%;
   padding: 26px;
-  border: 1px solid var(--border-2);
+  border: var(--bw-thin) solid var(--border-2);
   background: var(--panel);
-  border-radius: 16px;
+  border-radius: 0;
+  box-shadow: var(--shadow);
   text-decoration: none;
   color: inherit;
   transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 .card:hover {
-  border-color: var(--red);
-  box-shadow: var(--shadow);
-  transform: translateY(-4px);
+  transform: translate(var(--off), var(--off));
+  box-shadow: 0 0 0 0 var(--shadow-color);
 }
 
 .meta {
@@ -64,7 +64,7 @@
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--ink);
-  border-bottom: 1px solid var(--border-2);
+  border-bottom: var(--bw-thin) solid var(--border-2);
   padding: 8px 0 4px;
   margin-top: auto;
   align-self: flex-start;

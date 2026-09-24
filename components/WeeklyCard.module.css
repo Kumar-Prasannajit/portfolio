@@ -2,18 +2,18 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  border: 1px solid var(--border-2);
+  border: var(--bw-thin) solid var(--border-2);
   background: var(--panel);
-  border-radius: 16px;
+  border-radius: 0;
+  box-shadow: var(--shadow);
   text-decoration: none;
   color: inherit;
   overflow: hidden;
   transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 .card:hover {
-  border-color: var(--red);
-  box-shadow: var(--shadow);
-  transform: translateY(-4px);
+  transform: translate(var(--off), var(--off));
+  box-shadow: 0 0 0 0 var(--shadow-color);
 }
 
 /* No real cover photography exists for these entries, so the "thumbnail"
@@ -32,7 +32,7 @@
     transparent 1px,
     transparent 13px
   );
-  border-bottom: 1px solid var(--border-2);
+  border-bottom: var(--bw-thin) solid var(--border-2);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -16,8 +16,8 @@
   gap: 12px 40px;
   margin: 0 0 32px;
   padding: 16px 0;
-  border-top: 1px solid var(--border-2);
-  border-bottom: 1px solid var(--border-2);
+  border-top: var(--bw-thin) solid var(--border-2);
+  border-bottom: var(--bw-thin) solid var(--border-2);
 }
 .meta dt {
   margin-bottom: 4px;
@@ -43,9 +43,9 @@
 }
 
 .frame {
-  border: 2px solid var(--line-strong);
+  border: var(--bw) solid var(--line-strong);
   background: var(--panel);
-  box-shadow: 4px 4px 0 var(--red-dim);
+  box-shadow: var(--shadow);
   line-height: 0;
 }
 .frame img {
@@ -147,7 +147,7 @@ figure.frame {
   display: block;
   margin-top: 72px;
   padding: 26px 0 0;
-  border-top: 1px solid var(--border-2);
+  border-top: var(--bw-thin) solid var(--border-2);
   text-decoration: none;
   color: var(--ink);
 }

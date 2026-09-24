@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Archivo_Black, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
@@ -43,6 +43,15 @@ const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-ibm-plex-mono",
   display: "swap",
 });
+
+// Browser chrome colour: white in the light theme, the page red otherwise
+// (dark is the default, matching globals.css).
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { color: "#ff5757" },
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

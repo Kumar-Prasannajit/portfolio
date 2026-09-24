@@ -6,8 +6,7 @@
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: color-mix(in srgb, var(--bg) 70%, transparent);
-  backdrop-filter: blur(4px);
+  background: var(--line-soft);
   animation: overlay-in 0.15s ease-out;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -38,8 +37,8 @@
   display: flex;
   flex-direction: column;
   background: var(--panel);
-  border: 1px solid var(--border-2);
-  border-radius: 14px;
+  border: var(--bw-thin) solid var(--border-2);
+  border-radius: 0;
   box-shadow: var(--shadow);
   overflow: hidden;
   animation: content-in 0.15s cubic-bezier(0.22, 1, 0.36, 1);
@@ -82,7 +81,7 @@
   align-items: center;
   gap: 10px;
   padding: 4px 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: var(--bw-thin) solid var(--border);
 }
 .inputIcon {
   display: flex;
@@ -119,7 +118,7 @@
   align-items: center;
   gap: 16px;
   padding: 8px 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: var(--bw-thin) solid var(--border);
   color: var(--ink-faint);
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -136,8 +135,8 @@
   min-width: 20px;
   height: 20px;
   padding: 0 5px;
-  border: 1px solid var(--border-2);
-  border-radius: 5px;
+  border: var(--bw-thin) solid var(--border-2);
+  border-radius: 0;
   background: var(--panel-2);
   color: var(--ink-dim);
 }
@@ -171,7 +170,7 @@
 }
 .list::-webkit-scrollbar-thumb {
   background: var(--red);
-  border-radius: 999px;
+  border-radius: 0;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
@@ -199,7 +198,7 @@
   align-items: center;
   gap: 12px;
   padding: 9px 10px;
-  border-radius: 8px;
+  border-radius: 0;
   cursor: pointer;
   scroll-margin: 8px;
 }
@@ -210,7 +209,7 @@
   flex: none;
   width: 30px;
   height: 30px;
-  border-radius: 7px;
+  border-radius: 0;
   background: var(--panel-2);
   color: var(--ink-faint);
 }
@@ -246,8 +245,8 @@
   text-transform: uppercase;
   color: var(--ink-faint);
   font-size: 0.66rem;
-  border: 1px solid var(--border-2);
-  border-radius: 5px;
+  border: var(--bw-thin) solid var(--border-2);
+  border-radius: 0;
   padding: 3px 7px;
 }
 
