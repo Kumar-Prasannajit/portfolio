@@ -214,8 +214,8 @@ html.custom-cursor-active * {
   left: 0;
   width: 14px;
   height: 14px;
-  border: 1.5px solid var(--border-2);
-  border-radius: 2px;
+  border: var(--bw-thin) solid var(--bg);
+  border-radius: 0;
   background: var(--ink);
   pointer-events: none;
   z-index: 9999;
@@ -251,11 +251,11 @@ html.custom-cursor-active * {
   width: auto;
   height: auto;
   padding: 6px 10px;
-  border: 2px solid var(--red-ink);
+  border: var(--bw-thin) solid var(--ink);
   border-radius: 0;
   background: var(--red-solid);
   color: var(--red-ink);
-  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+  box-shadow: var(--shadow-sm);
   font-family: var(--font-mono);
   font-size: 0.68rem;
   font-weight: 700;
@@ -306,7 +306,7 @@ html.custom-cursor-active * {
    section underneath is painted red directly. */
 .custom-cursor.is-morphed {
   border: none;
-  border-radius: 3px;
+  border-radius: 0;
   background: #ffffff;
   mix-blend-mode: difference;
   animation: none;
@@ -2745,6 +2745,10 @@ html.lenis {
 }
 .stat-red .stat-label::before {
   background: var(--red-ink);
+}
+.stat-red .dim {
+  color: var(--red-ink);
+  opacity: 0.4; /* decorative leading zeros */
 }
 /* Fixed-width digits so a ticking clock doesn't jitter. */
 .dg {
