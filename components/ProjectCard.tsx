@@ -14,7 +14,15 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Project } from "@/lib/data";
 
-export default function ProjectCard({ project }: { project: Project }) {
+export default function ProjectCard({
+  project,
+  decorative = false,
+}: {
+  project: Project;
+  // A looped copy hidden from assistive tech: keep its link out of the tab
+  // order so keyboard users don't tab through the same projects again.
+  decorative?: boolean;
+}) {
   const [revealed, setRevealed] = useState(false);
   const ref = useRef<HTMLElement>(null);
 
@@ -65,6 +73,7 @@ export default function ProjectCard({ project }: { project: Project }) {
         className="pcard-link"
         data-cursor="View"
         aria-label={`${project.title}: view project`}
+        tabIndex={decorative ? -1 : undefined}
       />
     </article>
   );

@@ -15,7 +15,7 @@ import {
 } from "./icons";
 import TaglineCycler from "./TaglineCycler";
 import NowPlayingWidget from "./NowPlayingWidget";
-import { NAV_LINKS, NAV_LOGO_MARK, SOCIAL_LINKS, type NavLink } from "@/lib/data";
+import { NAV_LINKS, SOCIAL_LINKS, type NavLink } from "@/lib/data";
 import { useTheme } from "@/lib/useTheme";
 import { useCommandPalette } from "./CommandPaletteContext";
 
@@ -76,7 +76,7 @@ export default function Nav() {
     <header className="site-nav">
       <div className="nav-inner">
         <div className="nav-grid">
-          <Link href="/" className="nav-cell nav-cell-logo" aria-label={NAV_LOGO_MARK}>
+          <Link href="/" className="nav-cell nav-cell-logo" aria-label="Kumar Prasannajit Sahu, home">
             <span className="nav-logo-swap">
               {/* Both theme variants are rendered and CSS shows the right
                   one (.theme-dark-only / .theme-light-only), so the first
@@ -84,14 +84,14 @@ export default function Nav() {
                   useTheme's effect to flip a src. */}
               <Image
                 src="/darkmode.png"
-                alt={NAV_LOGO_MARK}
+                alt=""
                 width={140}
                 height={70}
                 className="nav-logo-img nav-logo-img-default theme-dark-only"
               />
               <Image
                 src="/lightmode.png"
-                alt={NAV_LOGO_MARK}
+                alt=""
                 width={140}
                 height={70}
                 className="nav-logo-img nav-logo-img-default theme-light-only"
@@ -200,17 +200,17 @@ export default function Nav() {
             right. The hamburger opens .nav-mobile-drawer below instead of
             trying to squeeze the full link list into the grid. */}
         <div className="nav-mobile-bar">
-          <Link href="/" className="nav-mobile-logo" aria-label={NAV_LOGO_MARK}>
+          <Link href="/" className="nav-mobile-logo" aria-label="Kumar Prasannajit Sahu, home">
             <Image
               src="/darkmode.png"
-              alt={NAV_LOGO_MARK}
+              alt=""
               width={140}
               height={70}
               className="nav-logo-img theme-dark-only"
             />
             <Image
               src="/lightmode.png"
-              alt={NAV_LOGO_MARK}
+              alt=""
               width={140}
               height={70}
               className="nav-logo-img theme-light-only"

@@ -99,10 +99,14 @@ export default function HomeShell({
   left,
   children,
   right,
+  rightClone,
 }: {
   left: ReactNode;
   children: ReactNode;
   right: ReactNode;
+  // The same rail, rendered with its links already out of the tab order, for
+  // the loop's extra copies.
+  rightClone: ReactNode;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -165,9 +169,6 @@ export default function HomeShell({
       registerScroller("right", rightLenis);
 
       // --- Right panel: infinite loop -----------------------------------
-      rightContent
-        .querySelectorAll<HTMLElement>(".loop-clone a")
-        .forEach((link) => (link.tabIndex = -1));
       let setHeight = 0;
       let positioned = false;
       const measure = () => {
@@ -407,16 +408,17 @@ export default function HomeShell({
           <div className="panel-content">
             {/* Only the first copy is real: the rest exist to make the loop
                 seamless, so they're hidden from assistive tech and their links
-                are taken out of the tab order (see mountPanels). They must
-                stay clickable though — the scroll sits in the middle copies
-                most of the time. #work lives in the main column, not here. */}
+                are taken out of the tab order (rightClone renders them with
+                tabIndex -1, in the server HTML). They must stay clickable
+                though — the scroll sits in the middle copies most of the
+                time. #work lives in the main column, not here. */}
             {Array.from({ length: LOOP_SETS }, (_, i) => (
               <div
                 key={i}
                 className={i === 0 ? "loop-set" : "loop-set loop-clone"}
                 aria-hidden={i > 0 ? true : undefined}
               >
-                {right}
+                {i === 0 ? right : rightClone}
               </div>
             ))}
           </div>

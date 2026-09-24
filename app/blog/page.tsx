@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 import { getAllBlogPosts, getAllBlogTags } from "@/lib/content";
 import BlogIndex from "@/components/BlogIndex";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Blog | Kumar Prasannajit Sahu",
   description:
     "Backend-leaning notes on MERN, payments, and whatever else took longer to understand than to fix.",
-};
+  path: "/blog",
+});
 
 export default function BlogIndexPage() {
   const posts = getAllBlogPosts();

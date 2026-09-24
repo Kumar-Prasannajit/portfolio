@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 import { PLACES } from "@/lib/data";
 import TermWindow from "@/components/TermWindow";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Places | Kumar Prasannajit Sahu",
   description: "Places I wanna go. Bucket list, funding TBD.",
-};
+  path: "/places",
+});
 
 export default function PlacesPage() {
   return (

@@ -2,6 +2,13 @@ import type { Metadata } from "next";
 import { Archivo_Black, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 import { SOCIAL_LINKS } from "@/lib/data";
+import {
+  SITE_DESCRIPTION,
+  SITE_KEYWORDS,
+  SITE_NAME,
+  SITE_TITLE,
+  SITE_URL,
+} from "@/lib/site";
 import CustomCursor from "@/components/CustomCursor";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
@@ -12,13 +19,6 @@ import CommandPalette from "@/components/CommandPalette";
 import { CommandPaletteProvider } from "@/components/CommandPaletteContext";
 import MotionProvider from "@/components/MotionProvider";
 import ViewCounter from "@/components/ViewCounter";
-
-const SITE_URL = "https://kumarp.in";
-
-const SITE_NAME = "Kumar Prasannajit Sahu";
-const SITE_TITLE = "Kumar Prasannajit Sahu | Full-Stack Software Engineer";
-const SITE_DESCRIPTION =
-  "Portfolio of Kumar Prasannajit Sahu, a Full-Stack Software Engineer specializing in Python, Node.js, and Generative AI Applications (RAG Chatbots).";
 
 const archivoBlack = Archivo_Black({
   subsets: ["latin"],
@@ -45,27 +45,17 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
-  keywords: [
-    "Kumar Prasannajit Sahu",
-    "Kumar Prasannajit",
-    "Full Stack Developer Hyderabad",
-    "AIdeas Tech Solutions",
-    "RAG Chatbot developer",
-    "Python Engineer",
-  ],
+  keywords: SITE_KEYWORDS,
   authors: [{ name: SITE_NAME, url: SITE_URL }],
   creator: SITE_NAME,
   robots: {
     index: true,
     follow: true,
   },
-  alternates: {
-    canonical: SITE_URL,
-  },
   openGraph: {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    url: SITE_URL,
+    url: "/",
     siteName: SITE_NAME,
     type: "website",
     locale: "en_US",
@@ -101,13 +91,18 @@ const PERSON_JSON_LD = {
     name: "GIET University",
   },
   knowsAbout: [
-    "Python",
-    "Node.js",
     "React",
     "Next.js",
-    "Generative AI",
-    "RAG Chatbots",
+    "Node.js",
+    "Express",
+    "MongoDB",
+    "PostgreSQL",
+    "Redis",
     "REST APIs",
+    "RAG",
+    "LLM integration",
+    "Generative AI",
+    "AI agents",
   ],
   sameAs: [SOCIAL_LINKS.github, SOCIAL_LINKS.linkedin],
 };
@@ -176,7 +171,11 @@ export default function RootLayout({
             {/* The side panels live here, not in the pages, so they stay
                 mounted (clock, viewers, the drifting project rail) while only
                 the middle column changes between routes. */}
-            <HomeShell left={<IdentityPanel />} right={<Projects />}>
+            <HomeShell
+              left={<IdentityPanel />}
+              right={<Projects />}
+              rightClone={<Projects decorative />}
+            >
               {children}
             </HomeShell>
             <Footer />

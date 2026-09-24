@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { pageMetadata, SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site";
 import Hero from "@/components/Hero";
 import Marquee from "@/components/Marquee";
 import About from "@/components/About";
@@ -7,6 +9,12 @@ import WorkSection from "@/components/WorkSection";
 import GithubHeatmap from "@/components/GithubHeatmap";
 import Contact from "@/components/Contact";
 import Boot from "@/components/Boot";
+
+export const metadata: Metadata = pageMetadata({
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  path: "/",
+});
 
 // The middle column's content. The side panels (identity on the left, the
 // project loop on the right) come from the layout, so every route shares them

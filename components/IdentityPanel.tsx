@@ -199,7 +199,7 @@ export default function IdentityPanel() {
           sizes="(min-width: 1280px) 460px, 340px"
           className="ident-img"
         />
-        <figcaption className="ident-tag mono">[ KUMAR // ODISHA, IN ]</figcaption>
+        <figcaption className="ident-tag mono">[ KUMAR // HYDERABAD, IN ]</figcaption>
       </figure>
 
       <div className="ident-stats">

@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 import { SPECS_GROUPS } from "@/lib/data";
 import TermWindow from "@/components/TermWindow";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Specs | Kumar Prasannajit Sahu",
   description: "The hardware and software keeping the bugs alive.",
-};
+  path: "/specs",
+});
 
 export default function SpecsPage() {
   return (

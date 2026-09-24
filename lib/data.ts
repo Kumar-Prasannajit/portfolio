@@ -42,8 +42,6 @@ export const BOOT_LINES = [
 export const PANEL_TIME_ZONE = "Asia/Kolkata";
 export const PANEL_TIME_ZONE_LABEL = "IST";
 
-export const NAV_LOGO_MARK = "KP.";
-
 export const SOCIAL_LINKS = {
   github: "https://github.com/Kumar-Prasannajit",
   linkedin: "https://www.linkedin.com/in/kumar-prasannajit-sahu",
@@ -57,7 +55,7 @@ export const TERM_ROWS = [
   { k: "ROLE", v: "Full Stack Developer — backend focus" },
   { k: "STACK", v: "MongoDB · Express · React · Node" },
   { k: "NOW", v: "Aideas Tech Solutions, Hyderabad" },
-  { k: "BASED", v: "Odisha, India" },
+  { k: "BASED", v: "Hyderabad, India" },
   { k: "DEGREE", v: "B.Tech ECE, GIET University" },
 ] as const;
 
@@ -307,7 +305,7 @@ export const MARQUEE_ITEMS = [
   "01001011 01010000 01010011",
   "POSTGRESQL · REDIS · TAILWIND",
   "BACKEND-LEANING FULL-STACK",
-  "BUILT IN ODISHA, INDIA",
+  "BUILT IN HYDERABAD, INDIA",
 ] as const;
 
 export const HERO_BINARY = "01001011 01010000 01010011 01000100 01000101 01010110";

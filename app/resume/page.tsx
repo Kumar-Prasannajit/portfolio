@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 import ResumeViewerLoader from "@/components/ResumeViewerLoader";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Resume | Kumar Prasannajit Sahu",
   description: "Kumar Prasannajit Sahu's resume, viewable inline or as a download.",
-};
+  path: "/resume",
+});
 
 export default function ResumePage() {
   return (

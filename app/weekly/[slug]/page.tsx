@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
@@ -22,10 +23,11 @@ export async function generateMetadata({
   const { slug } = await params;
   const entry = getWeeklyEntryBySlug(slug);
   if (!entry) return {};
-  return {
+  return pageMetadata({
     title: `#${String(entry.number).padStart(3, "0")} — ${entry.frontmatter.title} | Kumar Prasannajit Sahu`,
     description: entry.frontmatter.summary,
-  };
+    path: `/weekly/${slug}`,
+  });
 }
 
 export default async function WeeklyEntryPage({

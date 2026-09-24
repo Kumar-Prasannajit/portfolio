@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 import Image from "next/image";
 import { getGalleryImages } from "@/lib/gallery";
 import TermWindow from "@/components/TermWindow";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Gallery | Kumar Prasannajit Sahu",
   description: "A gallery of stuff that isn't a terminal window, allegedly.",
-};
+  path: "/gallery",
+});
 
 export default function GalleryPage() {
   const images = getGalleryImages();

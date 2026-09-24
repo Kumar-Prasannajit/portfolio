@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 import { getAllWeeklyEntries } from "@/lib/content";
 import WeeklyCard from "@/components/WeeklyCard";
 import styles from "@/components/ContentGrid.module.css";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Weekly | Kumar Prasannajit Sahu",
   description:
     "A numbered, dated build-in-public log of what actually shipped on this site and elsewhere, week to week.",
-};
+  path: "/weekly",
+});
 
 export default function WeeklyIndexPage() {
   const entries = getAllWeeklyEntries();

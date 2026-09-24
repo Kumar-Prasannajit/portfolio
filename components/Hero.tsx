@@ -56,12 +56,11 @@ export default function Hero() {
           <span className="l2">PRASANNAJIT</span>
         </ScrollLayer>
         <p className="hero-sub">
-          Backend-leaning <strong>full-stack developer</strong> on the MERN
-          stack — I ship REST APIs, booking platforms and the interfaces that
-          sit on top of them, out of Odisha, India.
+          <strong>Full-stack developer</strong> building web applications and
+          AI-powered products, based in Hyderabad, India.
         </p>
         <div className="meta-row">
-          <span className="meta-chip">[ ODISHA, IN ]</span>
+          <span className="meta-chip">[ HYDERABAD, IN ]</span>
           <Magnetic>
             <a className="btn btn-primary" href={`mailto:${SOCIAL_LINKS.email}`}>
               Get in touch

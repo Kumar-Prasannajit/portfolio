@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
@@ -19,10 +20,11 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = getBlogPostBySlug(slug);
   if (!post) return {};
-  return {
+  return pageMetadata({
     title: `${post.frontmatter.title} | Kumar Prasannajit Sahu`,
     description: post.frontmatter.excerpt,
-  };
+    path: `/blog/${slug}`,
+  });
 }
 
 export default async function BlogPostPage({

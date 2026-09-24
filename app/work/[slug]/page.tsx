@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -25,10 +26,11 @@ export async function generateMetadata({
   const { slug } = await params;
   const project = PROJECTS.find((p) => p.slug === slug);
   if (!project) return {};
-  return {
+  return pageMetadata({
     title: `${project.title} | Kumar Prasannajit Sahu`,
     description: project.summary,
-  };
+    path: `/work/${slug}`,
+  });
 }
 
 function Section({ label, children }: { label: string; children: ReactNode }) {
