@@ -1477,71 +1477,90 @@ html[data-boot="done"] .boot {
   align-items: center;
   font-family: var(--font-mono);
   font-size: 0.74rem;
-  border: 1px solid var(--border-2);
-  border-radius: 999px;
+  font-weight: 600;
+  border: var(--bw-thin) solid var(--ink);
+  border-radius: var(--radius);
   padding: 6px 12px;
-  color: var(--ink-dim);
-  background: var(--panel);
+  background: var(--yellow);
+  color: #000;
+  box-shadow: var(--shadow-sm);
+  transform: rotate(-1.5deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .meta-chip {
+    transform: none;
+  }
 }
 
 .cta-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 18px;
   align-items: center;
 }
+/* One button system: square, 3px stroke, flat fill, hard shadow. Hover lifts
+   up-left (shadow grows), press drops onto the page (shadow gone). The focus
+   ring is an outline, which paints above the shadow, so it is never hidden. */
 .btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   font-family: var(--font-mono);
   font-size: 0.82rem;
-  font-weight: 500;
+  font-weight: 700;
   text-decoration: none;
   padding: 11px 18px;
   min-height: 44px; /* touch target */
-  border-radius: 9px;
-  border: 1px solid transparent;
+  border-radius: var(--radius);
+  border: var(--nb-border);
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: var(--shadow);
   cursor: pointer;
   transition:
-    transform 0.15s ease,
-    background 0.15s ease,
-    border-color 0.15s ease;
+    transform 0.1s,
+    box-shadow 0.1s;
 }
 .btn:hover {
-  transform: translateY(-2px);
+  transform: translate(-2px, -2px);
+  box-shadow: calc(var(--off) + 2px) calc(var(--off) + 2px) 0 0
+    var(--shadow-color);
+}
+.btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+.btn:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn:hover,
+  .btn:active {
+    transform: none;
+    transition: none;
+  }
 }
 .btn-primary {
   background: var(--red-solid);
   color: var(--red-ink);
 }
-.btn-primary:hover {
-  background: var(--red-dim);
-}
 .btn-ghost {
-  border-color: var(--border-2);
+  background: var(--panel);
   color: var(--ink);
-  background: transparent;
-}
-.btn-ghost:hover {
-  border-color: var(--red);
 }
 .btn-icon {
   width: 44px;
   height: 44px;
   padding: 0;
   justify-content: center;
-  border: 1px solid var(--border-2);
-  color: var(--ink-dim);
-  border-radius: 10px;
-}
-.btn-icon:hover {
-  border-color: var(--red);
+  background: var(--panel);
   color: var(--ink);
 }
 .btn-icon svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 /* ============ MARQUEE ============ */
@@ -2201,27 +2220,20 @@ html[data-boot="done"] .boot {
   margin-bottom: 28px;
   line-height: 1.6;
 }
+/* On the red band the borders and shadows go black in BOTH themes (a red
+   shadow would vanish on red), and the buttons take flat accent fills. */
+.contact-band {
+  --ink: #000;
+  --shadow-color: #000;
+}
 .contact-band .btn-primary {
-  background: var(--red-ink);
-  color: var(--red-solid);
+  background: var(--yellow);
+  color: #000;
 }
-.contact-band .btn-primary:hover {
-  background: #fff;
-}
-.contact-band .btn-ghost {
-  border-color: rgba(255, 255, 255, 0.5);
-  color: var(--red-ink);
-}
-.contact-band .btn-ghost:hover {
-  border-color: var(--red-ink);
-}
+.contact-band .btn-ghost,
 .contact-band .btn-icon {
-  border-color: rgba(255, 255, 255, 0.5);
-  color: var(--red-ink);
-}
-.contact-band .btn-icon:hover {
-  border-color: var(--red-ink);
-  background: rgba(255, 255, 255, 0.08);
+  background: #fff;
+  color: #000;
 }
 .contact-email {
   font-family: var(--font-mono);
