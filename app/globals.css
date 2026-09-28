@@ -203,6 +203,22 @@
   --accent-ink: var(--bg);
 }
 
+/* ---- accordion identity swatches ----
+   Rail 3's theme accordion (phase 3) shows all four characters' colours at
+   once, so — unlike every other accent value in this file — these can't be
+   gated by data-theme: the zoro panel must read green even while shanks is
+   the page's active theme. Deliberately mode-agnostic (one value, not a
+   light/dark pair) since they're small decorative identity marks, not body
+   content; this does not reintroduce the "combination-specific rule" the
+   token-discipline rule above guards against; no rule here needs to know
+   both data-theme AND data-mode at once. */
+:root {
+  --swatch-shanks: #e8404a;
+  --swatch-zoro: #3ecf6e;
+  --swatch-luffy: #f2871f;
+  --swatch-news: var(--ink);
+}
+
 /* ============ BRUTAL MODE ============ */
 /* Overrides four tokens and nothing else. Composes with all four palettes
    for free because every border/radius/shadow/display-weight declaration
@@ -2786,35 +2802,51 @@ html.lenis {
 }
 
 /* ============ RAIL THREE ============ */
-/* RailThree.tsx: the fixed, non-scrolling right panel. Structural placeholder
-   only for now (docs/redesign-spec.md phase 2 — "layout shell... no new
-   content yet") — every block below is static chrome with no live data or
-   interactivity; phase 3 fills each one in without needing to touch this
-   shell. Top-to-bottom order, mirroring rail 1 (a big flexible block on top,
-   fixed-height data below): ASCII block (largest, flexible, opposite rail
-   1's photo) -> Stats (fixed-height rows) -> theme accordion (fixed
-   collapsed height) -> BRUTAL button. Sized to fit a 768px-tall viewport
-   with room to spare even under the taller ~87px nav height. */
+/* RailThree.tsx: the fixed, non-scrolling right panel (docs/redesign-spec.md
+   phase 3). Top-to-bottom, mirroring rail 1: ASCII block (largest, flexible,
+   opposite rail 1's photo) -> Stats (fixed-height rows, live data) -> theme
+   accordion (hover-preview/click-commit, one of the spec's three named
+   motion exceptions) -> BRUTAL button. Fit-checked at a 768px-tall viewport
+   with the accordion in its one real state — always exactly one panel
+   expanded: 96 (ascii min) + 168 (3x56 stats) + 344 (200 + 3x48 accordion) +
+   52 (brutal) = 660px, under the 681px budget the worst-case ~87px nav
+   height leaves at 768px total. */
 .rail3 {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
 }
+
+/* AsciiFlow.tsx cycles pre-generated frames into this <pre>; this file only
+   lays out and colours it. Single colour from --accent (never a mix), so
+   every theme re-colours it for free. overflow:hidden means the absolute
+   worst case (narrowest nav-height bracket stacked on the shortest budgeted
+   viewport) crops a row or two of ambient texture rather than breaking the
+   fixed-height layout below it. */
 .rail3-ascii {
   flex: 1;
   min-height: 96px;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   border-bottom: var(--border-width) solid var(--border);
   background: var(--panel-2);
 }
-.rail3-ascii-label {
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
-  color: var(--ink-faint);
+.rail3-ascii-frame {
+  margin: 0;
+  color: var(--accent);
+  font-size: 7px;
+  line-height: 1.2;
+  white-space: pre;
+  opacity: 0.85;
+  user-select: none;
 }
+
+/* Three fixed-height rows so a live value (an anime title, a repo name)
+   never shoves the layout — ScrambleText's value is truncated, not
+   wrapped, and the row itself never grows. */
 .rail3-stats {
   flex: none;
   display: grid;
@@ -2826,40 +2858,121 @@ html.lenis {
   justify-content: space-between;
   gap: 8px;
   padding: 0 16px;
+  min-width: 0;
 }
 .rail3-stat + .rail3-stat {
   border-top: var(--border-width) solid var(--border);
 }
 .rail3-stat-label {
+  flex: none;
   font-size: 0.62rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-dim);
 }
 .rail3-stat-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
   font-size: 0.78rem;
   color: var(--ink-faint);
 }
+
+/* Theme accordion: a real radiogroup (RailThree.tsx). Exactly one panel is
+   ever expanded — whichever is hovered, else the committed theme — so
+   grid-template-rows only ever holds one 200px band among three 48px ones,
+   set inline from React and animated here on the parent (never the panels'
+   own heights), keeping all four perfectly complementary with no sub-pixel
+   gap. ~400ms, one ease, per spec. */
 .rail3-accordion {
   flex: none;
   display: grid;
-  grid-template-rows: repeat(4, 48px);
   border-top: var(--border-width) solid var(--border);
+  transition: grid-template-rows 400ms ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rail3-accordion {
+    transition: none;
+  }
 }
 .rail3-accordion-panel {
+  position: relative;
   display: flex;
   align-items: center;
-  padding: 0 16px;
+  padding: 0 14px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--panel);
 }
 .rail3-accordion-panel + .rail3-accordion-panel {
   border-top: var(--border-width) solid var(--border);
 }
+.rail3-accordion-panel:focus-within {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+/* Stays in the tab order and keyboard-operable (arrow keys move the native
+   radio group) but is visually replaced by the label + texture below —
+   never display:none, which would drop it from the a11y tree too. */
+.rail3-accordion-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  opacity: 0;
+}
+.rail3-accordion-texture {
+  position: absolute;
+  inset: 0;
+  opacity: 0.16;
+  transition: opacity 400ms ease;
+}
+.rail3-accordion-panel.is-active .rail3-accordion-texture,
+.rail3-accordion-panel:hover .rail3-accordion-texture {
+  opacity: 0.34;
+}
+/* One abstract, dithered pattern per character — never artwork (spec:
+   "someone else's IP on a public site") — tinted from that theme's own
+   --swatch-* identity token (see ACCORDION IDENTITY SWATCHES near the top
+   of this file) rather than the live --accent, so all four stay visible in
+   their own colour regardless of which theme is currently active. */
+.rail3-accordion-panel[data-swatch="shanks"] .rail3-accordion-texture {
+  background-image: repeating-linear-gradient(45deg, var(--swatch-shanks) 0 2px, transparent 2px 7px);
+}
+.rail3-accordion-panel[data-swatch="zoro"] .rail3-accordion-texture {
+  background-image: repeating-linear-gradient(-45deg, var(--swatch-zoro) 0 2px, transparent 2px 7px);
+}
+.rail3-accordion-panel[data-swatch="luffy"] .rail3-accordion-texture {
+  background-image: radial-gradient(var(--swatch-luffy) 1.4px, transparent 1.4px);
+  background-size: 10px 10px;
+}
+.rail3-accordion-panel[data-swatch="news"] .rail3-accordion-texture {
+  background-image: repeating-linear-gradient(90deg, var(--swatch-news) 0 1px, transparent 1px 4px);
+}
+/* Rotated 90°, reading bottom-to-top — the vertical-rl + rotate(180deg)
+   trick, wider-supported than writing-mode: sideways-lr. Sized to fit the
+   48px collapsed band ("SHANKS", the longest name, is ~43px tall at this
+   size/tracking) — collapsed is the default state for 3 of 4 panels, so
+   this is the label read most. position:relative + later DOM order than
+   the texture above is what keeps it painted on top, not a z-index. */
 .rail3-accordion-label {
+  position: relative;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
   font-size: 0.62rem;
   letter-spacing: 0.14em;
-  text-transform: uppercase;
   color: var(--ink-faint);
+  white-space: nowrap;
 }
+.rail3-accordion-panel.is-active .rail3-accordion-label {
+  color: var(--ink);
+  font-weight: 700;
+}
+
 .rail3-brutal {
   flex: none;
   width: 100%;
@@ -2872,14 +2985,22 @@ html.lenis {
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.14em;
-  cursor: default;
+  cursor: pointer;
+}
+.rail3-brutal:hover {
+  color: var(--ink);
+}
+.rail3-brutal[aria-pressed="true"] {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
 }
 
 /* Mobile: only the phase-3 controls survive, as a horizontal bottom bar —
-   the ASCII block and Stats are dropped rather than squeezed inline. Same
-   explicit-height approach as rail 1's mobile block above (matches the
-   56px .side-right/.panel-fixed height set there), so nothing depends on
-   grid/flex stretch resolving a particular way. */
+   the ASCII block and Stats are dropped rather than squeezed inline. No
+   hover to preview with on touch, so panels are flat, equal-width tap
+   targets; the expand/collapse choreography above is desktop-only, so the
+   inline gridTemplateRows React still sets (it doesn't know about this
+   breakpoint) is overridden here. */
 @media (max-width: 1023px) {
   .rail3 {
     flex-direction: row;
@@ -2892,17 +3013,23 @@ html.lenis {
   .rail3-accordion {
     flex: 1;
     height: 56px;
-    grid-template-rows: 56px;
+    grid-template-rows: 56px !important;
     grid-template-columns: repeat(4, 1fr);
     border-top: none;
+    transition: none;
   }
   .rail3-accordion-panel {
     justify-content: center;
-    padding: 0 8px;
+    padding: 0 4px;
   }
   .rail3-accordion-panel + .rail3-accordion-panel {
     border-top: none;
     border-left: var(--border-width) solid var(--border);
+  }
+  .rail3-accordion-label {
+    writing-mode: horizontal-tb;
+    transform: none;
+    font-size: 0.56rem;
   }
   .rail3-brutal {
     flex: none;

@@ -131,7 +131,107 @@ Follow-ups:
   Deviated above), and re-check crossbar alignment once phase 3's real accordion heights land.
 
 ## Phase 3 — Rail 3 contents
-Status: not started
+Status: done
+Commit: (pending — committed together with this file)
+Decisions:
+- **Stats: one aggregated route, not three.** `app/api/rail-stats/route.ts` calls AniList
+  (WATCHING) and GitHub (LAST COMMIT, UPTIME) in parallel and returns all three in one response —
+  same discriminated-union-per-field shape as `now-playing`'s `NowPlayingResponse`, so one field
+  failing (say AniList times out) never blanks the other two. `lib/useRailStats.ts` polls it every
+  5 minutes (these values change a few times a day at most) and — unlike `useNowPlaying` — keeps
+  the last good response on a failed poll instead of re-showing a placeholder over live data.
+- **WATCHING needs `ANILIST_USERNAME`** (new env var, `.env.example` updated) — public GraphQL,
+  no auth. Unset renders "not set up" (an honest, distinct state from "error"), never a layout
+  hole, matching the `LASTFM_*` "unconfigured" precedent. **Not set in this session** — the row
+  will show "not set up" until it's added to `.env.local` / Vercel.
+- **UPTIME tracks the commit actually deployed, not just `main`'s HEAD.** Reads
+  `VERCEL_GIT_COMMIT_SHA` (Vercel stamps it into the runtime env automatically) and falls back to
+  `main` only when that's unset (local dev, non-Vercel hosting). `GITHUB_TOKEN` is optional —
+  everything read is public, unauthenticated works fine at this traffic level, the token only
+  raises the rate ceiling (60/hr -> 5000/hr).
+- **ASCII frames are a checked-in static snapshot, not a build step.** `scripts/generate-ascii-
+  frames.mjs` is run by hand (`node scripts/generate-ascii-frames.mjs`) and writes `lib/
+  asciiFrames.ts` — the same pattern `lib/data.ts`'s `GH_COUNTS` already uses, and doing this
+  keeps `next build` from paying a codegen cost for something that only needs regenerating when
+  the pattern itself changes. 60 frames, 30x15 chars, a seeded 2-octave value-noise field sampled
+  at a drifting offset per frame (a cheap plasma/dither "flow", not a real particle sim) mapped to
+  a 10-character density ramp. Single colour (`--accent`) by construction — glyph choice carries
+  the intensity, not colour — so it re-themes for free. `AsciiFlow.tsx` only swaps `textContent`
+  on a 130ms interval; it never computes a frame client-side, and pauses entirely on
+  `prefers-reduced-motion` and `document.hidden` (a background tab gains nothing from a running
+  timer).
+- **`ScrambleText.tsx` is the shared scramble-settle primitive**, not a one-off for Stats — the
+  motion budget calls this out as one of exactly two reusable effects "used everywhere", so
+  phases 5 and 6's live variables should import this component rather than reimplementing the
+  effect. Structural characters (space, `·`, `/`, `:`, `-`) never scramble, only glyph positions
+  do, so separators read as fixed while the value "resolves" around them.
+- **Accordion sizing is exact, not `~`.** 200px expanded / 48px collapsed per the spec's own
+  numbers, animated via `grid-template-rows` on the parent (`RailThree.tsx` computes the row
+  string, `.rail3-accordion`'s `transition: grid-template-rows 400ms ease` animates it) — never
+  the panels' own heights, so all four stay complementary with zero sub-pixel gap. **Verified live
+  or against a computed 768px-height fit that it lands with exactly 0px of spare** at both nav-
+  height brackets (`.rail3-brutal`'s bottom edge sits at exactly `y=768` in both the 1024-1459px
+  width bracket, 61px nav-head, and the >=1460px bracket, 87px nav-head — checked via the Chrome
+  DevTools MCP's `resize_page` + `evaluate_script`, not just arithmetic).
+- **New root tokens: `--swatch-shanks/zoro/luffy/news`.** The accordion has to show all four
+  characters' colours at once regardless of which theme is currently active, which no existing
+  `data-theme`-gated token can do — these are deliberately flat (unconditional, mode-agnostic)
+  identity swatches for the picker only, not a reintroduction of the "combination-specific rule"
+  token discipline bans: nothing here needs to know `data-theme` AND `data-mode` together.
+  Commented in `globals.css` as an explicit, narrow exception.
+- **Textures are CSS gradients, not artwork or precomputed ASCII.** Two diagonal hatch patterns
+  (shanks, zoro — opposite angles), a dot halftone (luffy), a vertical hatch (news), each tinted
+  from that panel's own `--swatch-*`. Per spec: "do not use Zoro or Luffy character artwork."
+- **Rotated labels use `writing-mode: vertical-rl` + `transform: rotate(180deg)`**, not a manual
+  `rotate(90deg)` on a horizontal span — the standard cross-browser trick for bottom-to-top
+  vertical text (wider support than `writing-mode: sideways-lr`). Sized against the 48px collapsed
+  band: "SHANKS", the longest name, renders ~43px tall at 0.62rem/0.14em tracking, verified in the
+  live screenshot below.
+- **Keyboard IS the commit, not a third preview state.** Real radio inputs mean arrow keys move
+  focus *and* the checked value natively, firing `onChange` -> `commit()` immediately — there's no
+  keyboard-only "preview without committing" affordance, since hover-preview is inherently a mouse
+  enhancement (no hover concept on a keyboard). Tabbing into the group (without pressing an arrow)
+  focuses the already-checked radio and changes nothing, which is exactly correct. Verified live:
+  focusing the `zoro` radio and pressing `ArrowDown` committed `luffy` immediately (`data-theme`,
+  `localStorage`, and the expanded panel all updated in the same tick).
+- **Mobile: tap-to-commit, no preview.** No hover on touch, so `<1024px` collapses the accordion to
+  a flat, equal-width, un-rotated (`writing-mode: horizontal-tb`) 4-column row — the expand/
+  collapse choreography is desktop-only. React's inline `gridTemplateRows` doesn't know about this
+  breakpoint, so the mobile media query overrides it with `!important` (a CSS rule with `!important`
+  does beat an element's own inline style without one).
+- **BRUTAL is `aria-pressed`-driven**, not a second boolean prop threaded through — `[aria-
+  pressed="true"]` swaps background/colour to the accent pair. Its "no transition" requirement
+  (spec: "the brutal toggle snaps") was already satisfied for free by phase 1's transition rule,
+  which only ever eases colour-ish properties, never border-width/radius/shadow — the axis this
+  button doesn't touch anyway.
+Deviated:
+- **Rail 3's total fixed budget now lands with exactly 0px of spare at 768px height** (measured
+  live, see Decisions above), not phase 2's placeholder headroom. There is no room left in rail 3's
+  fixed budget for anything else without either shrinking an existing fixed value (Stats' 56px
+  rows are the obvious lever) or accepting a scroll rail 3 isn't supposed to have — flagging this
+  now so a later phase doesn't add a fourth Stats row or a taller accordion without revisiting it.
+- **The ASCII block's rendered text can be marginally taller than its flex-allocated box** in the
+  single tightest case (narrowest nav-height bracket stacked on the shortest budgeted viewport);
+  `.rail3-ascii`'s `overflow: hidden` crops a row or two of ambient texture rather than breaking
+  layout. Cosmetic only — not observed in the two brackets actually checked live.
+- **Did not touch GSAP / the masked-line-rise effect.** Phase 3 only needed the other half of the
+  motion budget (scramble-settle) plus the accordion's own named exception — masked line rise
+  arrives with real prose in phase 5 About.
+Follow-ups:
+- Set `ANILIST_USERNAME` (and optionally `GITHUB_TOKEN`) in `.env.local` / Vercel — WATCHING shows
+  "not set up" until then, by design, not a bug.
+- Phase 10 QA pass should exercise `prefers-reduced-motion` live (ASCII freeze, scramble resolves
+  instantly, accordion snaps with no transition) — the guards are in place in
+  `AsciiFlow.tsx`/`ScrambleText.tsx`/`globals.css` and code-reviewed, but the Chrome DevTools MCP
+  used for this session's live checks had no reduced-motion emulation switch, so this wasn't
+  exercised in a real browser this session.
+- Phase 10's contrast audit (already planned for zoro/luffy/news generally, see phase 1) should
+  specifically include the accordion's collapsed rotated labels (`--ink-faint` on `--panel`) —
+  new text phase 1's own contrast pass never saw.
+- No screen-reader (VoiceOver/NVDA) pass yet on the accordion's `radiogroup` — verified
+  structurally (real inputs, `aria-label`s, keyboard-operable) but not listened to.
+- If rail width (`--panel-w`) is ever revisited past its phase-2 240px floor, re-check the
+  accordion's collapsed-label fit — see Decisions above for the ~43px/48px margin it currently has.
 
 ## Phase 4 — Custom cursor
 Status: not started
