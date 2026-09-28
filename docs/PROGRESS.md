@@ -72,7 +72,63 @@ component changes. No console errors. Production build (`next build`) and `eslin
 ---
 
 ## Phase 2 — Layout shell
-Status: not started
+Status: done
+Commit: (pending — committed together with this file)
+Decisions:
+- **Rail width: 240px minimum** (open decision 2, resolved with the user). `--panel-w`'s clamp
+  floor moved from 300px to 240px, giving the middle column ~800px on a 1280px laptop and
+  ~527px at exactly 1024px (verified live) — tighter at the low end, which is the accepted
+  trade-off of dropping the tabbed compromise below.
+- **Dropped the 1024–1279px tabbed PROFILE/PROJECTS compromise entirely** (resolved with the
+  user — not a listed open decision, but a scope call this phase forced: the spec only describes
+  two states, ≥1024px three panes and <1024px stacked). Both rails are now `position: fixed` and
+  visible at every width ≥1024px, no tab-switching, no per-panel scroller routing.
+- **Rail 3 rebuilt as a fixed, non-scrolling shell — the auto-scrolling Projects loop is gone,**
+  not deferred to phase 3. The spec's phase 2 acceptance line ("rail 3 cannot scroll... every
+  Stats row gets a fixed height") only holds if the old drifting `Projects`/`ProjectCard` rail
+  (its own Lenis instance, infinite loop-set cloning, hover/touch/focus pause logic) is removed
+  now, so it was — `components/Projects.tsx` and `components/ProjectCard.tsx` deleted (fully
+  orphaned once removed from the rail; `.proj-grid`/`.pcard*` CSS removed with them; `.card`
+  itself stays — WorkSection.tsx still uses it), along with the `PROFILE`/`PROJECTS` tabs, the
+  `▶ AUTO` / `❚❚ PAUSED` status pill, and `HomeShell`'s `rightClone` prop.
+- **`components/RailThree.tsx`** is the new rail 3 content: a static, `aria-hidden` structural
+  placeholder in phase 3's exact top-to-bottom order (ASCII block -> Stats -> theme accordion ->
+  BRUTAL), fixed-height throughout (stats rows 56px, accordion panels 48px collapsed, BRUTAL
+  52px, ASCII flexible/largest) so phase 3 can wire in real content — live data, the interactive
+  accordion, the ambient animation — without touching this shell's sizing.
+- **`lib/panelScroll.ts` collapsed to a single scroller.** With neither rail scrolling anymore,
+  `scrollToSection()` no longer needs to pick between a "page" and "right" Lenis instance or
+  handle a hidden-panel retry loop — it's a plain "find the element, scroll the one page
+  scroller to it" now. `PANEL_MEDIA`/`PANEL_TAB_EVENT` exports removed (unused elsewhere).
+- **Mobile (<1024px):** rail 1 collapses to a 96px compact top strip (the photo shrinks to a
+  96px thumbnail beside the three stat tiles, laid out in a row instead of stacked) via
+  shell-level CSS only — `IdentityPanel.tsx` itself is untouched, only how `globals.css`
+  presents it at this width changes, consistent with how mobile already hid it entirely before
+  this phase. Rail 3 collapses to a 56px fixed bottom bar showing only the phase-3 controls
+  (theme accordion + BRUTAL); the ASCII block and Stats are dropped rather than squeezed inline,
+  per the spec's explicit "dropped or moved inline" choice.
+- Every new rule in this phase reads `--border-width`/`--radius` from the token layer rather than
+  hardcoding values, per phase 1's follow-up note.
+Deviated:
+- **Rail 1's photo-bottom-edge and rail 3's ASCII-block-bottom-edge are not forced to a pixel-
+  identical Y position.** Both are `flex: 1` (the one flexible block in an otherwise fixed-height
+  column), so they behave analogously as viewport height changes and read as mirrored — but
+  rail 3's exact Stats/accordion/BRUTAL heights are a phase-2 placeholder, not phase 3's final
+  sizing, so exact-pixel mirroring wasn't attempted yet. The one crossbar that's guaranteed
+  pixel-exact at every scroll position — the header line under the sticky nav, shared by
+  `panel-head`'s synced height on both rails — was verified live and holds at every breakpoint
+  tested.
+- **Mobile viewport testing used the browser automation tool's own scaling** (reported
+  `innerWidth` ~500px when the page was asked to resize to 375px) rather than a literal 375px
+  viewport — the top-strip/bottom-bar structure and no-horizontal-scroll were confirmed at that
+  effective width; phase 10's QA pass should re-check at literal 375px and 768px on a real device
+  or an unscaled emulator.
+Follow-ups:
+- Phase 3 replaces every block inside `RailThree.tsx` with real content and should remove the
+  component's outer `aria-hidden="true"` once there's something in it worth exposing to a screen
+  reader.
+- Phase 10: re-verify the mobile compact strip and bottom bar at literal 375px/768px (see
+  Deviated above), and re-check crossbar alignment once phase 3's real accordion heights land.
 
 ## Phase 3 — Rail 3 contents
 Status: not started
@@ -107,8 +163,8 @@ Unanswered as of phase 1 (spec section 13) — resolve before the phase that nee
 1. **Feed scope (phase 7).** Projects only, or a unified feed of projects + blog + weekly +
    gallery? Unified changes the nav, which is protected. **Default if not reopened: projects
    only.**
-2. **Rail width (phase 2).** 240px rails (~800px middle on a 1280 laptop) vs 300px rails
-   (~680px middle, tighter 3-column feed).
+2. ~~**Rail width (phase 2).**~~ **Answered in phase 2: 240px minimum.** See that phase's
+   Decisions above.
 3. **Opinion lines (phase 6).** Worth writing ten of them, or skip?
 4. **The game (phase 9).** Adding a play control to the protected contribution graph — approve,
    or drop the game?

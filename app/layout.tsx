@@ -17,7 +17,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import HomeShell from "@/components/HomeShell";
 import IdentityPanel from "@/components/IdentityPanel";
-import Projects from "@/components/Projects";
+import RailThree from "@/components/RailThree";
 import CommandPalette from "@/components/CommandPalette";
 import { CommandPaletteProvider } from "@/components/CommandPaletteContext";
 import MotionProvider from "@/components/MotionProvider";
@@ -190,13 +190,9 @@ export default function RootLayout({
           <div className="site-frame" id="top">
             <Nav />
             {/* The side panels live here, not in the pages, so they stay
-                mounted (clock, viewers, the drifting project rail) while only
+                mounted (clock, viewers, rail 3's status shell) while only
                 the middle column changes between routes. */}
-            <HomeShell
-              left={<IdentityPanel />}
-              right={<Projects />}
-              rightClone={<Projects decorative />}
-            >
+            <HomeShell left={<IdentityPanel />} right={<RailThree />}>
               {children}
             </HomeShell>
             <Footer />

@@ -1,6 +1,6 @@
 /* Deliberately its own small set of rules rather than reusing the
    global .card class (see globals.css) — that class is built for a
-   <div> with independent inner <a> links (Projects.tsx); this card is
+   <div> with an independent inner <a> link (WorkSection.tsx); this card is
    itself a single <Link>, and nesting an anchor inside an anchor is
    invalid HTML. Values below intentionally mirror .card's look. */
 

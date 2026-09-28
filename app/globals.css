@@ -1931,17 +1931,6 @@ html[data-boot="done"] .boot {
   margin-bottom: 0;
 }
 
-/* ============ PROJECTS ============ */
-.proj-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 22px;
-}
-@media (max-width: 980px) {
-  .proj-grid {
-    grid-template-columns: 1fr;
-  }
-}
 .card {
   border: 1px solid var(--border-2);
   border-radius: 16px;
@@ -2454,50 +2443,18 @@ footer {
 }
 
 /* ============ HOME PANELS ============ */
-/* HomeShell.tsx: on wide screens the middle column is the page and the two
-   gutters become fixed side panels (the right one has its own Lenis scroller).
-   ≥1280px  three columns (left identity · middle page · right project loop)
-   1024–1279px  middle + ONE side panel with PROFILE / PROJECTS tabs
-   <1024px  no panels — one stacked page, ordered by the `order` rules below */
+/* HomeShell.tsx: on wide screens the middle column is the page — the only
+   scroll container (docs/redesign-spec.md phase 2) — and the two gutters
+   become FIXED, non-scrolling side panels.
+   ≥1024px  three columns, always: left identity · middle page · right rail
+   <1024px  no panels — one stacked page, ordered by the `order` rules below,
+            with rail 1 collapsed to a top strip and rail 3's controls to a
+            fixed bottom bar (see the max-width: 1023px block). */
 html.lenis {
   scroll-behavior: auto;
 }
-.panel-tabs,
-.panel-status {
-  display: none;
-}
 .panel-head .path {
   white-space: nowrap;
-}
-.panel-tabs {
-  gap: 6px;
-  margin-left: auto;
-}
-.panel-tabs button {
-  padding: 4px 8px;
-  border: 2px solid var(--line-strong);
-  border-radius: 0;
-  background: transparent;
-  color: var(--ink-dim);
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-}
-.panel-tabs button[aria-selected="true"] {
-  border-color: var(--accent);
-  background: var(--accent-solid);
-  color: var(--accent-ink);
-}
-.panel-status {
-  margin-left: auto;
-  padding: 2px 6px;
-  border: 2px solid var(--line-strong);
-  color: var(--ink-dim);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
 }
 
 @media (min-width: 1024px) {
@@ -2506,8 +2463,9 @@ html.lenis {
        and on the fixed panels a % resolves against the viewport width WITHOUT
        the page scrollbar, which is what the layout needs, and it is right on
        the first frame. (100vw includes the scrollbar; correcting that from JS
-       moved the whole layout ~15px once the page hydrated.) */
-    --panel-w: clamp(300px, calc((100% - 64rem) / 2), 460px);
+       moved the whole layout ~15px once the page hydrated.) 240px minimum —
+       spec open decision 2 — gives the middle ~800px on a 1280px laptop. */
+    --panel-w: clamp(240px, calc((100% - 64rem) / 2), 460px);
     --frame-w: min(64rem, calc(100% - 2 * var(--panel-w)));
     max-width: var(--frame-w);
   }
@@ -2531,7 +2489,9 @@ html.lenis {
   }
 
   /* Same height as the nav, with the same 2px rule under it, so the three
-     columns share one header line. */
+     columns share one header line — the one crossbar guaranteed to align
+     across all three panes at every scroll position, since the nav is
+     sticky and both rails are fixed. */
   .panel-head {
     flex: none;
     /* The fallback is the nav's real height, so the panel headers don't jump
@@ -2541,49 +2501,6 @@ html.lenis {
     padding-top: 0;
     padding-bottom: 0;
     border-bottom: 2px solid var(--border);
-  }
-  .panel-scroll {
-    flex: 1;
-    min-height: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-  .panel-content {
-    position: relative;
-  }
-  /* The right panel moves by itself; a scrollbar would just twitch. */
-  .side-right .panel-scroll {
-    scrollbar-width: none;
-  }
-  .side-right .panel-scroll::-webkit-scrollbar {
-    display: none;
-  }
-  .side-right .panel-status {
-    display: inline-block;
-  }
-
-  /* The project cards were designed for the full-width column: tighten them
-     for a 300–460px panel. */
-  .side-panel .section {
-    padding: 28px 0 34px;
-  }
-  .side-panel .wrap {
-    padding: 0 20px;
-  }
-  .side-panel .proj-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-  .side-panel .card {
-    height: auto;
-    padding: 20px;
-  }
-  .side-right .band.alt {
-    background: transparent;
-  }
-  .side-right .section {
-    padding: 20px 0;
   }
 }
 
@@ -2752,55 +2669,22 @@ html.lenis {
   }
 }
 
-/* One side panel at a time, switched by the PROFILE / PROJECTS tabs. */
-@media (min-width: 1024px) and (max-width: 1279px) {
-  .site-frame:has(.home-shell) {
-    --panel-w: 340px;
-    --frame-w: calc(100% - var(--panel-w));
-    margin: 0;
-  }
-  .side-left,
-  .side-right {
-    left: auto;
-    right: 0;
-    border-left: 1px solid var(--border);
-    border-right: none;
-  }
-  .home-shell[data-tab="profile"] .side-right,
-  .home-shell[data-tab="projects"] .side-left {
-    display: none;
-  }
-  .panel-tabs {
-    display: flex;
-  }
-  .panel-head .path,
-  .side-right .panel-status {
-    display: none;
-  }
-}
-
-/* No panels: flatten the wrappers and lay the sections out in one column,
-   in reading order. `display: contents` makes each section a direct flex
-   item of .home-shell so `order` can interleave the three groups. */
+/* No fixed panels below 1024px: flatten .home-main's wrapper so its sections
+   become direct flex items of .home-shell and `order` can place them, while
+   rail 1 collapses into a compact top strip (order: 0, ahead of everything)
+   and rail 3's controls become a fixed bottom bar (position: fixed removes
+   it from flex flow entirely, so it needs no order of its own). Nothing
+   about either rail's own component changes — only how this shell presents
+   them at this width. */
 @media (max-width: 1023px) {
   .home-shell {
     display: flex;
     flex-direction: column;
   }
-  .home-main,
-  .side-panel,
-  .panel-scroll,
-  .panel-content {
+  .home-main {
     display: contents;
   }
-  .panel-head,
-  .loop-clone {
-    display: none;
-  }
-  /* The looping ticker and the identity panel are for wide screens; stacked,
-     the Work section (#work, below) is the one list of projects. */
-  .side-left,
-  .side-right {
+  .panel-head {
     display: none;
   }
   .hero {
@@ -2826,6 +2710,206 @@ html.lenis {
   }
   #contact {
     order: 8;
+  }
+
+  /* Rail 1: fixed becomes static, column becomes row — the photo shrinks to
+     a 96px thumbnail beside the three stat tiles instead of stacking above
+     them. Every box in the chain is pinned to the same 96px explicitly
+     (rather than left to grid/flex stretch) so it can't drift under content
+     changes. IdentityPanel.tsx itself is untouched; only this shell-level
+     presentation changes at this width. */
+  .side-left {
+    order: 0;
+    position: static;
+    width: auto;
+    height: 96px;
+    border-left: none;
+    border-bottom: 2px solid var(--border);
+  }
+  .side-left .panel-fixed {
+    height: 96px;
+  }
+  .side-left .ident {
+    height: 96px;
+    grid-template-rows: 96px;
+    grid-template-columns: 96px 1fr;
+  }
+  .side-left .ident-photo {
+    height: 96px;
+    border-bottom: none;
+    border-right: 2px solid var(--border);
+  }
+  .side-left .ident-tag {
+    display: none;
+  }
+  .side-left .ident-stats {
+    height: 96px;
+    grid-template-rows: 96px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .side-left .stat + .stat {
+    border-top: none;
+    border-left: 2px solid var(--border);
+  }
+  .side-left .stat-head {
+    top: 8px;
+  }
+  .side-left .stat-meta {
+    display: none;
+  }
+
+  /* Rail 3: fixed bottom bar with just the phase-3 controls (theme accordion,
+     BRUTAL) — the ASCII block and Stats are dropped, per the spec, rather
+     than squeezed inline. Same explicit-height approach as rail 1 above. */
+  .side-right {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    width: auto;
+    height: 56px;
+    z-index: 40;
+    border-right: none;
+    border-top: 2px solid var(--border);
+  }
+  .side-right .panel-fixed {
+    height: 56px;
+  }
+  /* .home-main is display: contents (no box of its own, so no padding of
+     its own) — the trailing gap that keeps the fixed bottom bar from
+     covering the last of the page goes on the footer instead, since it's
+     always the last thing in the scroll. */
+  footer {
+    margin-bottom: 56px;
+  }
+}
+
+/* ============ RAIL THREE ============ */
+/* RailThree.tsx: the fixed, non-scrolling right panel. Structural placeholder
+   only for now (docs/redesign-spec.md phase 2 — "layout shell... no new
+   content yet") — every block below is static chrome with no live data or
+   interactivity; phase 3 fills each one in without needing to touch this
+   shell. Top-to-bottom order, mirroring rail 1 (a big flexible block on top,
+   fixed-height data below): ASCII block (largest, flexible, opposite rail
+   1's photo) -> Stats (fixed-height rows) -> theme accordion (fixed
+   collapsed height) -> BRUTAL button. Sized to fit a 768px-tall viewport
+   with room to spare even under the taller ~87px nav height. */
+.rail3 {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.rail3-ascii {
+  flex: 1;
+  min-height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: var(--border-width) solid var(--border);
+  background: var(--panel-2);
+}
+.rail3-ascii-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--ink-faint);
+}
+.rail3-stats {
+  flex: none;
+  display: grid;
+  grid-template-rows: repeat(3, 56px);
+}
+.rail3-stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 16px;
+}
+.rail3-stat + .rail3-stat {
+  border-top: var(--border-width) solid var(--border);
+}
+.rail3-stat-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.rail3-stat-value {
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+}
+.rail3-accordion {
+  flex: none;
+  display: grid;
+  grid-template-rows: repeat(4, 48px);
+  border-top: var(--border-width) solid var(--border);
+}
+.rail3-accordion-panel {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+}
+.rail3-accordion-panel + .rail3-accordion-panel {
+  border-top: var(--border-width) solid var(--border);
+}
+.rail3-accordion-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.rail3-brutal {
+  flex: none;
+  width: 100%;
+  height: 52px;
+  border: none;
+  border-top: var(--border-width) solid var(--border);
+  background: var(--panel);
+  color: var(--ink-dim);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  cursor: default;
+}
+
+/* Mobile: only the phase-3 controls survive, as a horizontal bottom bar —
+   the ASCII block and Stats are dropped rather than squeezed inline. Same
+   explicit-height approach as rail 1's mobile block above (matches the
+   56px .side-right/.panel-fixed height set there), so nothing depends on
+   grid/flex stretch resolving a particular way. */
+@media (max-width: 1023px) {
+  .rail3 {
+    flex-direction: row;
+    height: 56px;
+  }
+  .rail3-ascii,
+  .rail3-stats {
+    display: none;
+  }
+  .rail3-accordion {
+    flex: 1;
+    height: 56px;
+    grid-template-rows: 56px;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: none;
+  }
+  .rail3-accordion-panel {
+    justify-content: center;
+    padding: 0 8px;
+  }
+  .rail3-accordion-panel + .rail3-accordion-panel {
+    border-top: none;
+    border-left: var(--border-width) solid var(--border);
+  }
+  .rail3-brutal {
+    flex: none;
+    width: 72px;
+    height: 56px;
+    border-top: none;
+    border-left: var(--border-width) solid var(--border);
   }
 }
 
@@ -2863,123 +2947,4 @@ html.lenis {
 .work-card:has(.work-card-link:focus-visible) {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
-}
-
-/* ============ PROJECT CARDS ============ */
-/* ProjectCard.tsx. At rest a card is only its landing-page screenshot in a
-   pixel frame. On hover / keyboard focus (or a tap on touch screens, which
-   adds .is-revealed) a dark scrim wipes in over the image in pixel rows,
-   carrying the project name and a "Click me" button. Pixel rules throughout:
-   square corners, 2px border, hard shadow, stepped animation. */
-.pcard {
-  position: relative;
-  overflow: hidden;
-  container-type: inline-size; /* the name sizes off the card, not the viewport */
-  border: 2px solid var(--line-strong);
-  border-radius: 0;
-  background: var(--panel);
-  box-shadow: 4px 4px 0 var(--accent-dim);
-  /* Taps toggle the card — don't flash a tap highlight or start a selection. */
-  -webkit-tap-highlight-color: transparent;
-}
-.pcard-media {
-  aspect-ratio: 4 / 3;
-}
-.pcard-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  user-select: none;
-}
-
-.pcard-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 16px;
-  /* Dark enough for the text to read, thin enough that the screenshot still
-     shows through underneath. */
-  background: color-mix(in srgb, var(--bg) 72%, transparent);
-  clip-path: inset(100% 0 0 0);
-  transition: clip-path 0.26s steps(6, end);
-}
-.pcard-name {
-  margin: 0;
-  max-width: 100%;
-  font-family: var(--font-display);
-  font-size: clamp(1rem, 7.5cqw, 1.6rem);
-  line-height: 1.05;
-  letter-spacing: var(--tracking-display);
-  font-weight: var(--font-weight-display);
-  text-transform: uppercase;
-  text-align: center;
-  color: var(--ink);
-  /* Hard, un-blurred shadow: reads as a pixel drop-shadow. */
-  text-shadow: 2px 2px 0 var(--accent-dim);
-}
-.pcard-cta {
-  padding: 9px 16px;
-  border: 2px solid var(--accent-ink);
-  border-radius: 0;
-  background: var(--accent-solid);
-  color: var(--accent-ink);
-  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-/* Invisible link over the whole card. Keyboard focus lands here and the
-   :focus-within rule below reveals the overlay. */
-.pcard-link {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-}
-.pcard-link:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: -6px;
-}
-/* Touch: the first tap only reveals the overlay (ProjectCard's onClick), so
-   the link ignores taps until then. */
-@media (hover: none) {
-  .pcard-link {
-    pointer-events: none;
-  }
-  .pcard.is-revealed .pcard-link {
-    pointer-events: auto;
-  }
-}
-
-/* Reveal: hover only on devices that have it (on touch, :hover sticks after
-   a tap and would fight the tap toggle), plus keyboard focus and the tap
-   state. The link is focusable while the overlay is hidden so focusing it reveals it. */
-@media (hover: hover) {
-  .pcard:hover {
-    border-color: var(--accent);
-  }
-  .pcard:hover .pcard-cta {
-    background: var(--accent-dim);
-  }
-  .pcard:hover .pcard-overlay {
-    clip-path: inset(0);
-  }
-}
-.pcard:focus-within .pcard-overlay,
-.pcard.is-revealed .pcard-overlay {
-  clip-path: inset(0);
-}
-.pcard.is-revealed {
-  border-color: var(--accent);
-}
-@media (prefers-reduced-motion: reduce) {
-  .pcard-overlay {
-    transition: none;
-  }
 }

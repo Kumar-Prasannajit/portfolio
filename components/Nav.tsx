@@ -20,8 +20,8 @@ import { useTheme } from "@/lib/useTheme";
 import { useCommandPalette } from "./CommandPaletteContext";
 
 // In-page sections ("/#work") stay plain anchors: HomeShell's click handler
-// scrolls them inside the right panel, and from another route they load "/"
-// and jump. Separate routes (/blog, /weekly) navigate client-side.
+// scrolls to them in the page's single scroller, and from another route they
+// load "/" and jump. Separate routes (/blog, /weekly) navigate client-side.
 function NavLinkItem({ link, onClick }: { link: NavLink; onClick?: () => void }) {
   const content = link.label;
   return link.href.startsWith("/#") ? (
