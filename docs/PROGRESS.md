@@ -324,10 +324,45 @@ Follow-ups:
   existing reduced-motion bail-out, which this phase didn't touch.
 
 ## Phase 5 — About section
-Status: not started
-
-## Phase 5 — About section
-Status: not started
+Status: done
+Commit: (pending — committed together with this file)
+Decisions:
+- **`whoami.sh` card deleted; About is one wide column of two paragraphs.** `TERM_ROWS` (its only
+  consumer) removed from `lib/data.ts`; `.about-grid`, `.term-row*` CSS removed. `.term-card`/
+  `.term-head`/`.term-body` stay — `TermWindow` and `HomeShell`'s panel heads still use them.
+- **GSAP added as a dependency (`gsap@^3.15`).** The spec names `SplitText.create(el, { type:
+  'lines', mask: 'lines' })`, and GSAP wasn't actually installed (a stale comment in `TaglineCycler`
+  and `lib/motion.ts`'s "don't mix in a second animation library" note both pre-date this). SplitText
+  is free in 3.13+. Only About uses it so far; Reveal/motion elsewhere is unchanged.
+- **Reveal is armed like `Reveal.tsx`:** copy is visible in server HTML/no-JS; after mount, only if
+  it starts below the fold (and not reduced-motion) are lines hidden (`yPercent: 110` inside the
+  SplitText mask) and risen once when 20% of the block is in view (`power4.out`, stagger from
+  `STAGGER`). `split.revert()` after the tween restores the original DOM; `autoSplit` re-splits on
+  resize/font swap without re-hiding an already-revealed block. Waits on `document.fonts.ready`.
+- **Live variables** (`.about-var`): role, company, city from `EXPERIENCE[0]` (company strips
+  "Pvt. Ltd."; city is the first comma segment of `location`), and the closing line from AniList via
+  the rail-3 stats feed (title + `EP n / total`). Rendered in mono so scrambling glyphs can't change
+  width; `nowrap` + SplitText's `ignore` so a line break never slices one; an sr-only copy carries
+  the real value because the scrambling glyphs are `aria-hidden`. Accent is only the dashed
+  underline; text is `--ink`.
+- **`ScrambleText` gained `active` (default true)** to hold the scramble until the reveal fires.
+- **`useRailStats` is now a shared store** (`useSyncExternalStore`, ref-counted 5-min poll) so About
+  and rail 3 share one request. Behaviour for rail 3 is unchanged.
+- **The watching line is frozen to the first response** (fallback if none within 2.5s): SplitText
+  moves nodes, so React must not restructure a split paragraph later. Rail 3 keeps updating live.
+  When WATCHING isn't `ok` (unset/none/error) the line is a static "DSA problems in JavaScript"
+  sentence — no invented content, no layout hole.
+- **Copy is new and in first person; please review it.** Facts come only from existing site data
+  (roles, three apps, five-person Git workflow, ECE at GIET). "I got here sideways" is my inference
+  from the degree, not something the site said — cut it if it's wrong.
+Deviated:
+- GSAP `power4.out` stands in for `EASE.out` (`[0.22,1,0.36,1]`); GSAP has no cubic-bezier without
+  the CustomEase plugin.
+Follow-ups:
+- Set `ANILIST_USERNAME` to exercise the live watching line; it was verified only on the fallback
+  path this session (no username configured).
+- Phase 10: reduced-motion (reveal skipped, scramble instant) is code-reviewed, not exercised in a
+  browser; screen-reader pass on the sr-only variable copy not done.
 
 ## Phase 6 — Stack section
 Status: not started

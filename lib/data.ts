@@ -50,15 +50,6 @@ export const SOCIAL_LINKS = {
   email: "kumarprasannajitsahu@gmail.com",
 } as const;
 
-export const TERM_ROWS = [
-  { k: "NAME", v: "Kumar Prasannajit Sahu" },
-  { k: "ROLE", v: "Full Stack Developer — backend focus" },
-  { k: "STACK", v: "MongoDB · Express · React · Node" },
-  { k: "NOW", v: "Aideas Tech Solutions, Hyderabad" },
-  { k: "BASED", v: "Hyderabad, India" },
-  { k: "DEGREE", v: "B.Tech ECE, GIET University" },
-] as const;
-
 export const STACK_GROUPS = [
   {
     label: "Languages & Frontend",

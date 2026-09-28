@@ -31,11 +31,17 @@ function randomChar() {
 export default function ScrambleText({
   value,
   duration = 500,
+  active = true,
   className,
 }: {
   value: string;
   /** Total scramble time in ms before every character has settled. */
   duration?: number;
+  /**
+   * Holds the scramble until true (shows `value` meanwhile). For values that
+   * sit off screen until a scroll reveal, so the effect is seen, not spent.
+   */
+  active?: boolean;
   className?: string;
 }) {
   const [display, setDisplay] = useState(value);
@@ -44,7 +50,7 @@ export default function ScrambleText({
   useEffect(() => {
     // Reduced motion: the render below shows `value` directly in this case
     // (see the JSX), so there's nothing for this effect to animate.
-    if (prefersReducedMotion()) return;
+    if (prefersReducedMotion() || !active) return;
 
     const target = value;
     const totalFrames = Math.max(1, Math.round(duration / FRAME_MS));
@@ -67,7 +73,7 @@ export default function ScrambleText({
     }, FRAME_MS);
 
     return () => clearInterval(intervalRef.current);
-  }, [value, duration]);
+  }, [value, duration, active]);
 
   return (
     <span className={className} aria-hidden="true">

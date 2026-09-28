@@ -1815,27 +1815,39 @@ html[data-boot="done"] .boot {
 }
 
 /* ============ ABOUT ============ */
-.about-grid {
-  display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  gap: clamp(32px, 5vw, 72px);
-  align-items: start;
-}
-@media (max-width: 820px) {
-  .about-grid {
-    grid-template-columns: 1fr;
-  }
-}
+/* One wide column (phase 5). Body text stays a neutral token; the accent only
+   underlines the live variables. */
 .about-copy p {
-  font-size: 0.96rem;
-  line-height: 1.7;
+  font-size: clamp(1rem, 1.4vw, 1.12rem);
+  line-height: 1.8;
   color: var(--ink-dim);
-  max-width: 60ch;
-  margin: 0 0 16px;
+  max-width: 62ch;
+  margin: 0 0 20px;
+}
+.about-copy p:last-child {
+  margin-bottom: 0;
 }
 .about-copy strong {
   color: var(--ink);
   font-weight: 600;
+}
+/* A live word. Mono so scrambling glyphs never change its width, nowrap so a
+   line break can't split it, sr-only copy carries the real value for
+   assistive tech (the visible glyphs are aria-hidden while they cycle). */
+.about-var {
+  position: relative;
+  color: var(--ink);
+  font-size: 0.92em;
+  white-space: nowrap;
+  border-bottom: 1px dashed var(--accent);
+}
+.about-var-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .term-card {
@@ -1878,24 +1890,6 @@ html[data-boot="done"] .boot {
   font-family: var(--font-mono);
   font-size: 0.86rem;
 }
-.term-row {
-  display: grid;
-  grid-template-columns: 84px 1fr;
-  gap: 14px;
-  padding: 7px 0;
-  border-bottom: 1px dashed var(--border);
-  line-height: 1.5;
-}
-.term-row:last-child {
-  border-bottom: none;
-}
-.term-row .k {
-  color: var(--accent);
-}
-.term-row .v {
-  color: var(--ink-dim);
-}
-
 /* ============ STACK ============ */
 .stack-group {
   margin-bottom: 30px;
@@ -2473,9 +2467,6 @@ footer {
   }
   .hero-bin {
     display: none;
-  }
-  .term-row {
-    grid-template-columns: 72px 1fr;
   }
 }
 
