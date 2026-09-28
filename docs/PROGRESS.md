@@ -234,6 +234,96 @@ Follow-ups:
   accordion's collapsed-label fit — see Decisions above for the ~43px/48px margin it currently has.
 
 ## Phase 4 — Custom cursor
+Status: done
+Commit: (pending — committed together with this file)
+Decisions:
+- **Split into two nested elements.** `.custom-cursor` (outer, `wrapRef`) does nothing but position
+  itself — `transform: translate()` only, updated from a single-shot rAF scheduled per
+  `mousemove` (not a perpetual loop, so it costs nothing while the pointer is still — phase 10's
+  Lighthouse check cares about exactly this). `.custom-cursor-shape` (inner, `shapeRef`) carries
+  every visual state (size, tint, blink, morph) on its own `transition`, so the outer element's
+  un-eased position updates can never fight a visual transition on the same property. Splitting
+  was necessary, not stylistic: "positioned by transform... never top/left" plus "it steps, it
+  does not glide" (no easing on position) can't coexist with "slightly larger over clickable"
+  (an eased grow) on one shared `transform` property.
+- **Grid-snap is a draw-time-only quantization, never touches hit-testing.** `snap()` rounds to
+  the nearest 8px multiple purely for `wrap`'s `transform`; every selector check
+  (`onOver`/`onOut`/`enterMorph`) still reads the real, unsnapped `event.clientX/Y`. Verified live
+  (see below) that the block visibly steps in 8px increments while every hover/click target still
+  resolves correctly.
+- **Base shape: 4px x 20px, `mix-blend-mode: difference` on a plain white fill** — "thin caret
+  over text" is the resting state, not a per-context toggle; the accent/`--ink` solid fill (and
+  its always-on colour-cycle blink, shared with `.typewriter-cursor`) is gone entirely from the
+  cursor. `.is-hovering` grows it to 20x20/3px-radius ("slightly larger... over anything
+  clickable") — `label` was added to `HOVER_SELECTOR` for this, since the accordion's panels
+  (RailThree.tsx) are `<label>`s wrapping a visually-hidden radio, not buttons/inputs themselves,
+  and it's the only `<label>` anywhere in the codebase (checked: `Grep "<label" components/`).
+- **Idle-blink, not colour-cycle.** A 2000ms `setTimeout` reset on every real `mousemove` adds
+  `.is-idle` (a hard on/off `steps(1,end)` opacity cut, matching `.typewriter-cursor`'s own
+  cut-not-fade convention) once the pointer's been still that long; any movement clears it
+  immediately. Guarded against firing while `morphed` — a blink is a caret concept, and layering
+  an opacity flash onto the nav's clip-path reveal would fight it rather than read as "idle".
+- **Quick shrink on mousedown is a custom-property toggle, not a `transform` override.**
+  `.is-pressed` only sets `--cursor-scale: 0.55` (consumed by the base rule's
+  `scale(var(--cursor-scale))`); it never declares `transform` itself, so it composes for free
+  with `.is-hovering`/`.is-tinted`'s own width/height/background, and `.is-morphed`'s explicit
+  `transform: none` still wins outright over the base rule while a nav section is active — a
+  press during morph can't desync the clip-path circle from the rect it's covering.
+  Verified live: dispatching `mousedown` flips `--cursor-scale` to `.55` synchronously (read via
+  `getComputedStyle` after a forced `offsetWidth` reflow); `mouseup` reverts it and drops the class.
+- **Accordion tint is a literal colour preview, not another diff-blend state.** Spec: "tinted to
+  the theme colour... so the cursor itself previews the palette" — hovering a
+  `.rail3-accordion-panel[data-swatch]` sets `--cursor-tint: var(--swatch-<theme>)` and adds
+  `.is-tinted`, which switches `mix-blend-mode` back to `normal` so the swatch renders as its true
+  colour instead of an inversion. Verified live: hovering the SHANKS panel resolved the shape's
+  background to `rgb(232, 64, 74)` (`--swatch-shanks: #e8404a`) with `mix-blend-mode: normal`.
+- **Hygiene — native caret over text fields.** `TEXT_SELECTOR` (any real text `input`/`textarea`/
+  `[contenteditable]`, explicitly excluding the accordion's own radio) both hides the fake cursor
+  (`wrap.classList.add("is-hidden")`) and restores `cursor: text` via a CSS rule with higher
+  specificity than the blanket `cursor: none` (an element selector beats `*`, no `!important`
+  needed). An `overTextInput` flag stops the belt-and-suspenders "any mousemove reveals the
+  cursor" logic (needed for the Chromium-hover-sync-event case, see the comment in
+  CustomCursor.tsx) from immediately un-hiding it again on the very next pixel of movement inside
+  the field. Verified live via a dispatched `mouseover` on the blog's search input (`/blog`) —
+  real `hover` motion from the browser-automation tool used for the rest of this phase's live
+  checks turned out not to dispatch a genuine `mouseover` DOM event, only a visual pointer move,
+  so this one state needed a dispatched event to observe; every other state above was confirmed
+  from real tool-driven hovers.
+- **Nav morph (the pre-existing `enterMorph`/`exitMorph` mechanic) kept its exact geometry, only
+  its positioning primitive changed** — `wrap.style.transform = translate(rect.left, rect.top)`
+  instead of `dot.style.left/top`, `shape` (not the removed single `dot`) gets the inline
+  width/height/`--morph-x/-y/-r`. Verified live: dispatching `mouseover` on the logo nav cell
+  translated the wrapper to the cell's exact rect origin, sized the shape to its exact
+  width/height, set a real `--morph-r`, and added `cursor-invert-target` to the link; a follow-up
+  `mouseout` cleared all four cleanly. The light-mode overrides that switch the morphed box off
+  entirely (`:root:not([data-mode="dark"])`/`:root[data-mode="light"] .custom-cursor.is-morphed`)
+  were renamed to target `.custom-cursor-shape.is-morphed` alongside this move.
+- **Label state (`data-cursor`, the project-card "View →" tag) now sets `mix-blend-mode: normal`
+  explicitly** — it didn't need to before (the base cursor had no blend mode at all pre-phase-4),
+  but now that the base is diff-blended, the tag would otherwise invert instead of rendering its
+  true accent colour.
+- **Cursor shape's own `border-radius` stays a hardcoded 1px/3px/0, not `var(--radius)`.** The
+  token-discipline rule governs themed UI chrome (cards, buttons — brutal mode's 12px→0 sweep);
+  the cursor is one of the spec's three named motion-budget exceptions and its shape was already
+  hardcoded pre-redesign (2px/3px/0, never tokenized) — this isn't a new deviation, just carried
+  forward.
+Deviated:
+- **Grid step shipped at the spec's own literal 8px, not halved.** The spec's own fallback
+  ("if precision on links suffers in testing, halve the step") assumes real-user testing this
+  session's browser-automation tool couldn't do reliably (see the Decisions note above about
+  `hover` not dispatching real events) — but since snapping only quantizes the *drawn* position
+  and never the real hit-tested pointer, there is no click-precision regression to find; the only
+  open question is whether 8px reads as too laggy visually at small link targets. Flagging for a
+  real-device pass in phase 10 rather than guessing a smaller step now.
+Follow-ups:
+- Phase 10 QA pass should watch the grid-snap follow motion on a real trackpad/mouse (not the
+  automation tool) specifically over the nav links and the rail-3 accordion's narrow collapsed
+  bands, and halve `GRID_STEP` in CustomCursor.tsx if it reads as imprecise there.
+- No VoiceOver/NVDA-relevant change here (the whole cursor is `aria-hidden`/decorative and bails
+  out under touch or reduced motion already) — nothing new to re-check in phase 10 beyond the
+  existing reduced-motion bail-out, which this phase didn't touch.
+
+## Phase 5 — About section
 Status: not started
 
 ## Phase 5 — About section

@@ -327,60 +327,123 @@ main:focus {
 
 /* ============ CUSTOM CURSOR ============ */
 /* Replaces the system pointer everywhere (fine-pointer devices only —
-   see CustomCursor.tsx, which skips touch and prefers-reduced-motion)
-   with the same pixel-block, color-cycling caret used by the nav's
-   typewriter effect. Shares its cursor-cycle-dark/light keyframes,
-   declared alongside .typewriter-cursor further down. */
+   see CustomCursor.tsx, which skips touch and prefers-reduced-motion).
+   Phase 4 (docs/redesign-spec.md): keeps the pixel-block shape but
+   changes the behaviour entirely —
+     - mix-blend-mode: difference against a plain white fill, so it
+       inverts whatever's beneath it and stays visible over screenshots,
+       the red contact block, and all 16 theme combinations with zero
+       per-theme work (this is the same trick the nav morph reveal below
+       already used; the base cursor now shares it).
+     - true blink only when idle (.is-idle, driven by a 2s inactivity
+       timer in CustomCursor.tsx), not the old always-on colour cycle.
+     - two nested elements: .custom-cursor (outer) is positioned purely
+       via `transform: translate()` inside a rAF loop — never top/left —
+       snapped to an 8px grid so it steps like a caret instead of
+       gliding; .custom-cursor-shape (inner) carries every visual state
+       (size, tint, blink, morph) so its own transition never fights the
+       outer element's un-eased position updates. */
 html.custom-cursor-active,
 html.custom-cursor-active * {
   cursor: none;
+}
+/* Hygiene: editing text keeps the real system caret — a monospace-grid
+   block standing in for it would cost precision for no benefit. Higher
+   specificity than the universal `cursor: none` above (element selector
+   beats `*`), so it wins without `!important`. Excludes the accordion's
+   own radio input: that's a control, not something you type into. */
+html.custom-cursor-active
+  input:not([type="radio"]):not([type="checkbox"]):not([type="button"]):not(
+    [type="submit"]
+  ),
+html.custom-cursor-active textarea,
+html.custom-cursor-active [contenteditable="true"] {
+  cursor: text;
 }
 .custom-cursor {
   position: fixed;
   top: 0;
   left: 0;
-  width: 14px;
-  height: 14px;
-  border: 1.5px solid var(--border-2);
-  border-radius: 2px;
-  background: var(--ink);
+  width: 0;
+  height: 0;
   pointer-events: none;
   z-index: 9999;
-  transform: translate(-50%, -50%) scale(1);
-  transition:
-    transform 150ms ease,
-    opacity 150ms ease;
-  animation: cursor-cycle-dark 900ms steps(1, end) infinite;
-}
-.custom-cursor.is-hovering {
-  transform: translate(-50%, -50%) scale(1.8);
+  transition: opacity 150ms ease;
 }
 .custom-cursor.is-hidden {
   opacity: 0;
 }
-@media (prefers-color-scheme: light) {
-  :root:not([data-mode="dark"]) .custom-cursor {
-    animation-name: cursor-cycle-light;
+.custom-cursor-shape {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 20px;
+  border-radius: 1px;
+  background: #ffffff;
+  mix-blend-mode: difference;
+  --cursor-scale: 1;
+  transform: translate(-50%, -50%) scale(var(--cursor-scale));
+  transition:
+    width 150ms ease,
+    height 150ms ease,
+    border-radius 150ms ease,
+    transform 150ms ease,
+    background-color 150ms ease;
+}
+/* "Slightly larger over anything clickable" — the resting shape above is
+   the thin caret; this is the one state it grows into. */
+.custom-cursor-shape.is-hovering {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+}
+/* "Quick shrink on mousedown." Only touches the scale custom property, so
+   it composes with is-hovering/is-tinted's own width/height/background
+   instead of overriding them, and .is-morphed's explicit `transform: none`
+   below still wins outright while a nav section is active. */
+.custom-cursor-shape.is-pressed {
+  --cursor-scale: 0.55;
+  transition-duration: 80ms;
+}
+/* "Blink only when idle... starts blinking after ~2s stationary, exactly
+   like a real caret." A hard on/off cut (steps), not a fade — matches the
+   nav's own .typewriter-cursor blink further down. */
+.custom-cursor-shape.is-idle {
+  animation: cursor-caret-blink 1000ms steps(1, end) infinite;
+}
+@keyframes cursor-caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
   }
 }
-:root[data-mode="light"] .custom-cursor {
-  animation-name: cursor-cycle-light;
-}
-:root[data-mode="dark"] .custom-cursor {
-  animation-name: cursor-cycle-dark;
+/* Theme accordion panels (RailThree.tsx): "tinted to the theme colour...
+   so the cursor itself previews the palette" — a literal colour preview,
+   so this is the one state that switches the blend off rather than
+   inverting through it. --cursor-tint is set from JS to
+   `var(--swatch-<theme>)` per panel. */
+.custom-cursor-shape.is-tinted {
+  background: var(--cursor-tint, #ffffff);
+  mix-blend-mode: normal;
 }
 /* Label state (data-cursor="View", set from CustomCursor.tsx): the block
-   turns into a small red pixel tag carrying the word. Written as
-   `:root .custom-cursor.is-labelled` so it out-ranks the per-theme
-   animation-name rules above, which would otherwise keep the colour cycle
-   running. Never applies to touch: the whole cursor is hidden there. */
-:root .custom-cursor.is-labelled {
+   turns into a small red pixel tag carrying the word. Explicitly back to
+   mix-blend-mode: normal — the base shape above is now diff-blended, and
+   this tag needs to render as true accent colour, not an inversion.
+   Never applies to touch: the whole cursor is hidden there. */
+.custom-cursor-shape.is-labelled {
   width: auto;
   height: auto;
   padding: 6px 10px;
   border: 2px solid var(--accent-ink);
   border-radius: 0;
   background: var(--accent-solid);
+  mix-blend-mode: normal;
   color: var(--accent-ink);
   box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
   font-family: var(--font-mono);
@@ -390,10 +453,9 @@ html.custom-cursor-active * {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
-  animation: none;
   transform: translate(-50%, -50%) scale(1);
 }
-:root .custom-cursor.is-labelled::after {
+.custom-cursor-shape.is-labelled::after {
   content: attr(data-label) " \2192";
 }
 
@@ -413,11 +475,12 @@ html.custom-cursor-active * {
 }
 
 /* Nav sections (dark mode): the cursor snaps onto the hovered section's
-   own rect (left/top/width/height set from JS, instantly — no transition
-   on those) and clip-reveals it with a circle that grows from wherever
-   the pointer actually entered the section out to its farthest corner
-   (--morph-x/--morph-y/--morph-r, set from JS), same idea as the theme
-   toggle's wave transition. A plain white fill under
+   own rect (the outer .custom-cursor is translated to its origin, the
+   inner .custom-cursor-shape sized to match — both instantly, no
+   transition on either) and clip-reveals it with a circle that grows
+   from wherever the pointer actually entered the section out to its
+   farthest corner (--morph-x/--morph-y/--morph-r, set from JS), same idea
+   as the theme toggle's wave transition. A plain white fill under
    mix-blend-mode: difference inverts whatever's under it, so the
    icon/text stays fully legible (contrast is preserved by the invert)
    instead of being covered up. Against this site's near-black/near-white
@@ -431,17 +494,14 @@ html.custom-cursor-active * {
    difference blend can't be made to land on a clean white from a red
    source, so there the cursor box itself is switched off and the real
    section underneath is painted red directly. */
-.custom-cursor.is-morphed {
+.custom-cursor-shape.is-morphed {
   border: none;
   border-radius: 3px;
   background: #ffffff;
   mix-blend-mode: difference;
-  animation: none;
   transform: none;
   clip-path: circle(var(--morph-r, 0px) at var(--morph-x, 50%) var(--morph-y, 50%));
-  transition:
-    clip-path 380ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 150ms ease;
+  transition: clip-path 380ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 /* Boxes the whole page in a bordered frame; the diagonal hatch on <body>
    only shows through in the gutters outside it. */
@@ -1250,7 +1310,7 @@ header.site-nav {
    only to stay below it. Dark mode is untouched and keeps the
    diff-blend look above. */
 @media (prefers-color-scheme: light) {
-  :root:not([data-mode="dark"]) .custom-cursor.is-morphed {
+  :root:not([data-mode="dark"]) .custom-cursor-shape.is-morphed {
     background: transparent;
     mix-blend-mode: normal;
   }
@@ -1306,7 +1366,7 @@ header.site-nav {
     filter: none;
   }
 }
-:root[data-mode="light"] .custom-cursor.is-morphed {
+:root[data-mode="light"] .custom-cursor-shape.is-morphed {
   background: transparent;
   mix-blend-mode: normal;
 }
