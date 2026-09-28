@@ -109,7 +109,7 @@
 .input:focus {
   outline: none;
   /* borderless field: a red underline is the focus indicator */
-  box-shadow: inset 0 -2px 0 var(--red);
+  box-shadow: inset 0 -2px 0 var(--accent);
 }
 
 /* Footer-style hint bar: ↑↓ Navigate · ↵ Open · esc Close. Each key is
@@ -161,7 +161,7 @@
      properties cover Firefox/modern Chromium; the ::-webkit rules give
      older WebKit the same look and a rounded thumb inset from the edge. */
   scrollbar-width: thin;
-  scrollbar-color: var(--red) transparent;
+  scrollbar-color: var(--accent) transparent;
 }
 .list::-webkit-scrollbar {
   width: 8px;
@@ -170,13 +170,13 @@
   background: transparent;
 }
 .list::-webkit-scrollbar-thumb {
-  background: var(--red);
+  background: var(--accent);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 .list::-webkit-scrollbar-thumb:hover {
-  background: var(--red-dim);
+  background: var(--accent-dim);
   background-clip: padding-box;
 }
 
@@ -190,7 +190,7 @@
 
 /* Each result is a 3-column row: icon | title + description | type
    badge. The highlight on the active row (data-selected, driven by
-   arrow-key navigation) is plain var(--panel-2)/var(--red) — both
+   arrow-key navigation) is plain var(--panel-2)/var(--accent) — both
    already swap per-theme in globals.css, so the selection reads
    correctly in light and dark without any extra rules here. */
 .item {
@@ -255,11 +255,11 @@
   background: var(--panel-2);
 }
 .item[data-selected="true"] .itemIcon {
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--accent-solid);
+  color: var(--accent-ink);
 }
 .item[data-selected="true"] .itemType {
-  border-color: var(--red-dim);
+  border-color: var(--accent-dim);
   /* pure red is only 4.2:1 on the selected row; mixing in ink lifts it past 4.5 */
-  color: color-mix(in srgb, var(--red) 65%, var(--ink));
+  color: color-mix(in srgb, var(--accent) 65%, var(--ink));
 }

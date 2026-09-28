@@ -111,16 +111,31 @@ const PERSON_JSON_LD = {
   sameAs: [SOCIAL_LINKS.github, SOCIAL_LINKS.linkedin],
 };
 
-// Runs before paint to stamp the saved theme, avoiding a flash of the wrong
-// palette. The server can't know localStorage, so <html> below carries
-// suppressHydrationWarning: this attribute is the one intended difference
-// between server and client HTML (the same approach next-themes takes).
+// Runs before paint to stamp the three saved theme axes, avoiding a flash of
+// the wrong palette. The server can't know localStorage, so <html> below
+// carries suppressHydrationWarning: these attributes are the one intended
+// difference between server and client HTML (the same approach next-themes
+// takes).
+//
+// Three independent axes (see docs/redesign-spec.md phase 1):
+//   data-theme  zoro | luffy | news | shanks   (character palette, accent only)
+//   data-mode   light | dark                   (kept unset when there's no
+//               saved choice, so the prefers-color-scheme CSS fallback
+//               resolves it pre-JS with zero flash risk)
+//   data-ui     default | brutal
 const THEME_INIT_SCRIPT = `
 (function(){
   try{
-    var saved = localStorage.getItem('kps-theme');
-    if(saved === 'light' || saved === 'dark'){
-      document.documentElement.setAttribute('data-theme', saved);
+    var d = document.documentElement;
+    var theme = localStorage.getItem('kps-theme');
+    d.setAttribute('data-theme', (theme === 'zoro' || theme === 'luffy' || theme === 'news' || theme === 'shanks') ? theme : 'shanks');
+    var mode = localStorage.getItem('kps-mode');
+    if(mode === 'light' || mode === 'dark'){
+      d.setAttribute('data-mode', mode);
+    }
+    var ui = localStorage.getItem('kps-ui');
+    if(ui === 'brutal'){
+      d.setAttribute('data-ui', 'brutal');
     }
   }catch(e){}
 })();
@@ -151,6 +166,8 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-theme="shanks"
+      data-ui="default"
       suppressHydrationWarning
       className={`${archivoBlack.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
     >

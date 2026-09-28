@@ -78,9 +78,9 @@ export default function Nav() {
         <div className="nav-grid">
           <Link href="/" className="nav-cell nav-cell-logo" aria-label="Kumar Prasannajit Sahu, home">
             <span className="nav-logo-swap">
-              {/* Both theme variants are rendered and CSS shows the right
+              {/* Both mode variants are rendered and CSS shows the right
                   one (.theme-dark-only / .theme-light-only), so the first
-                  paint already matches data-theme instead of waiting for
+                  paint already matches data-mode instead of waiting for
                   useTheme's effect to flip a src. */}
               <Image
                 src="/darkmode.png"
