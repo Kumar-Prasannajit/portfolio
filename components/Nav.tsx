@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,24 +14,43 @@ import {
   IconResume,
   IconThemeCircle,
 } from "./icons";
-import TaglineCycler from "./TaglineCycler";
+import PaneTitle from "./PaneTitle";
 import NowPlayingWidget from "./NowPlayingWidget";
 import { NAV_LINKS, SOCIAL_LINKS, type NavLink } from "@/lib/data";
 import { useTheme } from "@/lib/useTheme";
+import { useActiveSection, type SectionId } from "@/lib/useActiveSection";
 import { useCommandPalette } from "./CommandPaletteContext";
 
 // In-page sections ("/#work") stay plain anchors: HomeShell's click handler
 // scrolls to them in the page's single scroller, and from another route they
 // load "/" and jump. Separate routes (/blog, /weekly) navigate client-side.
-function NavLinkItem({ link, onClick }: { link: NavLink; onClick?: () => void }) {
-  const content = link.label;
+// Which link marks where you are: a route link by pathname, an in-page one by
+// the section under the nav. Home owns the stretch above About (hero, ticker,
+// activity). Sections with no link of their own (Stack, Experience, Contact)
+// light nothing rather than a neighbour that would be wrong.
+function isLinkActive(href: string, pathname: string, section: SectionId) {
+  if (href === "/") return pathname === "/" && (section === "top" || section === "activity");
+  if (href.startsWith("/#")) return pathname === "/" && section === href.slice(2);
+  return pathname === href || pathname.startsWith(href + "/");
+}
+
+function NavLinkItem({
+  link,
+  active,
+  onClick,
+}: {
+  link: NavLink;
+  active: boolean;
+  onClick?: () => void;
+}) {
+  const current = active ? ("page" as const) : undefined;
   return link.href.startsWith("/#") ? (
-    <a href={link.href} onClick={onClick}>
-      {content}
+    <a href={link.href} onClick={onClick} aria-current={current}>
+      {link.label}
     </a>
   ) : (
-    <Link href={link.href} onClick={onClick}>
-      {content}
+    <Link href={link.href} onClick={onClick} aria-current={current}>
+      {link.label}
     </Link>
   );
 }
@@ -39,6 +59,8 @@ export default function Nav() {
   const { toggleTheme } = useTheme();
   const { isOpen: paletteOpen, toggle: togglePalette } = useCommandPalette();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const section = useActiveSection();
 
   // Mobile drawer: Escape closes it, and — since it's a fixed-position
   // overlay rather than a normal document flow element — resizing past
@@ -121,13 +143,13 @@ export default function Nav() {
           </Link>
 
           <div className="nav-cell nav-cell-top nav-cell-main">
-            <TaglineCycler />
+            <PaneTitle />
           </div>
           <div className="nav-cell nav-cell-bottom nav-cell-main">
             <ul className="nav-links">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
-                  <NavLinkItem link={link} />
+                  <NavLinkItem link={link} active={isLinkActive(link.href, pathname, section)} />
                 </li>
               ))}
             </ul>
@@ -258,7 +280,11 @@ export default function Nav() {
                   <ul>
                     {NAV_LINKS.map((link) => (
                       <li key={link.href}>
-                        <NavLinkItem link={link} onClick={() => setMobileMenuOpen(false)} />
+                        <NavLinkItem
+                          link={link}
+                          active={isLinkActive(link.href, pathname, section)}
+                          onClick={() => setMobileMenuOpen(false)}
+                        />
                       </li>
                     ))}
                   </ul>

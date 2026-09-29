@@ -410,10 +410,58 @@ Follow-ups:
   buttons are code-reviewed, not exercised in a browser.
 
 ## Phase 7 — Work feed (middle column)
-Status: not started
+Status: done
+Commit: (pending — committed together with this file)
+Decisions:
+- **Feed scope: projects only** (open decision 1 default; nav untouched). `lib/feed.ts` defines
+  `FeedItem` as a discriminated union (project/blog/weekly/gallery) so other kinds can be added
+  without changing the grid; `projectsToFeed` is the only producer today.
+- **Three columns, mixed footprints** (wide = 2 cols, tall = 2 rows, small) cycled by position,
+  with frames cycling fill / outline / invert — all from `--accent-solid`/`--ink`/`--bg`, no new
+  hues. Collapses to one column at <=720px.
+- **Duotone** is pure CSS: greyscale screenshot `mix-blend-mode: multiply` over an `--accent`
+  background, so it re-themes with no per-theme rule.
+- **Tag filter row with counts** (`tagCounts`, same `tags` the Stack section aggregates) writes to
+  the existing `useStackFilter` store, so Stack tools and feed chips are one control.
+- **Date chip only when a real date exists** — GitHub `pushed_at` (extracted to `lib/pushedAt.ts`,
+  shared with `Stack.tsx`) or `Project.lastWorked`. Manima (private repo) shows none.
+- Old `.work-grid`/`.work-card*` CSS replaced by `.feed-*`; new CSS uses the border/radius/display
+  tokens so brutal mode applies.
+Deviated:
+- With only 3 projects the grid is sparse (row 2 holds one card and the tall card stretches).
+  It fills out as projects are added.
+Follow-ups:
+- Phase 10: 375px/768px check, keyboard pass over the filter chips, contrast of chip text on
+  fill/invert frames across all themes.
+Verified: `tsc`, `eslint`, `next build` clean; dev server at 1440px shows wide/tall/small cards with
+duotone shots, no console errors. Filter click-through not exercised in a browser.
 
 ## Phase 8 — Header and nav
-Status: DEFERRED — do not implement without an explicit go-ahead (see spec section 10).
+Status: done (go-ahead given by the user in-session; spec section 10 had it deferred)
+Commit: (pending — not yet committed; the working tree still holds uncommitted phase 7 work)
+Decisions:
+- **All three spec ideas built.** Touches the protected header on purpose, per the go-ahead.
+- **Two strips merged into one.** The nav's typing tagline (`TaglineCycler.tsx`, deleted) and the
+  ticker band are now one live telemetry strip, `components/Marquee.tsx` (kept its name/position
+  under the hero). Segments: LAST COMMIT (age · repo), WATCHING (title · EP n / total), contributions
+  per year, BUILD status, interleaved with two old quips (`NAV_TAGLINES[2]`, `[3]`). Data comes from
+  the shared `useRailStats` store, so no extra request. A failed/unconfigured source drops its
+  segment instead of leaving a hole. `MARQUEE_ITEMS` (the static brand copy) removed.
+- **Pane title** (`components/PaneTitle.tsx`) takes the cell the tagline vacated: `~/kumar/about.md` →
+  `stack.json` → `work/` etc. on home, `~/kumar/blog/` etc. on other routes. Rewrites with the
+  existing scramble-settle; real value in an sr-only copy.
+- **Scroll tracking:** `lib/useActiveSection.ts`, one rAF-throttled window scroll listener shared
+  by the nav and the title.
+- **Nav active state:** `aria-current="page"` + an accent rule under the label (text stays neutral).
+  Stack, Experience and Contact have no nav link, so nothing lights there rather than a wrong neighbour.
+  Drawer links get the same state.
+Deviated:
+- Contribution count is the static `GH_COUNTS` snapshot total, not a live GitHub call.
+- WATCHING is absent until `ANILIST_USERNAME` is set.
+Follow-ups:
+- Phase 10: reduced-motion and the mobile drawer active state are not exercised in a browser.
+Verified: `tsc`, `eslint`, `next build` clean; live dev check: title and active link followed
+scroll through top/about/stack/work/contact, strip rendered real segments, no console errors.
 
 ## Phase 9 — Commit-graph game
 Status: not started (blocked on open decision 4 below)

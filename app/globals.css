@@ -62,8 +62,6 @@
      may diverge again later, not because the face itself differs today. */
   --font-accent: var(--font-ibm-plex-mono), "SFMono-Regular", Consolas,
     monospace;
-  /* The nav's typewriter tagline — same plain face as nav links now. */
-  --font-tagline: var(--font-body);
 }
 
 /* ---- neutrals: light mode ---- */
@@ -408,7 +406,7 @@ html.custom-cursor-active [contenteditable="true"] {
 }
 /* "Blink only when idle... starts blinking after ~2s stationary, exactly
    like a real caret." A hard on/off cut (steps), not a fade — matches the
-   nav's own .typewriter-cursor blink further down. */
+   header line's old typewriter caret did. */
 .custom-cursor-shape.is-idle {
   animation: cursor-caret-blink 1000ms steps(1, end) infinite;
 }
@@ -709,78 +707,30 @@ header.site-nav {
 .nav-cell-top.nav-cell-main {
   display: flex;
   align-items: center;
-  /* Left-anchored, not centered — a typewriter effect needs a fixed
-     starting edge to grow from; re-centering on every keystroke would
-     make the whole line jump around instead of reading as typed. */
+  /* Left-anchored: the path grows from a fixed edge as it rewrites. */
   justify-content: flex-start;
   overflow: hidden;
 }
-.nav-tagline {
+.nav-pane-title {
   margin: 0;
   padding: 0 14px;
-  font-family: var(--font-tagline);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   line-height: 1;
   font-weight: 600;
   letter-spacing: 0.03em;
-  word-spacing: 0.08em;
-  /* No text-transform — case is authored per line (see NAV_TAGLINES),
-     since "sudo make it happen" is deliberately lowercase. */
   color: var(--ink-dim);
   text-align: left;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-/* A slim bar caret. It doesn't fade in/out; it hard-cuts (steps(1))
-   between two solid colors, like a retro terminal cursor: ink↔red while
-   idle, and while a line is actively being typed/deleted it holds solid
-   red — a little "recording" cue that reads the same in either theme,
-   since --accent is itself theme-aware. */
-.typewriter-cursor {
-  display: inline-block;
-  width: 0.16em;
-  height: 0.85em;
-  margin-left: 4px;
-  background: var(--ink);
-  vertical-align: -0.1em;
-  animation: cursor-cycle-dark 900ms steps(1, end) infinite;
-}
-@media (prefers-color-scheme: light) {
-  :root:not([data-mode="dark"]) .typewriter-cursor {
-    animation-name: cursor-cycle-light;
-  }
-}
-:root[data-mode="light"] .typewriter-cursor {
-  animation-name: cursor-cycle-light;
-}
-:root[data-mode="dark"] .typewriter-cursor {
-  animation-name: cursor-cycle-dark;
-}
-.typewriter-cursor.is-typing {
-  animation: none;
-  background: var(--accent);
-}
-/* Dark theme: cycles white (--ink resolves near-white here) ↔ red. */
-@keyframes cursor-cycle-dark {
-  0%,
-  49.9% {
-    background: var(--ink);
-  }
-  50%,
-  100% {
-    background: var(--accent);
-  }
-}
-/* Light theme: cycles black (--ink resolves near-black here) ↔ red —
-   mirrors the dark theme's ink/red pairing instead of black/white. */
-@keyframes cursor-cycle-light {
-  0%,
-  49.9% {
-    background: var(--ink);
-  }
-  50%,
-  100% {
-    background: var(--accent);
-  }
+.nav-pane-title .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 /* Links row shares its cell with the command trigger, pinned to the
    right edge — both sit inside the tagline/links box, not a column
@@ -817,8 +767,23 @@ header.site-nav {
   font-weight: 500;
   transition: color 0.15s ease;
 }
-.nav-links a:hover {
+.nav-links a:hover,
+.nav-links a[aria-current] {
   color: var(--ink);
+}
+/* Active item: a rule under the label, the one place the accent shows up in
+   the links (the text itself stays a neutral token). */
+.nav-links a {
+  position: relative;
+}
+.nav-links a[aria-current]::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 0;
+  height: var(--border-width);
+  background: var(--accent-solid);
 }
 
 /* ⌘ hint, right-aligned in the nav-links row — one bordered container,
@@ -1278,9 +1243,13 @@ header.site-nav {
     color 0.15s ease,
     background 0.15s ease;
 }
-.nav-mobile-links a:hover {
+.nav-mobile-links a:hover,
+.nav-mobile-links a[aria-current] {
   color: var(--ink);
   background: var(--panel-2);
+}
+.nav-mobile-links a[aria-current] {
+  box-shadow: inset var(--border-width) 0 0 var(--accent-solid);
 }
 .nav-mobile-gif {
   height: 160px;
@@ -1783,7 +1752,7 @@ html[data-boot="done"] .boot {
     transform: translateX(calc(var(--marquee-ramp-shift) - 50%));
   }
 }
-.marquee-track span {
+.marquee-track > span {
   font-family: var(--font-mono);
   font-weight: 600;
   font-size: 0.92rem;
@@ -1794,7 +1763,7 @@ html[data-boot="done"] .boot {
   align-items: center;
   gap: 28px;
 }
-.marquee-track span::after {
+.marquee-track > span::after {
   content: "✶";
   opacity: 0.7;
   font-size: 0.8em;
@@ -3192,18 +3161,143 @@ html.lenis {
   }
 }
 
-/* ============ WORK SECTION ============ */
-/* WorkSection.tsx: the in-flow list behind /#work. One stretched link per
-   card, so the whole card is clickable. */
-.work-grid {
+/* ============ WORK FEED ============ */
+/* WorkGrid.tsx (phase 7): three columns, mixed footprints, one hue. Frame
+   treatment (fill / outline / invert) and size vary per card; screenshots are
+   duotoned into --accent so four different sites read as one set. One
+   stretched link per card. */
+.feed-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.feed-chip,
+.feed-chip-static {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: var(--border-width) solid var(--border);
+  border-radius: calc(var(--radius) / 2);
+  padding: 4px 9px;
+  color: var(--ink-dim);
+  background: none;
+}
+.feed-chip {
+  min-height: 32px;
+  cursor: pointer;
+}
+.feed-chip-n {
+  color: var(--ink-faint);
+  margin-left: 4px;
+}
+.feed-chip[aria-pressed="true"] {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  border-color: var(--accent-solid);
+}
+.feed-chip[aria-pressed="true"] .feed-chip-n {
+  color: inherit;
+}
+.feed-chip:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.feed-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-flow: dense;
+  gap: 16px;
+  margin-top: 20px;
 }
-.work-card {
+.feed-card {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: var(--border-width) solid var(--border-2);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--ink);
 }
-.work-card-link {
+.feed-card[data-size="wide"] {
+  grid-column: span 2;
+}
+.feed-card[data-size="tall"] {
+  grid-row: span 2;
+}
+.feed-card[data-frame="fill"] {
+  background: var(--accent-solid);
+  border-color: var(--accent-solid);
+  color: var(--accent-ink);
+}
+.feed-card[data-frame="invert"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+.feed-card[data-frame="outline"] {
+  background: transparent;
+}
+.feed-shot {
+  position: relative;
+  flex: none;
+  aspect-ratio: 3 / 2;
+  background: var(--accent);
+  overflow: hidden;
+}
+.feed-card[data-size="wide"] .feed-shot {
+  aspect-ratio: 16 / 9;
+}
+.feed-card[data-size="tall"] .feed-shot {
+  aspect-ratio: 4 / 5;
+}
+/* Duotone: greyscale multiplied onto the accent, so whites become the accent
+   and blacks stay black. Re-themes with no per-theme rule. */
+.feed-shot img {
+  object-fit: cover;
+  object-position: top;
+  filter: grayscale(1) contrast(1.15);
+  mix-blend-mode: multiply;
+}
+.feed-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+}
+.feed-meta,
+.feed-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.feed-card[data-frame="fill"] .feed-chip-static,
+.feed-card[data-frame="invert"] .feed-chip-static {
+  color: inherit;
+  border-color: currentColor;
+}
+.feed-title {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  letter-spacing: var(--tracking-display);
+  text-transform: uppercase;
+  font-size: 1.35rem;
+  line-height: 1.05;
+  margin: 0;
+}
+.feed-card[data-size="wide"] .feed-title {
+  font-size: 1.8rem;
+}
+.feed-summary {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: inherit;
+  opacity: 0.85;
+}
+.feed-link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -3212,18 +3306,31 @@ html.lenis {
   font-family: var(--font-mono);
   font-size: 0.8rem;
   font-weight: 500;
-  color: var(--ink);
+  color: inherit;
   text-decoration: none;
 }
-.work-card-link::after {
+.feed-link::after {
   content: "";
   position: absolute;
   inset: 0;
 }
-.work-card:hover .work-card-link {
-  color: var(--accent);
+.feed-card:hover {
+  box-shadow: var(--shadow);
 }
-.work-card:has(.work-card-link:focus-visible) {
+.feed-card:has(.feed-link:focus-visible) {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
+}
+@media (max-width: 720px) {
+  .feed-grid {
+    grid-template-columns: 1fr;
+  }
+  .feed-card[data-size="wide"],
+  .feed-card[data-size="tall"] {
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .feed-card[data-size="tall"] .feed-shot {
+    aspect-ratio: 16 / 9;
+  }
 }

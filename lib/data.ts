@@ -13,8 +13,8 @@ export const NAV_LINKS: readonly NavLink[] = [
   { href: "/gallery", label: "Gallery" },
 ];
 
-// Rotates in the nav's tagline slot via a GSAP letter-scatter transition
-// (see components/TaglineCycler.tsx). Case is intentional per-line — most
+// Quips. Two of them ride in the live telemetry strip (components/Marquee.tsx).
+// Case is intentional per-line — most
 // are all-caps but "console.log" reads as an actual code identifier, so
 // it stays lowercase.
 export const NAV_TAGLINES = [
@@ -281,15 +281,6 @@ export const PLACES: { name: string; note: string }[] = [
   { name: "New York", note: "To see if it's really as fast-paced as the memes say" },
   { name: "Bali", note: "Coding from a beach, at least once, for the plot" },
 ];
-
-export const MARQUEE_ITEMS = [
-  "MERN STACK",
-  "REACT · NODE.JS · EXPRESS · MONGODB",
-  "01001011 01010000 01010011",
-  "POSTGRESQL · REDIS · TAILWIND",
-  "BACKEND-LEANING FULL-STACK",
-  "BUILT IN HYDERABAD, INDIA",
-] as const;
 
 export const HERO_BINARY = "01001011 01010000 01010011 01000100 01000101 01010110";
 
