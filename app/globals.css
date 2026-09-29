@@ -2732,6 +2732,23 @@ html.lenis {
 .ident-img {
   object-fit: cover;
   object-position: 55% 38%;
+  transition: filter 400ms ease;
+}
+/* The portrait's red is the shanks baseline; the other themes recolour it
+   with a filter. Follows the live data-theme, so hover previews it too. */
+:root[data-theme="zoro"] .ident-img {
+  filter: hue-rotate(115deg) saturate(1.1);
+}
+:root[data-theme="luffy"] .ident-img {
+  filter: hue-rotate(28deg) saturate(1.25) brightness(1.05);
+}
+:root[data-theme="news"] .ident-img {
+  filter: grayscale(1) contrast(1.1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ident-img {
+    transition: none;
+  }
 }
 /* Faint scanlines tie the photo to the site's hatched, pixel look. */
 .ident-photo::after {
