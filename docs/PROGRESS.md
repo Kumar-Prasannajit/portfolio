@@ -365,7 +365,49 @@ Follow-ups:
   browser; screen-reader pass on the sr-only variable copy not done.
 
 ## Phase 6 — Stack section
-Status: not started
+Status: done
+Commit: (pending — committed together with this file)
+Decisions:
+- **Computed, not typed.** `lib/stack.ts#computeStack` aggregates `PROJECTS[].tags` (the data the
+  Work cards render) into `{ name, count, lastUsed, weight }`, top 10. `STACK_GROUPS` and its
+  categories deleted. `/specs` keeps its own `.stack-group`/`.pill` CSS (it never used the data).
+- **Ranking = project count, then position in a project's own tag list (primary tools first), then
+  project order.** Recency is display-only. My first cut ranked by recency and silently sank every
+  Manima-only tool (Node.js, Express, MongoDB) because Manima has no date — for a backend-leaning
+  profile that was the wrong result, so recency no longer affects rank. Result today: React (2),
+  then Next.js, HTML, Node.js, CSS, Express, TypeScript, JavaScript, MongoDB, Tailwind CSS.
+  Cut by the size limit: JWT, Razorpay, Particle.js, Lenis, Swiper.js. Git/Postman are gone
+  simply because they aren't project tags.
+- **"Last used" from GitHub** (answered with the user): `components/Stack.tsx` (server) reads
+  `pushed_at` for each project's Source-link repo, `revalidate: 3600`, optional `GITHUB_TOKEN`. A
+  tool's last-used is the newest date among its projects; if none known the segment is omitted.
+  `Project.lastWorked` (new, optional) overrides it. `pushed_at` is a proxy — any push bumps it,
+  not just work that used the tool.
+- **The ranking animation:** server HTML is the finished ranked state. After mount, if the board
+  starts below the fold (and not reduced-motion), it swaps to a flat equal-weight row in an
+  unrelated (alphabetical) order, then GSAP Flip re-ranks it once on entry (`power4.out`, 0.9s,
+  0.05s stagger); counts scramble-settle via `ScrambleText active`. Weight drives size through one
+  CSS var (`--w`, forced to 0 while flat).
+- **Relative time is client-only** (`useSyncExternalStore` mounted flag) — the page is prerendered,
+  so "2mo ago" in the HTML would mismatch on hydration.
+- **Filter store `lib/useStackFilter.ts`** (in-memory, `useSyncExternalStore`). Tools are real
+  `<button aria-pressed>`s. The current Work cards moved into a client `WorkGrid` that filters by
+  tag and shows "Showing n of m · show all". This is deliberately minimal so the control isn't
+  dead before phase 7; phase 7 replaces the grid and keeps the hook.
+- **Learning-now row** is driven by `LEARNING_NOW` in `lib/data.ts`, pulse dot 2.8s (off under
+  reduced motion). It is **empty, so the row is hidden** — the user said they'd name the tools but
+  hadn't yet. Nothing invented.
+- **Opinion lines (open decision 3): skipped** — optional in the spec and unanswered; not written.
+- CSS consumes `--border-width`/`--radius`/display-font tokens; accent is border/selection only
+  (selected tool uses the `--accent-solid`/`--accent-ink` pair, like BRUTAL).
+Deviated:
+- The spec's "React · 4 projects" shape can't reach that scale: there are only 3 projects, so
+  counts are 1–2 and only React reads as "heavy". Sizes will differentiate more as projects are added.
+Follow-ups:
+- TODO(content): fill `LEARNING_NOW`; set `lastWorked` on Manima (private repo).
+- Phase 7 owns the real feed; keep `useStackFilter` and the `tags` matching.
+- Phase 10: reduced-motion path (no flat row, counts instant) and keyboard pass over the tool
+  buttons are code-reviewed, not exercised in a browser.
 
 ## Phase 7 — Work feed (middle column)
 Status: not started

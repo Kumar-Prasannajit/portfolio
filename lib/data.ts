@@ -50,24 +50,11 @@ export const SOCIAL_LINKS = {
   email: "kumarprasannajitsahu@gmail.com",
 } as const;
 
-export const STACK_GROUPS = [
-  {
-    label: "Languages & Frontend",
-    items: ["JavaScript", "TypeScript", "React", "Next.js", "Tailwind CSS"],
-  },
-  {
-    label: "Backend & APIs",
-    items: ["Node.js", "Express.js", "REST APIs", "JWT Auth"],
-  },
-  {
-    label: "Data & Infra",
-    items: ["MongoDB", "PostgreSQL", "Redis", "Docker"],
-  },
-  {
-    label: "Tooling & Payments",
-    items: ["Git & GitHub", "Razorpay", "Vercel", "Postman"],
-  },
-] as const;
+// The Stack section's "learning now" row (phase 6) — the one hand-written part,
+// since a tool being learned hasn't shipped in a project yet. Empty hides the
+// row entirely rather than showing invented tools.
+//   TODO(content): name the tools currently being learned.
+export const LEARNING_NOW: readonly string[] = [];
 
 export const EXPERIENCE = [
   {
@@ -110,6 +97,11 @@ export type Project = {
   summary: string;
   description: string;
   tags: readonly string[];
+  // ISO date of last real work. Overrides the GitHub push date the Stack
+  // section otherwise reads from the Source link; the only way a project with
+  // no public repo (Manima) gets a "last used".
+  //   TODO(content): set for Manima.
+  lastWorked?: string;
   links: readonly ProjectLink[];
   sourceNote?: string;
   // --- case study ---
@@ -246,8 +238,8 @@ export const PROJECTS: readonly Project[] = [
   },
 ];
 
-// /specs page. Same shape as STACK_GROUPS (label + pill items) so the page
-// reuses Stack.tsx's exact pill-row rendering. Machine/OS/Editor rows are
+// /specs page. Label + pill items, rendered with the .stack-group/.pill-row
+// classes (globals.css). Machine/OS/Editor rows are
 // the real thing (pulled from the dev machine via PowerShell) — swap them
 // if you switch rigs. Peripherals can't be detected from code, so those
 // are placeholder jokes; replace with your actual gear whenever.

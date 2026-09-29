@@ -1,9 +1,9 @@
-import Link from "next/link";
+import WorkGrid from "./WorkGrid";
 import { PROJECTS } from "@/lib/data";
 
 // The in-flow "Work" section: the real target of the nav's and ⌘K's /#work.
 // (The right-hand ticker is ambient — it loops and can't be scrolled to.)
-// Each card is one stretched link to that project's /work/[slug] page.
+// Cards live in WorkGrid so the Stack section's tool filter can narrow them.
 export default function WorkSection() {
   return (
     <section className="section band alt" id="work">
@@ -13,32 +13,15 @@ export default function WorkSection() {
         </div>
         <h2 className="h2">Selected projects</h2>
         <div style={{ height: 28 }}></div>
-        <div className="work-grid">
-          {PROJECTS.map((project) => (
-            <article className="card work-card" key={project.slug}>
-              <div className="card-top">
-                <h3>{project.title}</h3>
-                <span className="tag">{project.badge}</span>
-              </div>
-              <p>{project.summary}</p>
-              <div className="card-tags">
-                {project.tags.map((tag) => (
-                  <span className="tag" key={tag}>
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              <Link
-                href={`/work/${project.slug}`}
-                className="work-card-link"
-                data-cursor="View"
-                aria-label={`${project.title}: view project`}
-              >
-                View project <span aria-hidden="true">→</span>
-              </Link>
-            </article>
-          ))}
-        </div>
+        <WorkGrid
+          projects={PROJECTS.map(({ slug, title, badge, summary, tags }) => ({
+            slug,
+            title,
+            badge,
+            summary,
+            tags,
+          }))}
+        />
       </div>
     </section>
   );
