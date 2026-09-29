@@ -358,7 +358,6 @@ html.custom-cursor-active [contenteditable="true"] {
   cursor: text;
 }
 .custom-cursor {
-  will-change: transform;
   position: fixed;
   top: 0;
   left: 0;
@@ -366,7 +365,16 @@ html.custom-cursor-active [contenteditable="true"] {
   height: 0;
   pointer-events: none;
   z-index: 9999;
+  /* The blend has to live on this outer, position: fixed element: it is its
+     own stacking context, so a mix-blend-mode on the inner shape only ever
+     blended against the (empty) wrapper — i.e. painted plain white over the
+     nav item instead of inverting it. */
+  mix-blend-mode: difference;
   transition: opacity 150ms ease;
+}
+/* Tinted / labelled states are true colours, not inversions. */
+.custom-cursor:has(.is-tinted, .is-labelled) {
+  mix-blend-mode: normal;
 }
 .custom-cursor.is-hidden {
   opacity: 0;
@@ -379,7 +387,6 @@ html.custom-cursor-active [contenteditable="true"] {
   height: 22px;
   border-radius: 0;
   background: #ffffff;
-  mix-blend-mode: difference;
   --cursor-scale: 1;
   transform: translate(-50%, -50%) scale(var(--cursor-scale));
   will-change: transform;
@@ -474,7 +481,6 @@ html.custom-cursor-active [contenteditable="true"] {
   border: none;
   border-radius: 3px;
   background: #ffffff;
-  mix-blend-mode: difference;
   transform: none;
   clip-path: circle(var(--morph-r, 0px) at var(--morph-x, 50%) var(--morph-y, 50%));
   transition: clip-path 380ms cubic-bezier(0.22, 1, 0.36, 1);
