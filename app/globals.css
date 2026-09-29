@@ -333,14 +333,13 @@ main:focus {
        the red contact block, and all 16 theme combinations with zero
        per-theme work (this is the same trick the nav morph reveal below
        already used; the base cursor now shares it).
-     - true blink only when idle (.is-idle, driven by a 2s inactivity
-       timer in CustomCursor.tsx), not the old always-on colour cycle.
+     - a transparent white square that follows the pointer exactly (no
+       grid snapping, no idle blink — both made it hard to find/laggy).
      - two nested elements: .custom-cursor (outer) is positioned purely
-       via `transform: translate()` inside a rAF loop — never top/left —
-       snapped to an 8px grid so it steps like a caret instead of
-       gliding; .custom-cursor-shape (inner) carries every visual state
-       (size, tint, blink, morph) so its own transition never fights the
-       outer element's un-eased position updates. */
+       via `transform: translate3d()` inside a rAF loop — never top/left;
+       .custom-cursor-shape (inner) carries every visual state (scale,
+       tint, morph) so its own transition never fights the outer element's
+       un-eased position updates. */
 html.custom-cursor-active,
 html.custom-cursor-active * {
   cursor: none;
@@ -359,6 +358,7 @@ html.custom-cursor-active [contenteditable="true"] {
   cursor: text;
 }
 .custom-cursor {
+  will-change: transform;
   position: fixed;
   top: 0;
   left: 0;
@@ -375,50 +375,28 @@ html.custom-cursor-active [contenteditable="true"] {
   position: absolute;
   left: 0;
   top: 0;
-  width: 4px;
-  height: 20px;
-  border-radius: 1px;
+  width: 22px;
+  height: 22px;
+  border-radius: 0;
   background: #ffffff;
   mix-blend-mode: difference;
   --cursor-scale: 1;
   transform: translate(-50%, -50%) scale(var(--cursor-scale));
-  transition:
-    width 150ms ease,
-    height 150ms ease,
-    border-radius 150ms ease,
-    transform 150ms ease,
-    background-color 150ms ease;
+  will-change: transform;
+  transition: transform 120ms ease;
 }
 /* "Slightly larger over anything clickable" — the resting shape above is
    the thin caret; this is the one state it grows into. */
 .custom-cursor-shape.is-hovering {
-  width: 20px;
-  height: 20px;
-  border-radius: 3px;
+  --cursor-scale: 1.5;
 }
 /* "Quick shrink on mousedown." Only touches the scale custom property, so
    it composes with is-hovering/is-tinted's own width/height/background
    instead of overriding them, and .is-morphed's explicit `transform: none`
    below still wins outright while a nav section is active. */
 .custom-cursor-shape.is-pressed {
-  --cursor-scale: 0.55;
+  --cursor-scale: 0.7;
   transition-duration: 80ms;
-}
-/* "Blink only when idle... starts blinking after ~2s stationary, exactly
-   like a real caret." A hard on/off cut (steps), not a fade — matches the
-   header line's old typewriter caret did. */
-.custom-cursor-shape.is-idle {
-  animation: cursor-caret-blink 1000ms steps(1, end) infinite;
-}
-@keyframes cursor-caret-blink {
-  0%,
-  49% {
-    opacity: 1;
-  }
-  50%,
-  100% {
-    opacity: 0;
-  }
 }
 /* Theme accordion panels (RailThree.tsx): "tinted to the theme colour...
    so the cursor itself previews the palette" — a literal colour preview,

@@ -53,18 +53,9 @@ const ACCORDION_SELECTOR = ".rail3-accordion-panel[data-swatch]";
 const MORPH_SELECTOR =
   ".nav-grid a:not(.nav-command-menu *), .nav-grid button:not(.nav-command-menu *)";
 
-// Phase 4 (docs/redesign-spec.md): "move in discrete steps aligned to the
-// monospace grid (one `ch`, or 8px)". A caret steps; it does not glide —
-// this only quantizes where the fake block is *drawn*, never the real
-// pointer position browsers hit-test against, so it has no effect on
-// click precision, only on how the follow motion reads.
-const GRID_STEP = 8;
-function snap(value: number) {
-  return Math.round(value / GRID_STEP) * GRID_STEP;
-}
-
-// "Starts blinking after ~2s stationary, exactly like a real caret."
-const IDLE_DELAY = 2000;
+// The block follows the pointer exactly (no grid snapping, no idle blink):
+// snapping made it feel like it lagged, and blinking made it vanish half the
+// time when the pointer sat still.
 
 export default function CustomCursor() {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -96,22 +87,10 @@ export default function CustomCursor() {
     let morphed = false;
     let morphedEl: HTMLElement | null = null;
     let overTextInput = false;
-    let idleTimerId = 0;
-
-    function scheduleIdle() {
-      window.clearTimeout(idleTimerId);
-      shape?.classList.remove("is-idle");
-      idleTimerId = window.setTimeout(() => {
-        // Never blink mid-morph — the block is a clip-revealed overlay on
-        // the nav section there, not a caret, and an opacity flash would
-        // fight that reveal instead of reading as "idle".
-        if (!morphed) shape?.classList.add("is-idle");
-      }, IDLE_DELAY);
-    }
 
     function positionAt(x: number, y: number) {
       if (!wrap) return;
-      wrap.style.transform = `translate(${snap(x)}px, ${snap(y)}px)`;
+      wrap.style.transform = `translate3d(${x}px, ${y}px, 0)`;
     }
 
     function onMove(event: MouseEvent) {
@@ -129,7 +108,6 @@ export default function CustomCursor() {
       // here too — unless it's currently sitting over a text field, where
       // the real system caret is doing the job instead.
       if (!overTextInput) wrap?.classList.remove("is-hidden");
-      scheduleIdle();
       // While morphed onto a nav section, position is pinned to that
       // section's own rect, not the mouse — a magnetic snap, not a follow.
       if (morphed) return;
@@ -163,7 +141,6 @@ export default function CustomCursor() {
       const rect = el.getBoundingClientRect();
       morphed = true;
       morphedEl = el;
-      shape.classList.remove("is-idle");
       // Difference-blending white against this design's red accents lands
       // on an off-palette cyan (255-224≈31, 255-48≈207, 255-58≈197) — so
       // while the cursor is over them, neutralize red to ink first, which
@@ -326,7 +303,6 @@ export default function CustomCursor() {
       document.removeEventListener("mouseleave", onLeaveWindow);
       document.removeEventListener("mouseenter", onEnterWindow);
       if (rafId) cancelAnimationFrame(rafId);
-      window.clearTimeout(idleTimerId);
     };
   }, []);
 
