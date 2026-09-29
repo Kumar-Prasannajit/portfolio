@@ -26,7 +26,7 @@ const THEME_LABELS: Record<CharacterTheme, string> = {
   shanks: "SHANKS",
   zoro: "ZORO",
   luffy: "LUFFY",
-  news: "NEWS",
+  news: "SANJI",
 };
 
 // Spec: "active panel expands to ~200px at full rail width; the other three

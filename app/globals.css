@@ -3112,30 +3112,38 @@ html.lenis {
 .rail3-accordion-texture {
   position: absolute;
   inset: 0;
-  opacity: 0.16;
-  transition: opacity 400ms ease;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.55;
+  filter: grayscale(0.6);
+  transition: opacity 400ms ease, filter 400ms ease;
 }
 .rail3-accordion-panel.is-active .rail3-accordion-texture,
 .rail3-accordion-panel:hover .rail3-accordion-texture {
-  opacity: 0.34;
+  opacity: 1;
+  filter: none;
 }
-/* One abstract, dithered pattern per character — never artwork (spec:
-   "someone else's IP on a public site") — tinted from that theme's own
-   --swatch-* identity token (see ACCORDION IDENTITY SWATCHES near the top
-   of this file) rather than the live --accent, so all four stay visible in
-   their own colour regardless of which theme is currently active. */
+/* Character artwork per panel (public/<name>.jpg). The news theme's panel
+   uses sanji.jpg. A bottom scrim keeps the label readable over any image. */
 .rail3-accordion-panel[data-swatch="shanks"] .rail3-accordion-texture {
-  background-image: repeating-linear-gradient(45deg, var(--swatch-shanks) 0 2px, transparent 2px 7px);
+  background-image: url("/shanks.jpg");
 }
 .rail3-accordion-panel[data-swatch="zoro"] .rail3-accordion-texture {
-  background-image: repeating-linear-gradient(-45deg, var(--swatch-zoro) 0 2px, transparent 2px 7px);
+  background-image: url("/zoro.jpg");
 }
 .rail3-accordion-panel[data-swatch="luffy"] .rail3-accordion-texture {
-  background-image: radial-gradient(var(--swatch-luffy) 1.4px, transparent 1.4px);
-  background-size: 10px 10px;
+  background-image: url("/luffy.jpg");
 }
 .rail3-accordion-panel[data-swatch="news"] .rail3-accordion-texture {
-  background-image: repeating-linear-gradient(90deg, var(--swatch-news) 0 1px, transparent 1px 4px);
+  background-image: url("/sanji.jpg");
+}
+.rail3-accordion-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.55), transparent 60%);
+  pointer-events: none;
 }
 /* Rotated 90°, reading bottom-to-top — the vertical-rl + rotate(180deg)
    trick, wider-supported than writing-mode: sideways-lr. Sized to fit the
@@ -3149,11 +3157,13 @@ html.lenis {
   transform: rotate(180deg);
   font-size: 0.62rem;
   letter-spacing: 0.14em;
-  color: var(--ink-faint);
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
   white-space: nowrap;
+  z-index: 1;
 }
 .rail3-accordion-panel.is-active .rail3-accordion-label {
-  color: var(--ink);
+  color: #fff;
   font-weight: 700;
 }
 
