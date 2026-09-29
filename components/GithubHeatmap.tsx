@@ -1,3 +1,4 @@
+import CommitSnake from "./CommitSnake";
 import { IconExternalLink } from "./icons";
 import { RevealGroup, RevealItem } from "./Reveal";
 import { GH_COUNTS, GH_START, SOCIAL_LINKS } from "@/lib/data";
@@ -92,6 +93,7 @@ function buildWeeks(): Week[] {
 export default function GithubHeatmap() {
   const weeks = buildWeeks();
   const total = GH_COUNTS.reduce((a, b) => a + b, 0);
+  const commitCells = GH_COUNTS.flatMap((n, i) => (n > 0 ? [i] : []));
 
   return (
     <section className="band gh-band" id="activity">
@@ -156,6 +158,11 @@ export default function GithubHeatmap() {
             </div>
           </RevealItem>
           <RevealItem className="gh-legend">
+            <CommitSnake
+              cols={weeks.length}
+              total={GH_COUNTS.length}
+              commitCells={commitCells}
+            />
             Less
             <span className="gh-cell" style={{ background: "var(--heat-0)" }}></span>
             <span className="gh-cell" style={{ background: "var(--heat-1)" }}></span>

@@ -464,7 +464,31 @@ Verified: `tsc`, `eslint`, `next build` clean; live dev check: title and active 
 scroll through top/about/stack/work/contact, strip rendered real segments, no console errors.
 
 ## Phase 9 — Commit-graph game
-Status: not started (blocked on open decision 4 below)
+Status: done (open decision 4 approved by the user in-session)
+Commit: (pending — committed together with this file)
+Decisions:
+- **Additive only.** `components/CommitSnake.tsx` (client) renders just a `▶ PLAY` button in the
+  legend row of `GithubHeatmap` (left side, `margin-right: auto`), so the header row, cells, copy
+  and data are untouched. The old AUTO pill was removed in phase 2, so the button is styled like
+  BRUTAL (mono, tracked, token border/radius; accent pair while pressed).
+- **Plays on the real cells.** No second grid: the game toggles `is-snake` / `is-trail` / `is-food`
+  classes on the server-rendered `.gh-cell` nodes (`!important`, since heat colours are inline).
+  Quitting removes every class, so idle == today's graph exactly. Snake = solid accent, trail =
+  accent tint (squares stay lit where it passed), food = hollow square — distinct even in `news`.
+- **Food spawns on days with real commits** (falls back to any free cell). Edges wrap; hitting
+  itself or the missing tail of the partial last week ends the run. Speed 130ms -> 70ms floor.
+- **Never autostarts. Keys are claimed only while focus is inside the graph card** (arrows/WASD
+  `preventDefault` only then; verified arrows are not captured when focus is elsewhere). Esc, a click
+  outside the card, tab hidden, or the graph scrolling out of view restores the graph. Game-over
+  keeps the board until one of those, or `▶ AGAIN`.
+- **High score** in `localStorage` (`kps-snake-best`), read when a run starts (no setState-in-effect).
+- **Mobile: hidden** (`<1024px` or `pointer: coarse`) rather than a cramped swipe version.
+- Original shapes only; no motion beyond the game's own steps.
+Follow-ups:
+- Phase 10: keyboard pass and reduced-motion (game is player-driven and has no easing, so nothing
+  animates on its own) not exercised beyond DOM-dispatched key events; check all 4 themes visually.
+Verified: `tsc`, `eslint`, `next build` clean; live at 1440px: start/steer/trail/quit/restore and
+no-capture-when-unfocused confirmed via the real DOM; screenshot shows snake, trail and food.
 
 ## Phase 10 — QA pass
 Status: not started
@@ -481,5 +505,4 @@ Unanswered as of phase 1 (spec section 13) — resolve before the phase that nee
 2. ~~**Rail width (phase 2).**~~ **Answered in phase 2: 240px minimum.** See that phase's
    Decisions above.
 3. **Opinion lines (phase 6).** Worth writing ten of them, or skip?
-4. **The game (phase 9).** Adding a play control to the protected contribution graph — approve,
-   or drop the game?
+4. ~~**The game (phase 9).**~~ **Answered: approved.** See phase 9 above.

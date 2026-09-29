@@ -2414,6 +2414,69 @@ html[data-boot="done"] .boot {
   --cell: 10px;
 }
 
+/* Commit-graph game. Idle = the graph exactly as before; only the PLAY
+   button exists. While a run is active the classes below are toggled on the
+   real cells (!important because each cell's heat colour is an inline style).
+   Snake is solid accent, the trail it leaves is a tint of it, food is a
+   hollow square — three states that stay distinct even in the `news` theme,
+   where the accent is the ink itself. */
+.gh-game {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: auto;
+}
+.gh-play {
+  min-height: 32px;
+  padding: 0 12px;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--ink-dim);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+.gh-play:hover {
+  color: var(--ink);
+}
+.gh-play[aria-pressed="true"] {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+}
+.gh-score {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+.gh-game .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.gh-weeks .gh-cell.is-trail {
+  background: color-mix(in srgb, var(--accent-solid) 40%, var(--panel)) !important;
+}
+.gh-weeks .gh-cell.is-snake {
+  background: var(--accent-solid) !important;
+}
+.gh-weeks .gh-cell.is-food {
+  background: var(--panel) !important;
+  outline: 2px solid var(--accent-solid);
+  outline-offset: -2px;
+}
+/* Small screens: the graph scrolls sideways and there are no arrow keys, so
+   the game is hidden rather than shipped cramped. */
+@media (max-width: 1023px), (pointer: coarse) {
+  .gh-game {
+    display: none;
+  }
+}
+
 /* ============ CONTACT ============ */
 .contact-band {
   background: var(--accent-solid);
