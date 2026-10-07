@@ -3518,3 +3518,605 @@ html.lenis {
     aspect-ratio: 16 / 9;
   }
 }
+
+/* ============ BRUTAL MODE COMPONENTS ============ */
+/* The look of redblack (docs/superpowers/specs/2026-10-08-brutal-reskin-design.md)
+   on the three-pane's own class names. Everything is scoped to
+   [data-ui="brutal"], so normal mode is untouched, and every colour comes
+   from the BRUTAL MODE tokens above: no literal colours, and nothing here
+   names a theme or a mode. Rules that must flip between a black block on
+   the primary page (dark) and a primary block on a white page (light) use
+   the --accent-solid / --accent-ink pair, which already means "surface" and
+   "text on it". */
+
+/* ---- page, frame, focus ---- */
+:root[data-ui="brutal"] {
+  scrollbar-color: var(--ink) var(--bg);
+}
+:root[data-ui="brutal"] body {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--hatch) 0,
+    var(--hatch) 2px,
+    transparent 2px,
+    transparent 13px
+  );
+}
+/* Full-bleed section rules take the thick stroke. */
+:root[data-ui="brutal"] :is(.band, .contact-band, .marquee-band, footer)::before,
+:root[data-ui="brutal"] :is(.marquee-band, header.site-nav)::after {
+  height: var(--bw-thick);
+}
+/* Every square corner, including the literal radii the base rules carry. */
+:root[data-ui="brutal"]
+  :is(
+    .meta-chip,
+    .btn,
+    .btn-icon,
+    .pill,
+    .term-card,
+    .tag,
+    .card,
+    .card-badge,
+    .gallery-item,
+    .place-card,
+    .tdot,
+    .pulse-dot
+  ) {
+  border-radius: var(--radius);
+}
+:root[data-ui="brutal"] .tl-item::before {
+  border-radius: var(--radius);
+}
+
+/* ---- nav: solid, thick bottom rule, ruled cells ---- */
+:root[data-ui="brutal"] header.site-nav {
+  background: var(--bg);
+  backdrop-filter: none;
+}
+:root[data-ui="brutal"] .nav-cell {
+  border-right: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .nav-cell-social {
+  border-right: none;
+}
+:root[data-ui="brutal"] .nav-cell-bottom {
+  border-top: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] :is(.nav-command, .np-nav) {
+  border-left: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .nav-cell-top.nav-cell-social a {
+  border-left: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .nav-cell-top.nav-cell-social a:first-child {
+  border-left: none;
+}
+/* The logo is a flat black mark on the page in both modes. */
+:root[data-ui="brutal"] .nav-logo-img {
+  filter: brightness(0);
+}
+:root[data-ui="brutal"] .nav-logo-img-hover {
+  display: none;
+}
+:root[data-ui="brutal"] .nav-cell-logo:hover,
+:root[data-ui="brutal"] .nav-mobile-logo:hover {
+  opacity: 1;
+  box-shadow: inset 0 0 0 var(--bw-thin) var(--line);
+}
+:root[data-ui="brutal"] .nav-links a {
+  color: var(--ink);
+  font-weight: 600;
+}
+:root[data-ui="brutal"] .nav-links a:hover {
+  box-shadow: inset 0 0 0 var(--bw-thin) var(--line);
+}
+/* Current page: a solid block, not just a colour change. */
+:root[data-ui="brutal"] .nav-links a[aria-current] {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  box-shadow: inset 0 0 0 var(--bw-thin) var(--line);
+}
+:root[data-ui="brutal"] .nav-links a[aria-current]::after {
+  display: none;
+}
+/* Icon cells: ink at rest, a solid block on hover/focus, and a hard inset
+   shadow when pressed (they sit in a ruled grid, so they cannot translate
+   like .btn does). The shadow and the focus ring use the block's own text
+   colour so they stay visible on it in both modes. */
+:root[data-ui="brutal"]
+  :is(
+    .nav-cmd-trigger,
+    .theme-toggle-btn,
+    .nav-hamburger-btn,
+    .np-btn,
+    .np-btn-mobile,
+    .nav-cell-top.nav-cell-social a
+  ) {
+  color: var(--ink);
+}
+:root[data-ui="brutal"]
+  :is(
+    .nav-cmd-trigger,
+    .theme-toggle-btn,
+    .nav-hamburger-btn,
+    .np-btn,
+    .np-btn-mobile,
+    .nav-cell-top.nav-cell-social a
+  ):is(:hover, :focus-visible) {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+}
+:root[data-ui="brutal"]
+  :is(
+    .nav-cmd-trigger,
+    .theme-toggle-btn,
+    .nav-hamburger-btn,
+    .np-btn,
+    .np-btn-mobile,
+    .nav-cell-top.nav-cell-social a
+  ):focus-visible {
+  outline-color: var(--accent-ink);
+  outline-offset: -6px;
+}
+:root[data-ui="brutal"]
+  :is(
+    .nav-cmd-trigger,
+    .theme-toggle-btn,
+    .nav-hamburger-btn,
+    .np-btn,
+    .np-btn-mobile,
+    .nav-cell-top.nav-cell-social a
+  ):active {
+  box-shadow: inset var(--off-sm) var(--off-sm) 0 0 var(--accent-ink);
+}
+:root[data-ui="brutal"] .nav-cmd-trigger:is(:hover, :focus-visible) .nav-cmd-kbd {
+  color: inherit;
+}
+:root[data-ui="brutal"] .np-btn:is(:hover, :focus-visible) .np-live-dot {
+  background: var(--accent-ink);
+}
+/* The nav's cursor morph (a diff-blend box in dark, a clipped wash in light)
+   is a different mode's look; brutal answers hover with the solid block
+   above, so the morph pieces are switched off. */
+:root[data-ui="brutal"] .custom-cursor-shape.is-morphed,
+:root[data-ui="brutal"] .cursor-invert-target::before {
+  display: none;
+}
+:root[data-ui="brutal"] .cursor-invert-target,
+:root[data-ui="brutal"] .cursor-invert-target svg,
+:root[data-ui="brutal"] .cursor-invert-target .nav-cmd-kbd {
+  filter: none;
+}
+:root[data-ui="brutal"] .nav-cell-top.nav-cell-social a.cursor-invert-target svg {
+  filter: none;
+}
+/* The nav's decorative strip: flattened to greys, multiplied by the page. */
+:root[data-ui="brutal"] :is(.nav-hatch, .nav-mobile-gif) {
+  position: relative;
+  filter: grayscale(1) contrast(1.15);
+}
+:root[data-ui="brutal"] :is(.nav-hatch, .nav-mobile-gif)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--panel);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* Now-playing popover. */
+:root[data-ui="brutal"] .np-pop {
+  border: var(--border-width) solid var(--line);
+  box-shadow: var(--shadow);
+}
+:root[data-ui="brutal"] .np-art {
+  border: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .np-link {
+  color: var(--ink);
+  font-weight: 700;
+  border-bottom: var(--bw-thin) solid var(--line);
+}
+
+/* Mobile nav bar and drawer. */
+:root[data-ui="brutal"] .nav-mobile-bar {
+  border: var(--border-width) solid var(--line);
+  min-height: calc(44px + 2 * var(--border-width));
+}
+:root[data-ui="brutal"] .nav-mobile-actions {
+  border-left: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .nav-mobile-actions .theme-toggle-btn,
+:root[data-ui="brutal"] .np-btn-mobile {
+  border-right: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .nav-mobile-drawer {
+  border-left: var(--border-width) solid var(--line);
+}
+:root[data-ui="brutal"] .nav-mobile-links {
+  border-bottom: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .nav-mobile-links li + li {
+  border-top: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .nav-mobile-links a {
+  color: var(--ink);
+}
+:root[data-ui="brutal"] .nav-mobile-links a:hover,
+:root[data-ui="brutal"] .nav-mobile-links a[aria-current] {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  box-shadow: none;
+}
+
+/* ---- side panels: ruled with the thick stroke ---- */
+:root[data-ui="brutal"] .term-head {
+  border-bottom: var(--border-width) solid var(--line);
+}
+:root[data-ui="brutal"] .term-head .tdot {
+  background: var(--ink);
+}
+:root[data-ui="brutal"] .ident-photo {
+  border-bottom: var(--border-width) solid var(--line);
+}
+:root[data-ui="brutal"] .stat + .stat {
+  border-top: var(--border-width) solid var(--line);
+}
+/* The accent tile is an emphasis block: the tokens are re-bound inside it
+   so every descendant (numerals, labels, the clock colon) reads on it. */
+:root[data-ui="brutal"] .stat-red {
+  background: var(--accent-solid);
+  --ink: var(--accent-ink);
+  --accent: var(--accent-ink);
+  --ink-dim: color-mix(in srgb, var(--accent-ink) 88%, var(--accent-solid));
+  --ink-faint: var(--ink-dim);
+}
+@media (min-width: 1024px) {
+  :root[data-ui="brutal"] .side-left {
+    border-left: var(--border-width) solid var(--line);
+  }
+  :root[data-ui="brutal"] .side-right {
+    border-right: var(--border-width) solid var(--line);
+  }
+  /* Same height as the nav and the same thick rule under it, so the three
+     columns still share one header line. */
+  :root[data-ui="brutal"] .panel-head {
+    border-bottom: var(--bw-thick) solid var(--line);
+  }
+}
+@media (max-width: 1023px) {
+  :root[data-ui="brutal"] .side-left {
+    border-bottom: var(--border-width) solid var(--line);
+  }
+  :root[data-ui="brutal"] .side-left .ident-photo {
+    border-right: var(--border-width) solid var(--line);
+  }
+  :root[data-ui="brutal"] .side-left .stat + .stat {
+    border-left: var(--border-width) solid var(--line);
+  }
+  :root[data-ui="brutal"] .side-right {
+    border-top: var(--border-width) solid var(--line);
+  }
+}
+
+/* ---- rail 3 ---- */
+:root[data-ui="brutal"] .rail3-ascii-frame {
+  opacity: 1;
+}
+:root[data-ui="brutal"] .rail3-stat-value {
+  color: var(--ink);
+}
+:root[data-ui="brutal"] .rail3-brutal {
+  color: var(--ink);
+}
+:root[data-ui="brutal"] .rail3-brutal[aria-pressed="true"] {
+  color: var(--accent-ink);
+}
+:root[data-ui="brutal"] .rail3-brutal:active {
+  box-shadow: inset var(--off-sm) var(--off-sm) 0 0 var(--accent-ink);
+}
+
+/* ---- hero and buttons ---- */
+/* An accent word is a solid chip, not coloured text (the tint cannot be read
+   as text on white). */
+:root[data-ui="brutal"] .hero h1 .l2 {
+  display: inline-block;
+  padding: 0.04em 0.1em 0;
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+}
+:root[data-ui="brutal"] .meta-chip {
+  border: var(--bw-thin) solid var(--line);
+  color: var(--ink);
+  font-weight: 600;
+}
+:root[data-ui="brutal"] .btn {
+  border: var(--border-width) solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  font-weight: 700;
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+:root[data-ui="brutal"] .btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: calc(var(--off) + 2px) calc(var(--off) + 2px) 0 0
+    var(--shadow-color);
+}
+/* Pressable: the button travels into its own shadow. */
+:root[data-ui="brutal"] .btn:active {
+  transform: translate(var(--off-sm), var(--off-sm));
+  box-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ui="brutal"] .btn,
+  :root[data-ui="brutal"] .btn:hover,
+  :root[data-ui="brutal"] .btn:active {
+    transform: none;
+    transition: none;
+  }
+}
+:root[data-ui="brutal"] .btn-primary,
+:root[data-ui="brutal"] .btn-primary:hover {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+}
+:root[data-ui="brutal"] .btn-icon {
+  color: var(--ink);
+}
+
+/* ---- headings, eyebrows, chips ---- */
+:root[data-ui="brutal"] .h2 {
+  display: inline-block;
+  padding-bottom: 6px;
+  border-bottom: var(--bw-thick) solid var(--line);
+}
+:root[data-ui="brutal"] .eyebrow {
+  color: var(--ink);
+}
+:root[data-ui="brutal"] .eyebrow .idx {
+  padding: 1px 7px;
+  background: var(--accent-solid);
+  border: var(--bw-thin) solid var(--line);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+:root[data-ui="brutal"] .eyebrow::after {
+  height: var(--bw-thin);
+  background: var(--line);
+}
+:root[data-ui="brutal"] .about-var {
+  border-bottom: var(--bw-thin) dashed var(--line);
+}
+:root[data-ui="brutal"] :is(.pill, .tag) {
+  border: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .pill {
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+:root[data-ui="brutal"] .pill:hover {
+  border-color: var(--line);
+  transform: translate(-2px, -2px);
+}
+:root[data-ui="brutal"] .card-badge,
+:root[data-ui="brutal"] .place-idx,
+:root[data-ui="brutal"] .tl-org,
+:root[data-ui="brutal"] .gh-total span {
+  display: inline-block;
+  padding: 1px 8px;
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+:root[data-ui="brutal"] .card-badge {
+  border: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .tl-org span {
+  color: inherit;
+}
+
+/* ---- stack ---- */
+:root[data-ui="brutal"] .stack-tool {
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+:root[data-ui="brutal"] .stack-tool:hover {
+  border-color: var(--line);
+  transform: translate(-2px, -2px);
+  box-shadow: calc(var(--off-sm) + 2px) calc(var(--off-sm) + 2px) 0 0
+    var(--shadow-color);
+}
+/* Selected: filled, and pushed into its shadow. */
+:root[data-ui="brutal"] .stack-tool[aria-pressed="true"] {
+  border-color: var(--line);
+  transform: translate(var(--off-sm), var(--off-sm));
+  box-shadow: none;
+}
+:root[data-ui="brutal"] .stack-learning {
+  border-top: var(--bw-thin) dashed var(--line);
+}
+
+/* ---- experience ---- */
+:root[data-ui="brutal"] .tl::before {
+  left: 4px;
+  width: var(--bw-thin);
+  background: var(--line);
+}
+:root[data-ui="brutal"] .tl-item::before {
+  border: var(--bw-thin) solid var(--line);
+}
+
+/* ---- cards ---- */
+:root[data-ui="brutal"] :is(.card, .place-card, .term-card) {
+  border: var(--border-width) solid var(--line);
+  box-shadow: var(--shadow);
+}
+:root[data-ui="brutal"] :is(.card, .place-card) {
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+:root[data-ui="brutal"] :is(.card, .place-card):hover {
+  border-color: var(--line);
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-lg);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ui="brutal"] :is(.card, .place-card):hover {
+    transform: none;
+  }
+}
+:root[data-ui="brutal"] .gallery-item {
+  border: var(--border-width) solid var(--line);
+  box-shadow: var(--shadow-sm);
+}
+:root[data-ui="brutal"] :is(.card-links a, .gh-link) {
+  border-bottom: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] :is(.card-links a, .gh-link, .foot-inner a):hover {
+  background: var(--accent-solid);
+  border-color: var(--line);
+  color: var(--accent-ink);
+}
+
+/* ---- work feed ---- */
+:root[data-ui="brutal"] :is(.feed-chip, .feed-chip-static) {
+  border-width: var(--bw-thin);
+  border-color: var(--line);
+  color: var(--ink);
+}
+:root[data-ui="brutal"] .feed-chip {
+  background: var(--panel);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+:root[data-ui="brutal"] .feed-chip:hover {
+  transform: translate(-2px, -2px);
+}
+:root[data-ui="brutal"] .feed-chip[aria-pressed="true"] {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  transform: translate(var(--off-sm), var(--off-sm));
+  box-shadow: none;
+}
+:root[data-ui="brutal"] .feed-card {
+  border-color: var(--line);
+  box-shadow: var(--shadow);
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+:root[data-ui="brutal"] .feed-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-lg);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ui="brutal"] .feed-card:hover {
+    transform: none;
+  }
+}
+:root[data-ui="brutal"] .feed-card:is([data-frame="fill"], [data-frame="invert"]) {
+  border-color: var(--line);
+}
+:root[data-ui="brutal"]
+  .feed-card:is([data-frame="fill"], [data-frame="invert"])
+  .feed-chip-static {
+  color: inherit;
+  border-color: currentColor;
+}
+/* Screenshots are greyscale multiplied onto a bright fill, so the fill has
+   to be the tint itself (the accent is ink here, and ink x grey is black). */
+:root[data-ui="brutal"] .feed-shot {
+  background: var(--primary);
+  border-bottom: var(--border-width) solid var(--line);
+}
+
+/* ---- contribution graph ---- */
+:root[data-ui="brutal"] .gh-play {
+  box-shadow: var(--shadow-sm);
+  color: var(--ink);
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+:root[data-ui="brutal"] .gh-play[aria-pressed="true"] {
+  color: var(--accent-ink);
+  transform: translate(var(--off-sm), var(--off-sm));
+  box-shadow: none;
+}
+:root[data-ui="brutal"] .gh-weeks .gh-cell.is-snake {
+  outline: var(--bw-thin) solid var(--accent-ink);
+  outline-offset: -2px;
+}
+:root[data-ui="brutal"] .gh-weeks .gh-cell.is-food {
+  outline-color: var(--line);
+}
+
+/* ---- contact band: an emphasis block, so its own lines, shadows and
+   buttons are re-bound to the block's text colour (black would vanish on it
+   in dark mode). The stroke tokens are re-declared here because a custom
+   property that references another is resolved where it is declared. ---- */
+:root[data-ui="brutal"] .contact-band {
+  --line: var(--accent-ink);
+  --shadow-color: var(--accent-ink);
+}
+:root[data-ui="brutal"] .contact-band {
+  --border: var(--line);
+  --border-2: var(--line);
+  --line-strong: var(--line);
+  --shadow-sm: var(--off-sm) var(--off-sm) 0 0 var(--shadow-color);
+  --shadow: var(--off) var(--off) 0 0 var(--shadow-color);
+  --shadow-lg: var(--off-lg) var(--off-lg) 0 0 var(--shadow-color);
+}
+:root[data-ui="brutal"] .contact-band .eyebrow {
+  color: var(--accent-ink);
+  opacity: 1;
+}
+:root[data-ui="brutal"] .contact-band .eyebrow::after {
+  background: var(--accent-ink);
+}
+:root[data-ui="brutal"] .contact-band .eyebrow .idx {
+  background: var(--accent-ink);
+  border-color: var(--accent-ink);
+  color: var(--accent-solid);
+}
+:root[data-ui="brutal"] .contact-band .btn-primary,
+:root[data-ui="brutal"] .contact-band .btn-primary:hover {
+  background: var(--accent-ink);
+  color: var(--accent-solid);
+}
+:root[data-ui="brutal"] .contact-band .btn-ghost,
+:root[data-ui="brutal"] .contact-band .btn-icon,
+:root[data-ui="brutal"] .contact-band .btn-ghost:hover,
+:root[data-ui="brutal"] .contact-band .btn-icon:hover {
+  background: var(--accent-solid);
+  border-color: var(--line);
+  color: var(--accent-ink);
+}
+
+/* ---- cursor: a square that does not blend (a difference blend would turn
+   the primary page cyan/magenta). Tinted and labelled states keep their own
+   look. ---- */
+:root[data-ui="brutal"] .custom-cursor {
+  mix-blend-mode: normal;
+}
+:root[data-ui="brutal"]
+  .custom-cursor-shape:not(.is-tinted, .is-labelled, .is-morphed) {
+  background: var(--ink);
+  border: var(--bw-thin) solid var(--bg);
+}
+:root[data-ui="brutal"] .custom-cursor-shape.is-tinted {
+  border: var(--bw-thin) solid var(--line);
+}
