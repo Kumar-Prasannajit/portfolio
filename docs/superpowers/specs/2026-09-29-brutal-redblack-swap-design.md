@@ -1,3 +1,14 @@
+> **SUPERSEDED (2026-10-08).** Do not implement this spec. The swap approach
+> (a `proxy.ts` rewrite of `/` to `/rb`, a cookie, an `(rb)` route group and
+> `components/rb/*`) was rejected: it replaces the whole page with the
+> `redblack` branch, which deletes rail 3's content and ignores the selected
+> character theme. The user wants a re-skin, not a swap: BRUTAL keeps the same
+> DOM and components, recoloured and re-bordered by tokens under
+> `[data-ui="brutal"]`, following the current character theme and light/dark
+> mode. See `docs/superpowers/specs/2026-10-08-brutal-reskin-design.md`.
+> The plan `docs/superpowers/plans/2026-09-29-brutal-redblack-swap.md` is
+> superseded with it.
+
 # Brutal mode = the `redblack` UI (design spec)
 
 Date: 2026-09-29 · Branch: `redesign-three-pane` · Status: draft for review
