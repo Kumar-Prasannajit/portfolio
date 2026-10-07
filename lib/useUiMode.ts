@@ -4,7 +4,9 @@
 // to rail 3's BRUTAL button (phase 3). Deliberately the simplest of the
 // three theme hooks — no preview/commit split like useCharacterTheme, no
 // View Transitions wave like useTheme: "the brutal toggle snaps with no
-// transition — the hard cut is intentional," so this is just a flip.
+// transition — the hard cut is intentional," so this is just a flip. BRUTAL
+// re-colours the page, and colour changes normally crossfade (~200ms), so
+// data-ui-cut holds every transition off for the two frames around the flip.
 
 import { useCallback, useEffect, useState } from "react";
 
@@ -20,6 +22,12 @@ export function useUiMode() {
     setBrutal((wasBrutal) => {
       const next = !wasBrutal;
       const root = document.documentElement;
+      root.setAttribute("data-ui-cut", "");
+      // The flip lands in the next style recalc; lift the cut once that has
+      // painted, so palette changes crossfade again afterwards.
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => root.removeAttribute("data-ui-cut"))
+      );
       if (next) {
         root.setAttribute("data-ui", "brutal");
       } else {
