@@ -3105,7 +3105,12 @@ html.lenis {
    with the accordion in its one real state — always exactly one panel
    expanded: 96 (ascii min) + 168 (3x56 stats) + 344 (200 + 3x48 accordion) +
    52 (brutal) = 660px, under the 681px budget the worst-case ~87px nav
-   height leaves at 768px total. */
+   height leaves at 768px total.
+   BRUTAL mode re-measured at 1600x768 (where the nav is tallest): rows keep
+   their fixed heights (border-box, so thicker rules cost nothing inside
+   them), the accordion's own top rule grows 1px -> 3px (+2px) and the thick
+   nav rules make the nav ~92px, leaving 676px. 96 + 168 + 347 + 52 = 663px,
+   13px of slack; the ASCII block measured 109px (min 96), overflow 0. */
 .rail3 {
   flex: 1;
   min-height: 0;
