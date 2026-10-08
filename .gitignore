@@ -46,3 +46,6 @@ next-env.d.ts
 
 # agent worktrees
 /.worktrees
+
+# local agent files (skills, scratch screenshots/baselines)
+/.claude/
