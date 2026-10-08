@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { githubHeaders } from "@/lib/githubHeaders";
 
 // Rail 3's three Stats rows (docs/redesign-spec.md phase 3): WATCHING (AniList
 // public GraphQL), LAST COMMIT and UPTIME (GitHub REST). One route so the
@@ -34,18 +35,6 @@ export type RailStatsResponse = {
   lastCommit: LastCommitStat;
   uptime: UptimeStat;
 };
-
-function githubHeaders() {
-  const headers: Record<string, string> = {
-    Accept: "application/vnd.github+json",
-  };
-  // Optional: raises the unauthenticated 60/hr rate limit to 5000/hr. Public
-  // read-only data either way — see .env.example.
-  if (process.env.GITHUB_TOKEN) {
-    headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
-  }
-  return headers;
-}
 
 async function fetchWatching(): Promise<WatchingStat> {
   const username = process.env.ANILIST_USERNAME;

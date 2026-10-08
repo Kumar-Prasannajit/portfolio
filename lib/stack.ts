@@ -1,6 +1,6 @@
 // Phase 6: the Stack section is computed from project data, never hand-typed
-// (docs/redesign-spec.md section 8). Pure and client-safe — the GitHub fetch
-// lives in components/Stack.tsx, this only aggregates.
+// (docs/redesign-spec.md section 8). Pure and client-safe — the GitHub fetches
+// live in lib/pushedAt.ts and lib/githubActivity.ts, this only aggregates.
 
 import type { Project } from "./data";
 
@@ -8,7 +8,7 @@ export type StackTool = {
   name: string;
   /** Projects that shipped with it. */
   count: number;
-  /** Most recent activity across those projects (ISO), when any is known. */
+  /** Most recent activity for it (ISO), when any is known — see computeStack. */
   lastUsed: string | null;
   /** 0..1, relative to the heaviest tool. Drives rendered size. */
   weight: number;
@@ -17,10 +17,24 @@ export type StackTool = {
 /** Roughly ten, per the spec. */
 export const STACK_SIZE = 10;
 
+/** The later of two ISO dates; either may be missing. */
+function later(a: string | null | undefined, b: string | null | undefined) {
+  if (!a) return b ?? null;
+  if (!b) return a;
+  return Date.parse(b) > Date.parse(a) ? b : a;
+}
+
 /**
- * Aggregate `tags` across projects. `dates` maps project slug -> ISO date of
- * last activity; a project with no known date still counts, it just can't
- * contribute a "last used" (so that segment is omitted rather than guessed).
+ * Aggregate `tags` across projects. The board is always the projects' tags:
+ * `activity` only adds dates to tools already on it.
+ *
+ * "Last used" for a tool is the latest of: `activity[tool]` (the owner's
+ * newest push to any repo that uses it — lib/githubActivity.ts), and across
+ * the projects that list it, `lastWorked` or else `dates[slug]` (that project's
+ * Source repo push date). Any of them may be missing; with none, the segment
+ * is omitted rather than guessed. A tool that shows up in `activity` but in no
+ * project is ignored: the board indexes the Work feed (spec section 8), and an
+ * entry with 0 projects would filter Work to nothing.
  *
  * Ranking: more projects first, then earlier in a project's own tag list (its
  * primary tools), then project order — deterministic. Recency is display-only:
@@ -30,6 +44,7 @@ export const STACK_SIZE = 10;
 export function computeStack(
   projects: readonly Project[],
   dates: Readonly<Record<string, string | undefined>>,
+  activity: Readonly<Record<string, string | undefined>> = {},
   size = STACK_SIZE,
 ): StackTool[] {
   const byName = new Map<
@@ -47,7 +62,7 @@ export function computeStack(
       }
       seen.count += 1;
       seen.tagIndex = Math.min(seen.tagIndex, tagIndex);
-      if (when && (!seen.lastUsed || when > seen.lastUsed)) seen.lastUsed = when;
+      seen.lastUsed = later(seen.lastUsed, when);
     });
   });
 
@@ -63,7 +78,7 @@ export function computeStack(
   return ranked.map(({ name, count, lastUsed }) => ({
     name,
     count,
-    lastUsed,
+    lastUsed: later(lastUsed, activity[name]),
     weight: max === 1 ? 0 : (count - 1) / (max - 1),
   }));
 }

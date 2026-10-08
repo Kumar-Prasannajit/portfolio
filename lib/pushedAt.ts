@@ -1,17 +1,15 @@
-// Last push date of a public GitHub repo ("org/repo"), shared by the Stack
-// section ("last used") and the Work feed (date chip). Fetched at build and
-// revalidated hourly; a GitHub outage or rate limit just yields undefined.
+// Last push date of one GitHub repo ("org/repo"): the Work feed's date chip,
+// and one input to the Stack section's "last used" (the showcased project's
+// Source repo — the rest of that comes from lib/githubActivity.ts). Fetched at
+// build and revalidated hourly; a GitHub outage or rate limit just yields
+// undefined.
+
+import { githubHeaders } from "./githubHeaders";
 
 export async function pushedAt(repo: string): Promise<string | undefined> {
   try {
-    const headers: Record<string, string> = {
-      Accept: "application/vnd.github+json",
-    };
-    if (process.env.GITHUB_TOKEN) {
-      headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
-    }
     const res = await fetch(`https://api.github.com/repos/${repo}`, {
-      headers,
+      headers: githubHeaders(),
       next: { revalidate: 3600 },
     });
     if (!res.ok) return undefined;
