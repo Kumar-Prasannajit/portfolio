@@ -55,7 +55,9 @@
   --tracking-display: -0.01em;
 
   --font-display: var(--font-archivo-black), "Arial Black", sans-serif;
-  --font-body: var(--font-ibm-plex-sans), -apple-system, "Segoe UI", sans-serif;
+  /* System stack: IBM Plex Sans was dropped because Google's variable-width
+     build of it fails `next build` under Turbopack (font-stretch faces). */
+  --font-body: -apple-system, "Segoe UI", sans-serif;
   --font-mono: var(--font-ibm-plex-mono), "SFMono-Regular", Consolas, monospace;
   /* Same face as --font-mono (IBM Plex Mono) — kept as its own token
      since it's a distinct semantic slot (nav tagline/links accent) that

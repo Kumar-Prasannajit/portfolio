@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Archivo_Black, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { Archivo_Black, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { SOCIAL_LINKS } from "@/lib/data";
 import {
@@ -27,13 +27,6 @@ const archivoBlack = Archivo_Black({
   subsets: ["latin"],
   weight: "400",
   variable: "--font-archivo-black",
-  display: "swap",
-});
-
-const ibmPlexSans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-ibm-plex-sans",
   display: "swap",
 });
 
@@ -169,7 +162,7 @@ export default function RootLayout({
       data-theme="shanks"
       data-ui="default"
       suppressHydrationWarning
-      className={`${archivoBlack.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
+      className={`${archivoBlack.variable} ${ibmPlexMono.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
