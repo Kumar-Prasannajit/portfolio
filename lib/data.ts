@@ -18,6 +18,7 @@ export const NAV_LINKS: readonly NavLink[] = [
 // after NAV_LINKS (components/Nav.tsx).
 export const MOBILE_EXTRA_LINKS: readonly NavLink[] = [
   { href: "/specs", label: "Specs" },
+  { href: "/places", label: "Places" },
 ];
 
 // Quips. Two of them ride in the live telemetry strip (components/Marquee.tsx).
