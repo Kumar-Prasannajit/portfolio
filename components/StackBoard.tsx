@@ -4,9 +4,10 @@
 // arrive already computed and ranked (lib/stack.ts). This adds the section's
 // signature move — it ranks itself: tools enter as a flat, equal-weight row,
 // then FLIP into their real sizes and order as the section scrolls into view,
-// once, with the counts scramble-settling as they land. The tiles are read-only:
-// clicking a tool no longer filters the Work feed, because the site doesn't show
-// every project, so "projects using X" would undercount.
+// once, with the "last used" dates scramble-settling as they land. The tiles
+// are read-only: clicking a tool no longer filters the Work feed, because the
+// site doesn't show every project, so "projects using X" would undercount.
+// For the same reason the tiles don't print the project count; it only ranks.
 //
 // Like About/Reveal, the server HTML is the finished, ranked state. Only after
 // mount, and only if the board starts below the fold (and not reduced-motion),
@@ -29,8 +30,6 @@ gsap.registerPlugin(Flip);
 const subscribeNever = () => () => {};
 const useMounted = () =>
   useSyncExternalStore(subscribeNever, () => true, () => false);
-
-const plural = (n: number) => `${n} project${n === 1 ? "" : "s"}`;
 
 export default function StackBoard({
   tools,
@@ -58,7 +57,7 @@ export default function StackBoard({
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced || board.getBoundingClientRect().top < window.innerHeight * FOLD) {
-      // Already visible, or motion is off: no ranking show, just land counts.
+      // Already visible, or motion is off: no ranking show, just land the dates.
       setCounted(true);
       return;
     }
@@ -106,19 +105,16 @@ export default function StackBoard({
               style={{ "--w": flat ? 0 : tool.weight } as React.CSSProperties}
             >
               <span className="sr-only">
-                {`${tool.name}, ${plural(tool.count)}${last ? `, last used ${last}` : ""}`}
+                {`${tool.name}${last ? `, last used ${last}` : ""}`}
               </span>
               <span className="stack-tool-name" aria-hidden="true">
                 {tool.name}
               </span>
+              {/* Only "last used": the project count still ranks the
+                  board but isn't shown. A no-break space holds the line
+                  until the date is known after mount, so tiles don't jump. */}
               <span className="stack-tool-meta" aria-hidden="true">
-                <ScrambleText value={plural(tool.count)} active={counted} />
-                {last ? (
-                  <span className="stack-tool-last">
-                    <span className="stack-tool-sep"> · </span>
-                    {`last used ${last}`}
-                  </span>
-                ) : null}
+                <ScrambleText value={last ? `last used ${last}` : "\u00a0"} active={counted} />
               </span>
             </div>
           );

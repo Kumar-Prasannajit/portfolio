@@ -2049,14 +2049,6 @@ html[data-boot="done"] .boot {
   .stack-tool[data-ranked] {
     grid-column: 1 / -1;
   }
-  /* A half-width tile would break the meta mid-phrase ("1 project · last" /
-     "used 19m ago"); "last used …" gets its own line and the dot goes. */
-  .stack-tool-last {
-    display: block;
-  }
-  .stack-tool-sep {
-    display: none;
-  }
 }
 .stack-filter-note {
   margin: 16px 0 0;
