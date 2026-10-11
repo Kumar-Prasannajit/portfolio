@@ -34,7 +34,7 @@ function later(a: string | null | undefined, b: string | null | undefined) {
  * Source repo push date). Any of them may be missing; with none, the segment
  * is omitted rather than guessed. A tool that shows up in `activity` but in no
  * project is ignored: the board indexes the Work feed (spec section 8), and an
- * entry with 0 projects would filter Work to nothing.
+ * entry reading "0 projects" would contradict it.
  *
  * Ranking: more projects first, then earlier in a project's own tag list (its
  * primary tools), then project order — deterministic. Recency is display-only:

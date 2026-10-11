@@ -3,14 +3,13 @@
 // Phase 7 (docs/redesign-spec.md section 9): the Work feed. Three columns,
 // mixed card sizes and frame treatments (fill / outline / invert — one hue),
 // screenshots duotoned into the accent, and a tag filter row with counts. The
-// filter is the same store the Stack section writes to
-// (lib/useStackFilter.ts), so picking a tool there or a tag here is one state.
+// filter is local to this feed: the Stack section no longer drives it.
 // Items are a discriminated union (lib/feed.ts) so blog/weekly/gallery can join.
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { frameAt, sizeAt, tagCounts, type FeedItem } from "@/lib/feed";
-import { setStackFilter, useStackFilter } from "@/lib/useStackFilter";
 
 const KIND_LABEL: Record<FeedItem["kind"], string> = {
   project: "Project",
@@ -25,7 +24,7 @@ const formatDate = (iso: string) =>
     .toUpperCase();
 
 export default function WorkGrid({ items }: { items: readonly FeedItem[] }) {
-  const filter = useStackFilter();
+  const [filter, setFilter] = useState<string | null>(null);
   const tags = tagCounts(items);
   const shown = filter ? items.filter((i) => i.tags.includes(filter)) : items;
 
@@ -36,7 +35,7 @@ export default function WorkGrid({ items }: { items: readonly FeedItem[] }) {
           type="button"
           className="feed-chip"
           aria-pressed={!filter}
-          onClick={() => setStackFilter(null)}
+          onClick={() => setFilter(null)}
         >
           All <span className="feed-chip-n">{items.length}</span>
         </button>
@@ -46,7 +45,7 @@ export default function WorkGrid({ items }: { items: readonly FeedItem[] }) {
             className="feed-chip"
             key={tag}
             aria-pressed={tag === filter}
-            onClick={() => setStackFilter(tag === filter ? null : tag)}
+            onClick={() => setFilter(tag === filter ? null : tag)}
           >
             {tag} <span className="feed-chip-n">{n}</span>
           </button>
@@ -57,7 +56,7 @@ export default function WorkGrid({ items }: { items: readonly FeedItem[] }) {
         {filter ? (
           <>
             Showing {shown.length} of {items.length} using {filter} ·{" "}
-            <button type="button" onClick={() => setStackFilter(null)}>
+            <button type="button" onClick={() => setFilter(null)}>
               show all
             </button>
           </>

@@ -7,7 +7,7 @@ import { githubRepo } from "@/lib/stack";
 // The in-flow "Work" section: the real target of the nav's and ⌘K's /#work.
 // (The right-hand ticker is ambient — it loops and can't be scrolled to.)
 // Phase 7: an editorial feed (WorkGrid) built from the same data as the Stack
-// section, so its tag filter and the Stack tool filter are one control.
+// section, with its own tag filter (the Stack tiles are read-only).
 export default async function WorkSection() {
   const dates: Record<string, string | undefined> = {};
   await Promise.all(

@@ -1994,8 +1994,8 @@ html[data-boot="done"] .boot {
 }
 
 /* Ranked stack (phase 6). --w is 0..1 tool weight, set inline; 0 for every
-   tool while the row is flat, so one rule covers both states. Accent only
-   marks borders/selection — text stays a neutral token. */
+   tool while the row is flat, so one rule covers both states. Tiles are
+   read-only (no hover or selected state); text stays a neutral token. */
 .stack-board {
   display: flex;
   flex-wrap: wrap;
@@ -2008,29 +2008,24 @@ html[data-boot="done"] .boot {
   flex-direction: column;
   gap: 5px;
   text-align: left;
-  font: inherit;
   color: var(--ink);
   background: var(--panel);
   border: var(--border-width) solid var(--border-2);
   border-radius: var(--radius);
   padding: calc(10px + var(--w) * 8px) calc(14px + var(--w) * 10px);
-  cursor: pointer;
   transition:
     border-color 0.15s ease,
     background-color 0.15s ease,
     color 0.15s ease;
 }
-.stack-tool:hover {
-  border-color: var(--accent);
-}
-.stack-tool:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-.stack-tool[aria-pressed="true"] {
-  background: var(--accent-solid);
-  border-color: var(--accent-solid);
-  color: var(--accent-ink);
+/* Read-only tiles: the spoken "name, N projects, last used" lives here. */
+.stack-tool .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .stack-tool-name {
   font-family: var(--font-display);
@@ -2045,15 +2040,11 @@ html[data-boot="done"] .boot {
   font-size: 0.7rem;
   color: var(--ink-faint);
 }
-.stack-tool[aria-pressed="true"] .stack-tool-meta {
-  color: inherit;
-}
 .stack-filter-note {
   margin: 16px 0 0;
   font-size: 0.76rem;
   color: var(--ink-faint);
 }
-.stack-filter-note a,
 .stack-filter-note button {
   font: inherit;
   color: var(--ink);
@@ -3941,22 +3932,8 @@ html.lenis {
 :root[data-ui="brutal"] .stack-tool {
   box-shadow: var(--shadow-sm);
   transition:
-    transform 0.1s,
-    box-shadow 0.1s,
     background-color 0.15s ease,
     color 0.15s ease;
-}
-:root[data-ui="brutal"] .stack-tool:hover {
-  border-color: var(--line);
-  transform: translate(-2px, -2px);
-  box-shadow: calc(var(--off-sm) + 2px) calc(var(--off-sm) + 2px) 0 0
-    var(--shadow-color);
-}
-/* Selected: filled, and pushed into its shadow. */
-:root[data-ui="brutal"] .stack-tool[aria-pressed="true"] {
-  border-color: var(--line);
-  transform: translate(var(--off-sm), var(--off-sm));
-  box-shadow: none;
 }
 :root[data-ui="brutal"] .stack-learning {
   border-top: var(--bw-thin) dashed var(--line);

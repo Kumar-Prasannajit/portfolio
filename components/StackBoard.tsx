@@ -4,8 +4,9 @@
 // arrive already computed and ranked (lib/stack.ts). This adds the section's
 // signature move — it ranks itself: tools enter as a flat, equal-weight row,
 // then FLIP into their real sizes and order as the section scrolls into view,
-// once, with the counts scramble-settling as they land — plus the click that
-// filters the Work feed (lib/useStackFilter.ts).
+// once, with the counts scramble-settling as they land. The tiles are read-only:
+// clicking a tool no longer filters the Work feed, because the site doesn't show
+// every project, so "projects using X" would undercount.
 //
 // Like About/Reveal, the server HTML is the finished, ranked state. Only after
 // mount, and only if the board starts below the fold (and not reduced-motion),
@@ -19,7 +20,6 @@ import ScrambleText from "./ScrambleText";
 import { formatRelativeTime } from "@/lib/format";
 import { FOLD } from "@/lib/motion";
 import type { StackTool } from "@/lib/stack";
-import { setStackFilter, useStackFilter } from "@/lib/useStackFilter";
 
 gsap.registerPlugin(Flip);
 
@@ -43,7 +43,6 @@ export default function StackBoard({
   const [flat, setFlat] = useState(false);
   const [counted, setCounted] = useState(false);
   const mounted = useMounted();
-  const filter = useStackFilter();
 
   // The flat row's order is deliberately unrelated to rank, so the FLIP
   // visibly re-sorts instead of only resizing.
@@ -89,26 +88,23 @@ export default function StackBoard({
     };
   }, []);
 
-  const selected = tools.find((t) => t.name === filter);
-
   return (
     <>
-      <div className="stack-board" ref={boardRef} role="group" aria-label="Tools, ranked by projects shipped">
+      <div className="stack-board" ref={boardRef} role="list" aria-label="Tools, ranked by projects shipped">
         {shown.map((tool) => {
-          const pressed = tool.name === filter;
           const last =
             mounted && tool.lastUsed ? formatRelativeTime(tool.lastUsed) : null;
           return (
-            <button
-              type="button"
+            <div
+              role="listitem"
               key={tool.name}
               data-flip-id={tool.name}
               className="stack-tool"
               style={{ "--w": flat ? 0 : tool.weight } as React.CSSProperties}
-              aria-pressed={pressed}
-              aria-label={`${tool.name}, ${plural(tool.count)}${last ? `, last used ${last}` : ""}`}
-              onClick={() => setStackFilter(pressed ? null : tool.name)}
             >
+              <span className="sr-only">
+                {`${tool.name}, ${plural(tool.count)}${last ? `, last used ${last}` : ""}`}
+              </span>
               <span className="stack-tool-name" aria-hidden="true">
                 {tool.name}
               </span>
@@ -116,24 +112,10 @@ export default function StackBoard({
                 <ScrambleText value={plural(tool.count)} active={counted} />
                 {last ? ` · last used ${last}` : null}
               </span>
-            </button>
+            </div>
           );
         })}
       </div>
-
-      <p className="stack-filter-note mono" aria-live="polite">
-        {selected ? (
-          <>
-            Filtering Work by {selected.name} · {plural(selected.count)} ·{" "}
-            <a href="#work">jump to Work ↓</a> ·{" "}
-            <button type="button" onClick={() => setStackFilter(null)}>
-              clear
-            </button>
-          </>
-        ) : (
-          "Pick a tool to filter the work below."
-        )}
-      </p>
 
       {learning.length > 0 ? (
         <div className="stack-learning">
