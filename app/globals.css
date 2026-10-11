@@ -3165,6 +3165,15 @@ html.lenis {
 .rail3-stat + .rail3-stat {
   border-top: var(--border-width) solid var(--border);
 }
+/* aria-label on a role-less div is ignored, so the spoken row lives here. */
+.rail3-stat .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 .rail3-stat-label {
   flex: none;
   font-size: 0.62rem;

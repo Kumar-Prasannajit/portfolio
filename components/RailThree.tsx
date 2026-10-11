@@ -46,7 +46,8 @@ function StatRow({
   spoken: string;
 }) {
   return (
-    <div className="rail3-stat" aria-label={`${label}: ${spoken}`}>
+    <div className="rail3-stat">
+      <span className="sr-only">{`${label}: ${spoken}`}</span>
       <span className="rail3-stat-label mono" aria-hidden="true">
         {label}
       </span>

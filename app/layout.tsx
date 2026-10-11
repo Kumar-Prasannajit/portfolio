@@ -121,8 +121,17 @@ const THEME_INIT_SCRIPT = `
   try{
     var d = document.documentElement;
     var theme = localStorage.getItem('kps-theme');
-    d.setAttribute('data-theme', (theme === 'zoro' || theme === 'luffy' || theme === 'news' || theme === 'shanks') ? theme : 'shanks');
     var mode = localStorage.getItem('kps-mode');
+    // The single-axis site stored light/dark under kps-theme. Move a returning
+    // visitor's choice to kps-mode once, so the key is free for the character.
+    if(theme === 'light' || theme === 'dark'){
+      if(mode !== 'light' && mode !== 'dark'){
+        mode = theme;
+        localStorage.setItem('kps-mode', mode);
+      }
+      localStorage.removeItem('kps-theme');
+    }
+    d.setAttribute('data-theme', (theme === 'zoro' || theme === 'luffy' || theme === 'news' || theme === 'shanks') ? theme : 'shanks');
     if(mode === 'light' || mode === 'dark'){
       d.setAttribute('data-mode', mode);
     }
