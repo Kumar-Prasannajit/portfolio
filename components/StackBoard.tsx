@@ -100,6 +100,9 @@ export default function StackBoard({
               key={tool.name}
               data-flip-id={tool.name}
               className="stack-tool"
+              // Ranked (weighted, so drawn larger) tiles take a full row on
+              // phones; see the max-width: 520px block in globals.css.
+              data-ranked={!flat && tool.weight > 0 ? "" : undefined}
               style={{ "--w": flat ? 0 : tool.weight } as React.CSSProperties}
             >
               <span className="sr-only">
@@ -110,7 +113,12 @@ export default function StackBoard({
               </span>
               <span className="stack-tool-meta" aria-hidden="true">
                 <ScrambleText value={plural(tool.count)} active={counted} />
-                {last ? ` · last used ${last}` : null}
+                {last ? (
+                  <span className="stack-tool-last">
+                    <span className="stack-tool-sep"> · </span>
+                    {`last used ${last}`}
+                  </span>
+                ) : null}
               </span>
             </div>
           );

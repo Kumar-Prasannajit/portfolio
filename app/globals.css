@@ -2045,6 +2045,31 @@ html[data-boot="done"] .boot {
   font-size: 0.7rem;
   color: var(--ink-faint);
 }
+/* Phones: tiles sized to their text came out ~225px wide, one per row (ten
+   rows, a whole screen of scrolling). Two columns instead; a ranked tile,
+   whose name is drawn up to 2.25rem, takes a full row so it never overflows
+   half a phone. Flip still animates the ranking into this grid. */
+@media (max-width: 520px) {
+  .stack-board {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+  .stack-tool {
+    min-width: 0;
+  }
+  .stack-tool[data-ranked] {
+    grid-column: 1 / -1;
+  }
+  /* A half-width tile would break the meta mid-phrase ("1 project · last" /
+     "used 19m ago"); "last used …" gets its own line and the dot goes. */
+  .stack-tool-last {
+    display: block;
+  }
+  .stack-tool-sep {
+    display: none;
+  }
+}
 .stack-filter-note {
   margin: 16px 0 0;
   font-size: 0.76rem;
