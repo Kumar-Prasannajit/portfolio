@@ -40,10 +40,11 @@ function useSegments(): Segment[] {
     segments.push({ id: "watching", text: `WATCHING · ${PENDING}` });
   } else if (watching.status === "ok") {
     const ep = String(watching.progress).padStart(2, "0");
-    const total = watching.episodes != null ? String(watching.episodes) : "?";
+    // No total while a show is still airing: "EP 1103", not "EP 1103 / ?".
+    const total = watching.episodes ? ` / ${watching.episodes}` : "";
     segments.push({
       id: "watching",
-      text: `WATCHING · ${watching.title.toUpperCase()} · EP ${ep} / ${total}`,
+      text: `WATCHING · ${watching.title.toUpperCase()} · EP ${ep}${total}`,
     });
   }
 

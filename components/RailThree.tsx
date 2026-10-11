@@ -74,9 +74,11 @@ function Stats() {
         break;
       case "ok": {
         const epNow = String(watching.progress).padStart(2, "0");
-        const epTotal = watching.episodes != null ? String(watching.episodes) : "?";
-        watchingValue = `${watching.title} · EP ${epNow} / ${epTotal}`;
-        watchingSpoken = `${watching.title}, episode ${watching.progress} of ${epTotal}`;
+        // A show still airing has no total (AniList sends null): no "/ ?",
+        // the same rule as the About section's watching line.
+        const total = watching.episodes;
+        watchingValue = `${watching.title} · EP ${epNow}${total ? ` / ${total}` : ""}`;
+        watchingSpoken = `${watching.title}, episode ${watching.progress}${total ? ` of ${total}` : ""}`;
         break;
       }
     }
