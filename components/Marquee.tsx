@@ -3,7 +3,8 @@
 // The single live telemetry line under the hero (docs/redesign-spec.md phase
 // 8): it replaces the old static ticker and the nav's typing tagline. Real
 // state — last commit age, the episode being watched, the contribution
-// count, build status — with a couple of the old quips kept in the rotation.
+// count, when the live version was deployed — with a couple of the old quips
+// kept in the rotation.
 // Values settle with the scramble effect when the data lands; a source that
 // fails or isn't configured drops its segment instead of leaving a hole.
 
@@ -52,11 +53,12 @@ function useSegments(): Segment[] {
   });
   segments.push({ id: "quip-1", text: QUIPS[1] });
 
-  const uptime = stats?.uptime;
-  if (!uptime) {
-    segments.push({ id: "build", text: `BUILD · ${PENDING}` });
-  } else if (uptime.status === "ok") {
-    segments.push({ id: "build", text: `BUILD · ${uptime.build === "ok" ? "OK" : "PREVIEW"}` });
+  const deployed = stats?.deployed;
+  if (!deployed) {
+    segments.push({ id: "deployed", text: `DEPLOYED · ${PENDING}` });
+  } else if (deployed.status === "ok") {
+    const age = formatRelativeTime(deployed.deployedAt).toUpperCase();
+    segments.push({ id: "deployed", text: `DEPLOYED · ${age}` });
   }
 
   return segments;

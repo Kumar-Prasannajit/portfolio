@@ -200,7 +200,7 @@ Monospace, single colour from the accent token, so it re-colours with the theme 
 - `WATCHING` — currently-watching anime from the **AniList public GraphQL API** (no auth needed
   for a public list). Title and `EP 07 / 12`. No cover art — there is no room.
 - `LAST COMMIT` — repo name plus relative time, from the GitHub API.
-- `UPTIME` — days since last deploy, plus build status.
+- `DEPLOYED` — when the live version was deployed (relative time). Was `UPTIME`, days since deploy plus a build status that was always "OK"; replaced 2026-10-11 because nothing monitors the site.
 
 Values arrive with scramble-settle. Cache API responses; the page must render with placeholder
 rows if a request fails, never with a layout hole.
@@ -314,7 +314,7 @@ The header is protected. This phase is recorded only so the ideas are not lost, 
 built without an explicit go-ahead:
 
 - Merging the two ticker strips into one live telemetry line (last commit age, current episode,
-  contribution count, build status) with a couple of the existing quips kept in rotation.
+  contribution count, deploy age) with a couple of the existing quips kept in rotation.
 - A contextual pane title that rewrites as you scroll (`~/kumar/about.md` → `stack.json` →
   `work/`), which would need somewhere in the header to live.
 - Nav items reflecting scroll position with an active state.

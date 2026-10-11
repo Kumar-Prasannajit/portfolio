@@ -1,21 +1,28 @@
 import { NextResponse } from "next/server";
 import { githubHeaders } from "@/lib/githubHeaders";
-import { ALLOWED_OWNERS, ALLOWED_REPOS, isAllowedRepo } from "@/lib/githubTools";
+import {
+  ALLOWED_OWNERS,
+  USER_LOGIN,
+  newestCommit,
+  pickRecentRepos,
+  repoListUrl,
+} from "@/lib/githubTools";
 
 // Rail 3's three Stats rows (docs/redesign-spec.md phase 3): WATCHING (AniList
-// public GraphQL), LAST COMMIT and UPTIME (GitHub REST). One route so the
+// public GraphQL), LAST COMMIT and DEPLOYED (GitHub REST). One route so the
 // client makes a single request instead of three, and each field fails
-// independently — a broken AniList call never blanks LAST COMMIT or UPTIME,
+// independently — a broken AniList call never blanks LAST COMMIT or DEPLOYED,
 // per the spec's "placeholder rows if a request fails, never a layout hole."
 // Same shape as app/api/now-playing/route.ts: a discriminated status union
 // per field, "unconfigured" distinct from "error".
 
-const GITHUB_OWNER = "Kumar-Prasannajit";
 const GITHUB_REPO = "portfolio";
 // 5 minutes: these change at most a few times a day (a commit, an episode),
 // so there's no reason to hit AniList/GitHub on every poll — see
 // lib/useRailStats.ts, which polls this route itself every 5 minutes too.
 const REVALIDATE_SECONDS = 300;
+// Repo lists only decide which repos to ask for commits; they change slowly.
+const LIST_REVALIDATE_SECONDS = 1800;
 
 export type WatchingStat =
   | { status: "unconfigured" }
@@ -27,14 +34,17 @@ export type LastCommitStat =
   | { status: "error" }
   | { status: "ok"; repo: string; committedAt: string };
 
-export type UptimeStat =
+// When the live version was deployed: the deployed commit's committer date
+// (a merge lands, Vercel deploys it within minutes). Never a health claim:
+// nothing here monitors the site.
+export type DeployedStat =
   | { status: "error" }
-  | { status: "ok"; committedAt: string; build: "ok" | "preview" };
+  | { status: "ok"; deployedAt: string };
 
 export type RailStatsResponse = {
   watching: WatchingStat;
   lastCommit: LastCommitStat;
-  uptime: UptimeStat;
+  deployed: DeployedStat;
 };
 
 async function fetchWatching(): Promise<WatchingStat> {
@@ -89,69 +99,86 @@ async function fetchWatching(): Promise<WatchingStat> {
   }
 }
 
+async function getJson(url: string, owner: string, revalidate: number): Promise<unknown> {
+  const res = await fetch(url, { headers: githubHeaders(owner), next: { revalidate } });
+  return res.ok ? res.json() : null;
+}
+
+// The user's own newest commit, read from the commits themselves: the public
+// events feed it replaced could lag GitHub by an hour or more. Only allowed
+// owners' PUBLIC repos (the rail is public, and so is every repo it names),
+// and only the 2 most recently pushed, which keeps the route near 40 GitHub
+// calls an hour while Vercel has no token (60/hr unauthenticated).
 async function fetchLastCommit(): Promise<LastCommitStat> {
   try {
-    const res = await fetch(
-      `https://api.github.com/users/${GITHUB_OWNER}/events/public?per_page=30`,
-      { headers: githubHeaders(), next: { revalidate: REVALIDATE_SECONDS } }
+    const hasToken = !!process.env.GITHUB_TOKEN;
+    const lists = await Promise.all(
+      ALLOWED_OWNERS.map((owner) =>
+        getJson(repoListUrl(owner, hasToken), owner, LIST_REVALIDATE_SECONDS)
+      )
     );
-    if (!res.ok) return { status: "error" };
+    const publicRepos = lists
+      .flatMap((list) => (Array.isArray(list) ? list : []))
+      .filter((repo) => repo?.private === false);
+    const repos = pickRecentRepos(publicRepos, 2, ALLOWED_OWNERS);
 
-    const events = await res.json();
-    if (!Array.isArray(events)) return { status: "error" };
-    // Pushes to repos outside ALLOWED_OWNERS (an employer's) are skipped, so
-    // their names never reach the page.
-    const push = events.find(
-      (event) =>
-        event?.type === "PushEvent" &&
-        typeof event.repo?.name === "string" &&
-        isAllowedRepo(event.repo.name, ALLOWED_OWNERS, ALLOWED_REPOS),
+    const perRepo = await Promise.all(
+      repos.map(async (repo) => ({
+        repo: repo.full_name,
+        commits: await getJson(
+          `https://api.github.com/repos/${repo.full_name}/commits?author=${USER_LOGIN}&per_page=1`,
+          repo.full_name.split("/")[0],
+          REVALIDATE_SECONDS
+        ),
+      }))
     );
-    if (!push) return { status: "error" };
+    const newest = newestCommit(perRepo);
+    if (!newest) return { status: "error" };
 
-    const repoName: string = push.repo.name;
     return {
       status: "ok",
-      repo: repoName.split("/")[1] ?? repoName,
-      committedAt: push.created_at,
+      repo: newest.repo.split("/")[1] ?? newest.repo,
+      committedAt: newest.committedAt,
     };
   } catch {
     return { status: "error" };
   }
 }
 
-async function fetchUptime(): Promise<UptimeStat> {
+async function fetchDeployed(): Promise<DeployedStat> {
   try {
     // The commit actually live right now: Vercel stamps its SHA into the
     // runtime env automatically. Falls back to the default branch's HEAD
     // for local dev / non-Vercel hosting, where that var isn't set.
     const ref = process.env.VERCEL_GIT_COMMIT_SHA || "main";
     const res = await fetch(
-      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/commits/${ref}`,
-      { headers: githubHeaders(), next: { revalidate: REVALIDATE_SECONDS } }
+      `https://api.github.com/repos/${USER_LOGIN}/${GITHUB_REPO}/commits/${ref}`,
+      // One deployed SHA, one fixed answer: cached for the whole deploy
+      // (the next deploy has a new SHA, so a new URL). Only the local "main"
+      // fallback moves, so only it is revalidated.
+      {
+        headers: githubHeaders(),
+        next: { revalidate: process.env.VERCEL_GIT_COMMIT_SHA ? false : REVALIDATE_SECONDS },
+      }
     );
     if (!res.ok) return { status: "error" };
 
     const commit = await res.json();
-    const committedAt: string | undefined =
+    const deployedAt: string | undefined =
       commit?.commit?.committer?.date ?? commit?.commit?.author?.date;
-    if (!committedAt) return { status: "error" };
+    if (!deployedAt) return { status: "error" };
 
-    return {
-      status: "ok",
-      committedAt,
-      build: process.env.VERCEL_ENV === "production" ? "ok" : process.env.VERCEL_ENV ? "preview" : "ok",
-    };
+    return { status: "ok", deployedAt };
   } catch {
     return { status: "error" };
   }
 }
 
 export async function GET() {
-  const [watching, lastCommit, uptime] = await Promise.all([
+  const [watching, lastCommit, deployed] = await Promise.all([
     fetchWatching(),
     fetchLastCommit(),
-    fetchUptime(),
+    fetchDeployed(),
   ]);
-  return NextResponse.json<RailStatsResponse>({ watching, lastCommit, uptime });
+  return NextResponse.json<RailStatsResponse>({ watching, lastCommit, deployed });
 }

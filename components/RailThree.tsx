@@ -13,7 +13,7 @@
 import { useState } from "react";
 import AsciiFlow from "./AsciiFlow";
 import ScrambleText from "./ScrambleText";
-import { daysSince, formatRelativeTime } from "@/lib/format";
+import { formatRelativeTime } from "@/lib/format";
 import {
   CHARACTER_THEMES,
   useCharacterTheme,
@@ -64,10 +64,6 @@ function Stats() {
   let watchingSpoken = "loading";
   if (watching) {
     switch (watching.status) {
-      case "unconfigured":
-        watchingValue = "not set up";
-        watchingSpoken = "AniList account not configured";
-        break;
       case "none":
         watchingValue = "nothing right now";
         watchingSpoken = "not currently watching anything";
@@ -100,26 +96,28 @@ function Stats() {
     }
   }
 
-  const uptime = stats?.uptime;
-  let uptimeValue = "···";
-  let uptimeSpoken = "loading";
-  if (uptime) {
-    if (uptime.status === "error") {
-      uptimeValue = "—";
-      uptimeSpoken = "unavailable";
+  const deployed = stats?.deployed;
+  let deployedValue = "···";
+  let deployedSpoken = "loading";
+  if (deployed) {
+    if (deployed.status === "error") {
+      deployedValue = "—";
+      deployedSpoken = "unavailable";
     } else {
-      const days = daysSince(uptime.committedAt);
-      const buildLabel = uptime.build === "preview" ? "PREVIEW" : "OK";
-      uptimeValue = `${days}d · ${buildLabel}`;
-      uptimeSpoken = `${days} days since the last deploy, build ${buildLabel.toLowerCase()}`;
+      deployedValue = formatRelativeTime(deployed.deployedAt);
+      deployedSpoken = deployedValue;
     }
   }
 
   return (
     <div className="rail3-stats">
-      <StatRow label="WATCHING" value={watchingValue} spoken={watchingSpoken} />
+      {/* An unconfigured AniList account is a setup gap, not something to
+          show visitors: the row is left out, as the marquee leaves it out. */}
+      {watching?.status !== "unconfigured" && (
+        <StatRow label="WATCHING" value={watchingValue} spoken={watchingSpoken} />
+      )}
       <StatRow label="LAST COMMIT" value={commitValue} spoken={commitSpoken} />
-      <StatRow label="UPTIME" value={uptimeValue} spoken={uptimeSpoken} />
+      <StatRow label="DEPLOYED" value={deployedValue} spoken={deployedSpoken} />
     </div>
   );
 }

@@ -34,9 +34,3 @@ export function formatRelativeTime(iso: string, now: Date = new Date()) {
   return `${diffYear}y ago`;
 }
 
-// Whole days between an ISO timestamp and now — rail 3's UPTIME row (days
-// since the currently-deployed commit landed).
-export function daysSince(iso: string, now: Date = new Date()) {
-  const then = new Date(iso).getTime();
-  return Math.max(0, Math.floor((now.getTime() - then) / 86_400_000));
-}
