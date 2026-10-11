@@ -45,11 +45,10 @@ const untilIso = istMidnightIso(addDays(until, 1));
 const errors = [];
 // Only public repos are read, but without a token GitHub allows 60 requests an
 // hour per IP (shared in the cloud) and lists just 30 of the user's repos; say so.
+// GITHUB_TOKEN alone covers every owner (githubHeaders falls back to it), since
+// any token can read public repos.
 if (!process.env.GITHUB_TOKEN) {
   errors.push("GITHUB_TOKEN not set: unauthenticated, 60 requests/hour and only 30 repos of " + USER_LOGIN + " listed");
-}
-if (!process.env.GITHUB_TOKEN_SALONJAA) {
-  errors.push("GITHUB_TOKEN_SALONJAA not set: salonjaa-digital-solution is read with GITHUB_TOKEN or unauthenticated");
 }
 let requests = 0;
 let failures = 0;
