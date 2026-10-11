@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  ALLOWED_OWNERS,
+  ALLOWED_REPOS,
+  isAllowedRepo,
   latestByTool,
   pickRecentRepos,
   toolsFromLanguages,
@@ -144,6 +147,77 @@ test("pickRecentRepos skips forks, archived repos and the profile repo", () => {
   assert.deepEqual(
     picked.map((r) => r.full_name),
     ["Kumar-Prasannajit/keep"],
+  );
+});
+
+test("isAllowedRepo: own account and Salonjaa yes, employer and others no", () => {
+  assert.equal(isAllowedRepo("Kumar-Prasannajit/portfolio", ALLOWED_OWNERS), true);
+  assert.equal(isAllowedRepo("salonjaa-digital-solution/crm", ALLOWED_OWNERS), true);
+  assert.equal(isAllowedRepo("SALONJAA-DIGITAL-SOLUTION/crm", ALLOWED_OWNERS), true);
+  assert.equal(
+    isAllowedRepo("AIdeas-Tech-Solutions-Private-Limited/app", ALLOWED_OWNERS),
+    false,
+  );
+  assert.equal(isAllowedRepo("biraceyuva-GIET/e-yuva", ALLOWED_OWNERS), false);
+  assert.equal(isAllowedRepo("no-slash", ALLOWED_OWNERS), false);
+});
+
+test("isAllowedRepo: a named repo on someone else's account, but not their other repos", () => {
+  const allowed = (name: string) => isAllowedRepo(name, ALLOWED_OWNERS, ALLOWED_REPOS);
+  assert.equal(allowed("biraceyuva-GIET/giet-eyuva-center"), true);
+  assert.equal(allowed("navgyanpvt/shrimp-disease-detection"), true);
+  assert.equal(allowed("OmkarPadhy/E-Fiesta-2k25"), true);
+  assert.equal(allowed("OmkarPadhy/some-other-repo"), false);
+  assert.equal(allowed("AIdeas-Tech-Solutions-Private-Limited/app"), false);
+});
+
+test("pickRecentRepos keeps named repos alongside allowed owners", () => {
+  const picked = pickRecentRepos(
+    [
+      repo({ full_name: "me/mine" }),
+      repo({ full_name: "friend/built-together" }),
+      repo({ full_name: "friend/not-mine" }),
+    ],
+    15,
+    ["me"],
+    ["friend/built-together"],
+  );
+  assert.deepEqual(
+    picked.map((r) => r.full_name),
+    ["me/mine", "friend/built-together"],
+  );
+});
+
+test("pickRecentRepos keeps only allowed owners, ignoring case", () => {
+  const picked = pickRecentRepos(
+    [
+      repo({ full_name: "Kumar-Prasannajit/mine" }),
+      repo({ full_name: "Salonjaa-Digital-Solution/crm" }),
+      repo({ full_name: "AIdeas-Tech-Solutions-Private-Limited/work" }),
+      repo({ full_name: "someone-else/shared" }),
+    ],
+    15,
+    ["kumar-prasannajit", "salonjaa-digital-solution"],
+  );
+  assert.deepEqual(
+    picked.map((r) => r.full_name),
+    ["Kumar-Prasannajit/mine", "Salonjaa-Digital-Solution/crm"],
+  );
+});
+
+test("pickRecentRepos fills the limit from allowed owners only", () => {
+  const picked = pickRecentRepos(
+    [
+      repo({ full_name: "blocked/a", pushed_at: "2026-09-30T00:00:00Z" }),
+      repo({ full_name: "blocked/b", pushed_at: "2026-09-29T00:00:00Z" }),
+      repo({ full_name: "me/x", pushed_at: "2026-01-01T00:00:00Z" }),
+    ],
+    1,
+    ["me"],
+  );
+  assert.deepEqual(
+    picked.map((r) => r.full_name),
+    ["me/x"],
   );
 });
 

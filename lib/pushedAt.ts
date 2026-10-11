@@ -9,7 +9,7 @@ import { githubHeaders } from "./githubHeaders";
 export async function pushedAt(repo: string): Promise<string | undefined> {
   try {
     const res = await fetch(`https://api.github.com/repos/${repo}`, {
-      headers: githubHeaders(),
+      headers: githubHeaders(repo.split("/")[0]),
       next: { revalidate: 3600 },
     });
     if (!res.ok) return undefined;

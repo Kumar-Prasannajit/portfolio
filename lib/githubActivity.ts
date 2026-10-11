@@ -5,14 +5,23 @@
 // with the per-project dates. Every fetch is revalidated hourly and any failure
 // degrades to {} (the section falls back to project dates) — it never throws.
 //
+// Only repos owned by ALLOWED_OWNERS (lib/githubTools.ts) are listed: the
+// user's account and the org they own. Each owner is listed separately with
+// its own token (lib/githubHeaders.ts), so an employer's repos are never even
+// fetched, and the allowlist check below is a second guard. ALLOWED_REPOS,
+// single repos the user built on other people's accounts, are fetched by name.
+//
 // Rate budget, unauthenticated (60/hr, shared with rail-stats' ~24/hr and the
-// 3 pushedAt calls): 1 repo list + at most REPO_LIMIT /languages = 16 per
-// revalidation. package.json comes from raw.githubusercontent.com, which is not
-// API-rate-limited. With GITHUB_TOKEN the list also covers private/org repos
-// and their package.json goes through the contents API (+ at most REPO_LIMIT).
+// 3 pushedAt calls): 2 repo lists + 3 named repos + at most REPO_LIMIT + 3
+// /languages = 23 per
+// revalidation. Public package.json comes from raw.githubusercontent.com, which
+// is not API-rate-limited; a private repo's goes through the contents API
+// (+ at most REPO_LIMIT, authenticated only).
 
 import { githubHeaders } from "./githubHeaders";
 import {
+  ALLOWED_OWNERS,
+  ALLOWED_REPOS,
   latestByTool,
   pickRecentRepos,
   toolsFromLanguages,
@@ -24,6 +33,8 @@ const OWNER = "Kumar-Prasannajit";
 const REPO_LIMIT = 15;
 const NEXT = { revalidate: 3600 };
 
+const ownerOf = (repo: RepoSummary) => repo.full_name.split("/")[0];
+
 async function getJson(url: string, headers: Record<string, string>) {
   try {
     const res = await fetch(url, { headers, next: NEXT });
@@ -33,13 +44,28 @@ async function getJson(url: string, headers: Record<string, string>) {
   }
 }
 
+/** One owner's most recently pushed repos, private ones included when its token allows. */
+async function listRepos(owner: string): Promise<unknown[]> {
+  let url: string;
+  if (owner.toLowerCase() !== OWNER.toLowerCase()) {
+    url = `https://api.github.com/orgs/${owner}/repos?sort=pushed&per_page=100`;
+  } else if (process.env.GITHUB_TOKEN) {
+    // affiliation=owner: the user's own repos only, never org or collaborator ones.
+    url = "https://api.github.com/user/repos?affiliation=owner&sort=pushed&per_page=100";
+  } else {
+    url = `https://api.github.com/users/${OWNER}/repos?sort=pushed&per_page=30`;
+  }
+  const list = await getJson(url, githubHeaders(owner));
+  return Array.isArray(list) ? list : [];
+}
+
 function packageJson(repo: RepoSummary) {
   const { full_name: name, default_branch: branch } = repo;
   if (repo.private) {
     // Only the contents API can read a private repo; ask for the raw file.
     return getJson(
       `https://api.github.com/repos/${name}/contents/package.json?ref=${encodeURIComponent(branch)}`,
-      { ...githubHeaders(), Accept: "application/vnd.github.raw+json" },
+      { ...githubHeaders(ownerOf(repo)), Accept: "application/vnd.github.raw+json" },
     );
   }
   // Public: raw host, no token, no API quota.
@@ -53,7 +79,7 @@ async function scan(repo: RepoSummary) {
   const [languages, pkg] = await Promise.all([
     getJson(
       `https://api.github.com/repos/${repo.full_name}/languages`,
-      githubHeaders(),
+      githubHeaders(ownerOf(repo)),
     ),
     packageJson(repo),
   ]);
@@ -65,13 +91,20 @@ async function scan(repo: RepoSummary) {
 
 export async function githubActivity(): Promise<Record<string, string>> {
   try {
-    const list = await getJson(
-      process.env.GITHUB_TOKEN
-        ? "https://api.github.com/user/repos?affiliation=owner,collaborator,organization_member&sort=pushed&per_page=30"
-        : `https://api.github.com/users/${OWNER}/repos?sort=pushed&per_page=30`,
-      githubHeaders(),
-    );
-    const repos = pickRecentRepos(list, REPO_LIMIT);
+    const [lists, named] = await Promise.all([
+      Promise.all(ALLOWED_OWNERS.map(listRepos)),
+      Promise.all(
+        ALLOWED_REPOS.map((name) =>
+          getJson(`https://api.github.com/repos/${name}`, githubHeaders(name.split("/")[0])),
+        ),
+      ),
+    ]);
+    // The named repos are few and older than most, so they're always scanned
+    // rather than competing for the REPO_LIMIT most recent slots.
+    const repos = [
+      ...pickRecentRepos(lists.flat(), REPO_LIMIT, ALLOWED_OWNERS),
+      ...pickRecentRepos(named, ALLOWED_REPOS.length, [], ALLOWED_REPOS),
+    ];
     return latestByTool(await Promise.all(repos.map(scan)));
   } catch {
     return {};

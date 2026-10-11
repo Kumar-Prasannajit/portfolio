@@ -119,11 +119,57 @@ function isProfileRepo(fullName: string): boolean {
 }
 
 /**
- * The `limit` most recently pushed repos worth scanning: no forks, archived
- * repos or the profile repo. Sorts defensively rather than trusting the API's
- * order. Anything that isn't a repo list (an error body) yields [].
+ * The only GitHub owners whose repos may show on the site: the user's own
+ * account and the org they own. An allowlist on purpose — the token can also
+ * see an employer's repos (AIdeas-Tech-Solutions-Private-Limited) that must
+ * never appear, and an org joined later stays out until it is added here.
  */
-export function pickRecentRepos(list: unknown, limit: number): RepoSummary[] {
+export const ALLOWED_OWNERS: readonly string[] = [
+  "Kumar-Prasannajit",
+  "salonjaa-digital-solution",
+];
+
+/**
+ * Single repos the user built that live on someone else's personal account.
+ * Named one by one so those accounts' other repos never count. All public, so
+ * they need no token.
+ */
+export const ALLOWED_REPOS: readonly string[] = [
+  "biraceyuva-GIET/giet-eyuva-center",
+  "navgyanpvt/Shrimp-Disease-Detection",
+  "OmkarPadhy/E-Fiesta-2k25",
+];
+
+/**
+ * Whether "owner/name" belongs to one of `owners`, or is one of `repos`
+ * (both case-insensitive).
+ */
+export function isAllowedRepo(
+  fullName: string,
+  owners: readonly string[],
+  repos: readonly string[] = [],
+): boolean {
+  const name = fullName.toLowerCase();
+  const owner = name.split("/")[0];
+  return (
+    owners.some((o) => o.toLowerCase() === owner) ||
+    repos.some((r) => r.toLowerCase() === name)
+  );
+}
+
+/**
+ * The `limit` most recently pushed repos worth scanning: no forks, archived
+ * repos or the profile repo, and, when `owners` is given, only repos those
+ * accounts or orgs own or that `repos` names (case-insensitive). Sorts defensively rather than
+ * trusting the API's order. Anything that isn't a repo list (an error body)
+ * yields [].
+ */
+export function pickRecentRepos(
+  list: unknown,
+  limit: number,
+  owners?: readonly string[],
+  repos: readonly string[] = [],
+): RepoSummary[] {
   if (!Array.isArray(list)) return [];
   return list
     .filter(
@@ -133,7 +179,8 @@ export function pickRecentRepos(list: unknown, limit: number): RepoSummary[] {
         typeof r.pushed_at === "string" &&
         !r.fork &&
         !r.archived &&
-        !isProfileRepo(r.full_name),
+        !isProfileRepo(r.full_name) &&
+        (!owners || isAllowedRepo(r.full_name, owners, repos)),
     )
     .sort((a, b) => Date.parse(b.pushed_at) - Date.parse(a.pushed_at))
     .slice(0, limit);

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { githubHeaders } from "@/lib/githubHeaders";
+import { ALLOWED_OWNERS, ALLOWED_REPOS, isAllowedRepo } from "@/lib/githubTools";
 
 // Rail 3's three Stats rows (docs/redesign-spec.md phase 3): WATCHING (AniList
 // public GraphQL), LAST COMMIT and UPTIME (GitHub REST). One route so the
@@ -98,10 +99,17 @@ async function fetchLastCommit(): Promise<LastCommitStat> {
 
     const events = await res.json();
     if (!Array.isArray(events)) return { status: "error" };
-    const push = events.find((event) => event?.type === "PushEvent");
+    // Pushes to repos outside ALLOWED_OWNERS (an employer's) are skipped, so
+    // their names never reach the page.
+    const push = events.find(
+      (event) =>
+        event?.type === "PushEvent" &&
+        typeof event.repo?.name === "string" &&
+        isAllowedRepo(event.repo.name, ALLOWED_OWNERS, ALLOWED_REPOS),
+    );
     if (!push) return { status: "error" };
 
-    const repoName: string = push.repo?.name ?? `${GITHUB_OWNER}/unknown`;
+    const repoName: string = push.repo.name;
     return {
       status: "ok",
       repo: repoName.split("/")[1] ?? repoName,
