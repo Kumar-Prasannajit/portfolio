@@ -358,7 +358,12 @@
 /* BRUTAL re-colours the page, so the toggle would crossfade like a palette
    change. useUiMode stamps data-ui-cut on <html> for the frames around the
    flip so it hard-cuts instead; !important because component rules carry
-   their own `transition` at higher specificity. */
+   their own `transition` at higher specificity. useTheme stamps it too while
+   the light/dark wave runs: the wave is the animation, and ~1,600 colour
+   transitions underneath it dropped the wave to ~15fps. The root itself is
+   cut too: `color` is inherited, so a transitioning <html> would re-trigger
+   a colour transition on every descendant, frame after frame. */
+:root[data-ui-cut],
 :root[data-ui-cut] *,
 :root[data-ui-cut] *::before,
 :root[data-ui-cut] *::after {

@@ -30,6 +30,19 @@ function prefersReducedMotion() {
   );
 }
 
+// The view transition (wave or touch crossfade) is the animation. Without
+// this, the global ~200ms colour crossfade in globals.css also starts on
+// every element at once (~1,600 transitions on the home page) under the live
+// new snapshot, and the wave drops to ~15fps. Same cut useUiMode uses: held
+// for the two frames around the flip, then palette changes crossfade again.
+function cutTransitions() {
+  const root = document.documentElement;
+  root.setAttribute("data-ui-cut", "");
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => root.removeAttribute("data-ui-cut"))
+  );
+}
+
 // The mode actually being rendered right now: an explicit data-mode
 // stamp wins, otherwise it's whatever the prefers-color-scheme media
 // query is currently resolving the CSS variables to.
@@ -81,6 +94,7 @@ export function useTheme() {
 
       if (!origin || coarsePointer) {
         doc.startViewTransition(() => {
+          cutTransitions();
           flushSync(() => applyTheme(next));
         });
         return;
@@ -93,6 +107,7 @@ export function useTheme() {
       );
 
       const transition = doc.startViewTransition(() => {
+        cutTransitions();
         flushSync(() => applyTheme(next));
       });
 
