@@ -1,6 +1,7 @@
 # Redesign progress
 
-State of the `redesign-three-pane` build against `docs/redesign-spec.md`. Read this before
+State of the three-pane redesign (built on `redesign-three-pane`, carried on `feat/brutal-reskin`)
+against `docs/redesign-spec.md`. Read this before
 touching anything. Updated in the same commit as the phase work it describes — never separately.
 
 ---
@@ -21,6 +22,9 @@ Decisions:
   now needed for the character palette, so the mode toggle moved to `data-mode="light"|"dark"`
   (`lib/useTheme.ts`, `app/layout.tsx`, `app/globals.css`). `localStorage` keys renamed to match:
   `kps-theme` (character, was the mode key), `kps-mode` (mode, was `kps-theme`), `kps-ui` (new).
+  The inline script in `app/layout.tsx` migrates a stored `kps-theme` of `light`/`dark` to
+  `kps-mode` once (unless `kps-mode` is already set) and clears it, so returning visitors keep
+  their mode (added after code review, 2026-10-11).
   `useTheme.ts`'s existing View Transitions wave toggle is untouched beyond the attribute rename.
 - Contribution-graph heat scale (`--heat-0..4`) is derived from `--accent`/`--accent-solid` via
   `color-mix()` instead of 5 hand-picked hex values per theme x mode (was 10 values for 2 modes;
@@ -182,6 +186,10 @@ Decisions:
 - **Textures are CSS gradients, not artwork or precomputed ASCII.** Two diagonal hatch patterns
   (shanks, zoro — opposite angles), a dot halftone (luffy), a vertical hatch (news), each tinted
   from that panel's own `--swatch-*`. Per spec: "do not use Zoro or Luffy character artwork."
+  **Superseded by 00bde41: deviates from spec §5.** The panels now show character artwork
+  (`public/shanks.jpg`, `zoro.jpg`, `luffy.jpg`, `sanji.jpg`, ~400KB) and the news panel is
+  labelled SANJI. The user chose to keep the artwork after code review (2026-10-11).
+  Asset rights are still an open to-do before this goes public.
 - **Rotated labels use `writing-mode: vertical-rl` + `transform: rotate(180deg)`**, not a manual
   `rotate(90deg)` on a horizontal span — the standard cross-browser trick for bottom-to-top
   vertical text (wider support than `writing-mode: sideways-lr`). Sized against the 48px collapsed
@@ -236,6 +244,11 @@ Follow-ups:
 ## Phase 4 — Custom cursor
 Status: done
 Commit: (pending — committed together with this file)
+**Revised after phase 4, deviating from spec §6 (c3208de, 9fb58e6):** the 8px grid snap
+(`snap()`/`GRID_STEP`), the idle blink (`.is-idle`) and the 4x20 caret are gone. The cursor is now
+a 22px white square with `mix-blend-mode: difference`. Hover scales it 1.5x and mousedown scales
+it 0.7x. The blend moved to the outer `position: fixed` wrapper so nav items invert instead of
+vanishing. The grid-snap and idle-blink notes below describe the original build only.
 Decisions:
 - **Split into two nested elements.** `.custom-cursor` (outer, `wrapRef`) does nothing but position
   itself — `transform: translate()` only, updated from a single-shot rAF scheduled per
@@ -394,20 +407,27 @@ Decisions:
   `<button aria-pressed>`s. The current Work cards moved into a client `WorkGrid` that filters by
   tag and shows "Showing n of m · show all". This is deliberately minimal so the control isn't
   dead before phase 7; phase 7 replaces the grid and keeps the hook.
+  **Removed 2026-10-11 at the user's request, deviating from spec §8** ("clicking a tool filters
+  the feed below it"): the site doesn't show every project, so "projects
+  using X" undercounted. Stack tiles are now read-only list items (no click, hover or selected
+  state), the "Pick a tool…" note is gone, and `lib/useStackFilter.ts` is deleted. The Work feed's
+  own tag chips still filter, on local state in `WorkGrid`.
 - **Learning-now row** is driven by `LEARNING_NOW` in `lib/data.ts`, pulse dot 2.8s (off under
   reduced motion). It is **empty, so the row is hidden** — the user said they'd name the tools but
   hadn't yet. Nothing invented.
 - **Opinion lines (open decision 3): skipped** — optional in the spec and unanswered; not written.
 - CSS consumes `--border-width`/`--radius`/display-font tokens; accent is border/selection only
-  (selected tool uses the `--accent-solid`/`--accent-ink` pair, like BRUTAL).
+  (selected tool uses the `--accent-solid`/`--accent-ink` pair, like BRUTAL). *Superseded
+  2026-10-11: tiles have no hover or selected state.*
 Deviated:
 - The spec's "React · 4 projects" shape can't reach that scale: there are only 3 projects, so
   counts are 1–2 and only React reads as "heavy". Sizes will differentiate more as projects are added.
 Follow-ups:
 - TODO(content): fill `LEARNING_NOW`; set `lastWorked` on Manima (private repo).
-- Phase 7 owns the real feed; keep `useStackFilter` and the `tags` matching.
-- Phase 10: reduced-motion path (no flat row, counts instant) and keyboard pass over the tool
-  buttons are code-reviewed, not exercised in a browser.
+- Phase 7 owns the real feed; keep `useStackFilter` and the `tags` matching. *Superseded
+  2026-10-11: the store is deleted; the feed filters on its own state.*
+- Phase 10: reduced-motion path (no flat row, counts instant) is code-reviewed, not exercised in
+  a browser. (The keyboard pass over the tool buttons no longer applies: tiles are read-only.)
 
 ## Phase 7 — Work feed (middle column)
 Status: done
@@ -423,6 +443,7 @@ Decisions:
   background, so it re-themes with no per-theme rule.
 - **Tag filter row with counts** (`tagCounts`, same `tags` the Stack section aggregates) writes to
   the existing `useStackFilter` store, so Stack tools and feed chips are one control.
+  *Superseded 2026-10-11: the Stack no longer filters; the chips use `WorkGrid`'s own state.*
 - **Date chip only when a real date exists** — GitHub `pushed_at` (extracted to `lib/pushedAt.ts`,
   shared with `Stack.tsx`) or `Project.lastWorked`. Manima (private repo) shows none.
 - Old `.work-grid`/`.work-card*` CSS replaced by `.feed-*`; new CSS uses the border/radius/display
@@ -489,6 +510,45 @@ Follow-ups:
   animates on its own) not exercised beyond DOM-dispatched key events; check all 4 themes visually.
 Verified: `tsc`, `eslint`, `next build` clean; live at 1440px: start/steer/trail/quit/restore and
 no-capture-when-unfocused confirmed via the real DOM; screenshot shows snake, trail and food.
+
+## Stack "last used" from GitHub activity (after phase 9)
+Status: done
+Commit: e09b55b
+Decisions:
+- "Last used" previously read only the showcased projects' repos. It now also scans the ~15
+  most recently pushed repos (non-fork, non-archived, not the profile repo), detects tools from
+  `/languages` and `package.json` (`lib/githubTools.ts`, `lib/githubActivity.ts`), and keeps the
+  newest push per tool. Ranking and counts still come only from `PROJECTS`. Tools seen only on
+  GitHub are not added to the board.
+- Only owners in `ALLOWED_OWNERS` (`lib/githubTools.ts`) are read: the user's account and
+  `salonjaa-digital-solution`, which the user owns. The user is an employee at
+  AIdeas-Tech-Solutions-Private-Limited and nothing of it may show, so this is an allowlist,
+  not a blocklist (2026-10-11). Each owner is listed on its own (`/user/repos?affiliation=owner`
+  for the user, `/orgs/<org>/repos` for the org) with its own token: `GITHUB_TOKEN` and
+  `GITHUB_TOKEN_SALONJAA`, since a fine-grained token covers one owner (`lib/githubHeaders.ts`).
+  `ALLOWED_REPOS` adds three public repos the user built on other people's personal accounts
+  (biraceyuva-GIET, navgyanpvt, OmkarPadhy), named one by one so those accounts' other repos
+  never count, and always scanned rather than competing for the 15 most-recent slots.
+  Rail 3's LAST COMMIT skips pushes to repos outside the allowlist too. Checked against live
+  data: 15 repos picked from 34 own + 4 org repos, none from AIdeas. A teammate's push to an
+  allowed repo still counts.
+- Any GitHub failure degrades to `{}`. `npm test` covers both pure modules.
+
+## Brutal mode (re-skin)
+Status: done
+Commits: b36f050, 390c6ef, f5ec980
+Spec: `docs/superpowers/specs/2026-10-08-brutal-reskin-design.md` (supersedes the rejected
+redblack-swap spec and plan, which are kept with SUPERSEDED banners; none of their code shipped)
+Decisions:
+- The rail 3 BRUTAL toggle sets `<html data-ui="brutal">` (`lib/useUiMode.ts`, `kps-ui`) and
+  re-skins the same DOM through tokens only. Each theme sets just `--primary`; each mode sets
+  just the neutral/accent block. Component rules live in the BRUTAL MODE COMPONENTS block at
+  the end of `app/globals.css` and never name a theme or mode.
+- Theme accent selectors are gated with `:not([data-ui="brutal"])`, so normal mode is
+  unchanged and brutal tokens win on source order.
+- `useUiMode` stamps a transient `data-ui-cut` so the switch is a hard cut, not a crossfade.
+- The rail 3 height budget in brutal was re-measured at 1600x768 (f5ec980): 663px of fixed
+  rows against 676px available, with no overflow.
 
 ## Phase 10 — QA pass
 Status: not started
