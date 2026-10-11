@@ -118,6 +118,9 @@ function isProfileRepo(fullName: string): boolean {
   return !!owner && owner.toLowerCase() === name?.toLowerCase();
 }
 
+/** The user's GitHub login: their own account, and the author of the commits the automation reads. */
+export const USER_LOGIN = "Kumar-Prasannajit";
+
 /**
  * The only GitHub owners whose repos may show on the site: the user's own
  * account and the org they own. An allowlist on purpose — the token can also
@@ -125,7 +128,7 @@ function isProfileRepo(fullName: string): boolean {
  * never appear, and an org joined later stays out until it is added here.
  */
 export const ALLOWED_OWNERS: readonly string[] = [
-  "Kumar-Prasannajit",
+  USER_LOGIN,
   "salonjaa-digital-solution",
 ];
 
@@ -139,6 +142,23 @@ export const ALLOWED_REPOS: readonly string[] = [
   "navgyanpvt/Shrimp-Disease-Detection",
   "OmkarPadhy/E-Fiesta-2k25",
 ];
+
+/**
+ * The GitHub API URL listing `owner`'s most recently pushed repos. The user's
+ * own account uses /user/repos when a token is present (private repos too,
+ * affiliation=owner so never org or collaborator ones) and the public listing
+ * otherwise; any other owner is an org. Shared by the site's Stack section and
+ * scripts/collect-activity.mjs.
+ */
+export function repoListUrl(owner: string, hasToken: boolean): string {
+  const me = USER_LOGIN;
+  if (owner.toLowerCase() !== me.toLowerCase()) {
+    return `https://api.github.com/orgs/${owner}/repos?sort=pushed&per_page=100`;
+  }
+  return hasToken
+    ? "https://api.github.com/user/repos?affiliation=owner&sort=pushed&per_page=100"
+    : `https://api.github.com/users/${me}/repos?sort=pushed&per_page=30`;
+}
 
 /**
  * Whether "owner/name" belongs to one of `owners`, or is one of `repos`

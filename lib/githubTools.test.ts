@@ -6,6 +6,7 @@ import {
   isAllowedRepo,
   latestByTool,
   pickRecentRepos,
+  repoListUrl,
   toolsFromLanguages,
   toolsFromPackageJson,
   type RepoSummary,
@@ -252,4 +253,13 @@ test("latestByTool keeps the newest repo push per tool", () => {
     Express: "2026-09-01T00:00:00Z",
     HTML: "2026-07-01T00:00:00Z",
   });
+});
+
+test("repoListUrl: own account with/without token, orgs", () => {
+  assert.equal(repoListUrl("kumar-prasannajit", true),
+    "https://api.github.com/user/repos?affiliation=owner&sort=pushed&per_page=100");
+  assert.equal(repoListUrl("Kumar-Prasannajit", false),
+    "https://api.github.com/users/Kumar-Prasannajit/repos?sort=pushed&per_page=30");
+  assert.equal(repoListUrl("salonjaa-digital-solution", true),
+    "https://api.github.com/orgs/salonjaa-digital-solution/repos?sort=pushed&per_page=100");
 });

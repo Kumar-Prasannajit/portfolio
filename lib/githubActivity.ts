@@ -24,12 +24,12 @@ import {
   ALLOWED_REPOS,
   latestByTool,
   pickRecentRepos,
+  repoListUrl,
   toolsFromLanguages,
   toolsFromPackageJson,
   type RepoSummary,
 } from "./githubTools";
 
-const OWNER = "Kumar-Prasannajit";
 const REPO_LIMIT = 15;
 const NEXT = { revalidate: 3600 };
 
@@ -46,15 +46,7 @@ async function getJson(url: string, headers: Record<string, string>) {
 
 /** One owner's most recently pushed repos, private ones included when its token allows. */
 async function listRepos(owner: string): Promise<unknown[]> {
-  let url: string;
-  if (owner.toLowerCase() !== OWNER.toLowerCase()) {
-    url = `https://api.github.com/orgs/${owner}/repos?sort=pushed&per_page=100`;
-  } else if (process.env.GITHUB_TOKEN) {
-    // affiliation=owner: the user's own repos only, never org or collaborator ones.
-    url = "https://api.github.com/user/repos?affiliation=owner&sort=pushed&per_page=100";
-  } else {
-    url = `https://api.github.com/users/${OWNER}/repos?sort=pushed&per_page=30`;
-  }
+  const url = repoListUrl(owner, !!process.env.GITHUB_TOKEN);
   const list = await getJson(url, githubHeaders(owner));
   return Array.isArray(list) ? list : [];
 }
