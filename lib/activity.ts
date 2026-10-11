@@ -50,6 +50,28 @@ export function weeklySince(entryDates: string[], runDate: string): string {
   return entryDates.reduce((a, b) => (b > a ? b : a));
 }
 
+/**
+ * A weekly window split into one post per Monday-Sunday (IST) week. Each chunk
+ * ends on its Sunday, or on `runDate` for a partial last week, and that end is
+ * the post's date. When `since` is a Sunday it is the previous entry's own
+ * date, so it joins the following week instead of becoming a one-day post.
+ */
+export function weeklyChunks(since: string, runDate: string): { start: string; end: string }[] {
+  const weekday = (date: string) => new Date(parseDate(date)).getUTCDay(); // 0 = Sunday
+  const chunks: { start: string; end: string }[] = [];
+  let start = since;
+  while (start <= runDate) {
+    const sunday = addDays(start, (7 - weekday(start)) % 7);
+    const end = sunday < runDate ? sunday : runDate;
+    chunks.push({ start, end });
+    start = addDays(end, 1);
+  }
+  if (chunks.length > 1 && weekday(since) === 0) {
+    chunks.splice(0, 2, { start: since, end: chunks[1].end });
+  }
+  return chunks;
+}
+
 /** The blog run's fallback window, used only when no idea is waiting. */
 export function blogSince(runDate: string): string {
   return addDays(runDate, -14);
@@ -119,6 +141,11 @@ export function nextWeeklyNumber(filenames: string[]): string {
     if (match) highest = Math.max(highest, Number(match[1]));
   }
   return String(highest + 1).padStart(3, "0");
+}
+
+/** A weekly entry's `cover` label: its number in two digits, like the existing "01" to "03". */
+export function coverLabel(number: string): string {
+  return String(Number(number)).padStart(2, "0");
 }
 
 /* --------------------------------- Ideas --------------------------------- */
