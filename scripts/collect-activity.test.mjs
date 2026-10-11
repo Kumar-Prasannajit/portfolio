@@ -84,9 +84,20 @@ test("warns when a repo returns a full page of commits", () => {
   assert.ok(JSON.parse(res.stdout).errors.includes("Kumar-Prasannajit/portfolio: 100 commits, results may be truncated"));
 });
 
-test("says so when a token is missing (rate limit, shorter repo list)", () => {
+test("says so when GITHUB_TOKEN is missing (rate limit, shorter repo list)", () => {
   const { res } = run(["--since", "2026-09-14"], { GITHUB_TOKEN: "", GITHUB_TOKEN_SALONJAA: "" });
   const errors = JSON.parse(res.stdout).errors;
   assert.ok(errors.some((e) => e.startsWith("GITHUB_TOKEN not set")), errors.join("\n"));
-  assert.ok(errors.some((e) => e.startsWith("GITHUB_TOKEN_SALONJAA not set")), errors.join("\n"));
+});
+
+test("names the cloud proxy's placeholder token instead of only logging 401s", () => {
+  const { res } = run(["--since", "2026-09-14"], { GITHUB_TOKEN: "proxy-injected" });
+  const errors = JSON.parse(res.stdout).errors;
+  assert.ok(errors.some((e) => e.startsWith("GITHUB_TOKEN is the cloud placeholder")), errors.join("\n"));
+});
+
+test("GITHUB_TOKEN alone is enough: public repos only, so no Salonjaa token note", () => {
+  const { res } = run(["--since", "2026-09-14"], { GITHUB_TOKEN_SALONJAA: "" });
+  const errors = JSON.parse(res.stdout).errors;
+  assert.ok(errors.every((e) => !e.includes("GITHUB_TOKEN")), errors.join("\n"));
 });

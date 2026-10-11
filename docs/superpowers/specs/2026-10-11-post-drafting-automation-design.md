@@ -42,7 +42,7 @@ Either can be started with "Run now". The first weekly run is started by hand ri
 
 **Environment:**
 - Network level **Trusted**, which allows GitHub and the npm registry.
-- `GITHUB_TOKEN` and `GITHUB_TOKEN_SALONJAA`: the same two read-only fine-grained tokens the site uses (Metadata + Contents read). They are stored in the routine's cloud environment. They only lift GitHub's 60/hour unauthenticated limit: the collector reads **public repos only** (decided 2026-10-11), because a private repo's commit messages would end up in a public PR and post.
+- `GITHUB_TOKEN`: one fine-grained token with "Public repositories (read-only)" access and no other permissions, stored as an environment variable of the routines' own cloud environment `portfolio-routines` (network secrets don't apply to GitHub hosts). `GITHUB_TOKEN_SALONJAA` isn't needed there. The token only lifts GitHub's 60/hour unauthenticated limit: the collector reads **public repos only** (decided 2026-10-11), because a private repo's commit messages would end up in a public PR and post.
 - PRs are opened through the Claude GitHub App on the portfolio repo.
 - **Node ≥ 22.18.** The scripts import the `lib/*.ts` modules directly through Node's native TypeScript support, as `npm test` already does. The setup checks `node --version` and stops with a clear message if it is older.
 
