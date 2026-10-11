@@ -3063,7 +3063,8 @@ html.lenis {
   /* A tile is ~97px wide on a 390px phone and ~73px at 320px, too narrow
      for "LOCAL TIME" on one line (~84px), and the tile clips its overflow.
      The label wraps instead: two lines end ~36px down, well above the value
-     (which starts ~72px down). TODAY and VIEWERS still fit on one line. */
+     (which starts ~72px down at 390px, ~78px at 320px). TODAY and VIEWERS
+     still fit on one line. */
   .side-left .stat-head {
     top: 8px;
     left: 10px;
@@ -3109,10 +3110,13 @@ html.lenis {
 }
 
 /* Below 360px "VIEWERS" in the mobile identity strip (one word, so it can't
-   wrap) would reach its tile's clipping edge; tighter tracking keeps it
-   inside down to 320px. */
+   wrap) would reach its tile's clipping edge, most of all in BRUTAL, whose
+   3px dividers narrow each tile. Tighter tracking and insets keep it 5-7px
+   inside down to 320px in both looks. */
 @media (max-width: 359px) {
   .side-left .stat-head {
+    left: 6px;
+    right: 6px;
     letter-spacing: 0.06em;
   }
 }
