@@ -1,0 +1,41 @@
+---
+title: "Receipts for Salonjaa, and a three-panel home page"
+date: "2026-09-20"
+summary: "A downloadable PDF receipt for the Salonjaa client portal, plus a now-playing chip and independent scrolling panels on the portfolio."
+cover: "04"
+linkedin: |
+  A receipt that looked fine on screen turned into five commits before it became a real PDF.
+
+  This week on the Salonjaa client portal I added a payment receipt, wired it to real payment data, and then spent most of the time on the download. Browser print was the first version. It was replaced with a generated PDF, then a plain img instead of next/image so the capture library could see the logo, then html2canvas-pro because the original choked on modern colour functions, and finally a proper A4 layout with margins.
+
+  The same stretch also brought a password visibility toggle, a payment thank-you email and an invoice card.
+
+  On my own portfolio I moved the site chrome into the root layout, added a now-playing chip to the hero, and switched the home page to three panels that scroll independently.
+
+  None of it is glamorous, but the receipt is the sort of feature a client actually opens.
+
+  #nextjs #buildinpublic #webdev
+---
+
+Two things this week: a receipt flow for a client project, and a restructure of this site's home page.
+
+## Salonjaa client portal
+
+The portal got a printable payment receipt, then a downloadable one wired to real payment data. Getting the download right took most of the work:
+
+- Browser print was replaced with a generated PDF.
+- `next/image` was swapped for a plain `img` in the receipt, so the capture step could render the logo.
+- `html2canvas` gave way to `html2canvas-pro`, which handles `oklch` and `lab` colours.
+- The receipt now sits on a real A4 page with margins.
+
+Around it: a password visibility toggle, a payment thank-you email and an invoice card.
+
+## This site
+
+- Site chrome moved into the root layout, with Blogs and Weekly links in the nav.
+- A now-playing chip in the hero and a music-icon button in the nav with a pixel popover.
+- The home page became a three-panel layout, each panel scrolling on its own with Lenis.
+- Project cards turned into screenshot cards with a hover overlay. That one is still work in progress.
+- Small fixes: a dead resume link, a missing hero work button, Firefox cursor visibility.
+
+I also created a new repo, `spendly`, with only an initial commit so far. {/* CHECK: anything to say about spendly? Only an initial commit is visible. */}

@@ -1,0 +1,36 @@
+---
+title: "Work pages, a boot screen and one motion system"
+date: "2026-09-27"
+summary: "Case-study pages, a terminal boot preloader, scroll motion and a Lighthouse pass on the portfolio, plus portal admin tools for Salonjaa."
+cover: "05"
+linkedin: |
+  Lots of small visual features this week, and the most useful commit was the boring one: a Lighthouse pass.
+
+  On my portfolio I added a Work section with its own /work/[slug] case-study pages and real screenshots, a terminal-style boot preloader timed in CSS, and scroll reveals, hero parallax and a marquee, all on a single motion system so they stop fighting each other. I also tried interaction sounds and removed them again the next day.
+
+  Then came the pass on contrast, focus and touch targets, followed by SEO work: Open Graph images for the home, blog and weekly pages, RSS feeds and sitemap dates.
+
+  For the Salonjaa client portal I improved the admin side: a client form with an editable email and server-generated password, password reset when the email changes, a safer GitHub-style client delete, and viewable payment requests that can be cancelled.
+
+  #nextjs #webdev #buildinpublic
+---
+
+A busy week on the portfolio, with some admin work on a client project.
+
+## This site
+
+- **Work.** An in-flow Work section, `/work/[slug]` routes with consistent numbering, and case-study pages with real screenshots.
+- **Boot screen.** A terminal-style preloader timed with CSS.
+- **Motion.** Scroll reveals, hero parallax and the marquee, all on one motion system.
+- **Home.** A fixed identity panel with a portrait, live time, date and viewers, a GitHub heatmap under the marquee recoloured to the site's red, and a note of where the viewer is watching from.
+- **Layout.** Side panels now stay mounted across every route.
+- **Quality.** A Lighthouse pass covering contrast, focus and touch targets, plus fixes for a theme hydration mismatch and a few client-side navigation links.
+- **SEO.** Per-page canonicals, Open Graph images for home, blog and weekly pages, RSS feeds, sitemap dates and Vercel analytics.
+
+I added interaction sounds early in the week, off by default, and removed the toggle and the sounds again the next day. {/* CHECK: the reason for removing the sounds isn't in the commits. */}
+
+## Salonjaa client portal
+
+- Admin client form: editable email, server-generated password, +91 phone.
+- Password reset when a client's email changes, and a GitHub-style client delete.
+- Viewable payment requests with soft-cancel, admin modals portaled to `document.body`, and an admin receipt download.
