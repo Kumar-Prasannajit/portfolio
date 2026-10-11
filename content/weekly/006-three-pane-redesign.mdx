@@ -1,0 +1,39 @@
+---
+title: "The three-pane redesign, in nine phases"
+date: "2026-10-04"
+summary: "A spec, then nine phases: theme tokens, a three-pane shell, live stats, a computed Stack section and a playable Snake."
+cover: "06"
+linkedin: |
+  I wrote the spec first, then shipped a full site redesign in nine phases over two days.
+
+  The portfolio now has a three-pane layout. Phase one was a three-axis token architecture for theming. Phase two was the layout shell. After that came live stats and ambient ASCII in the third rail, a data-bound About section, a Stack section that computes and ranks itself, an editorial work feed with live telemetry in the nav, and a playable Snake game on the GitHub contribution grid.
+
+  The theme accordion also got character images, and the portrait is tinted per theme.
+
+  The cursor needed the most rework. I changed it to a square difference-blend, dropped grid snapping and the idle blink, and moved the blend onto an outer wrapper so nav items invert instead of vanishing.
+
+  #nextjs #frontend #buildinpublic
+---
+
+I started this week with a spec (`docs: add three-pane redesign spec`) and then worked through it phase by phase.
+
+## The phases
+
+1. A three-axis token architecture for theming.
+2. A three-pane layout shell.
+3. Rail 3: live stats, ambient ASCII and a theme accordion.
+4. Cursor: `mix-blend-mode: difference`.
+5. A data-bound, two-paragraph About with a masked line rise.
+6. A computed, self-ranking Stack section with a Work filter.
+7. and 8. An editorial work feed and a live telemetry nav.
+9. A playable Snake on the contribution grid.
+
+After the phases: character images in the theme accordion panels, and the portrait tinted per character theme.
+
+## The cursor, again
+
+The cursor is the part I reworked most. It ended up as a square difference-blend cursor. Grid snapping and the idle blink were dropped, and the blend moved to the outer wrapper so nav items invert instead of vanishing.
+
+## Salonjaa
+
+One commit on the client site: an SEO overhaul with service landing pages and real project screenshots.

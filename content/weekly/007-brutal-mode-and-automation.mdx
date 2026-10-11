@@ -1,0 +1,38 @@
+---
+title: "Brutal mode, a read-only Stack, and drafting these posts"
+date: "2026-10-11"
+summary: "A red-and-black brutal look, Stack tiles that read from recent GitHub activity, and the automation that now drafts these posts."
+cover: "07"
+linkedin: |
+  This post was drafted by a script I wrote this week, and I still have to approve it.
+
+  That is the last piece of a week with three threads. First, a brutal mode on my portfolio: primary and black colour tokens, a hard-cut toggle and a red-and-black look on the three-pane class names. Second, the Stack section: last used is now derived from all recent GitHub activity, and the tiles became read-only, so the Stack-to-Work filter is gone. I also fixed a build failure by dropping IBM Plex Sans, and made the site remember a returning visitor's light or dark choice.
+
+  The third thread is the automation itself. A collector reads commits only from an allowlist of owners, one token per owner, and a routine turns a week of commits into a short post in a pull request. Nothing is published until I merge it.
+
+  #buildinpublic #nextjs #automation
+---
+
+Three threads this week.
+
+## Brutal mode
+
+A new look on the existing three-pane class names: primary and black colour tokens and a hard-cut toggle. I also recorded the height budget for rail 3 in the docs. The first swap spec was superseded by a re-skin spec.
+
+## Stack and small fixes
+
+- "Last used" for each Stack item is now derived from all recent GitHub activity.
+- Stack tiles are read-only, and the Stack-to-Work filter is gone.
+- IBM Plex Sans was dropped so the Turbopack build passes.
+- Returning visitors' light or dark choice is kept, and the rail 3 stats are voiced.
+
+## Drafting posts
+
+I wrote a spec and a plan for automation that drafts the blog and weekly posts into pull requests. On the site side, GitHub reads now cover only allowed owners, with one token per owner. For the collector itself:
+
+- It reads public repos only.
+- One `GITHUB_TOKEN` is enough.
+- The cloud proxy's placeholder token is named explicitly.
+- It writes one short post per week and lists every source commit.
+
+This post came out of that routine, and it goes live only after I merge the pull request.
