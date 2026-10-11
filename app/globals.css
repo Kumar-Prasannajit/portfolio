@@ -1731,18 +1731,6 @@ html[data-boot="done"] .boot {
   gap: 10px;
   margin-bottom: 34px;
 }
-.meta-chip {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-mono);
-  font-size: 0.74rem;
-  border: 1px solid var(--border-2);
-  border-radius: 999px;
-  padding: 6px 12px;
-  color: var(--ink-dim);
-  background: var(--panel);
-}
-
 .cta-row {
   display: flex;
   flex-wrap: wrap;
@@ -3564,7 +3552,6 @@ html.lenis {
 /* Every square corner, including the literal radii the base rules carry. */
 :root[data-ui="brutal"]
   :is(
-    .meta-chip,
     .btn,
     .btn-icon,
     .pill,
@@ -3839,11 +3826,6 @@ html.lenis {
   padding: 0.04em 0.1em 0;
   background: var(--accent-solid);
   color: var(--accent-ink);
-}
-:root[data-ui="brutal"] .meta-chip {
-  border: var(--bw-thin) solid var(--line);
-  color: var(--ink);
-  font-weight: 600;
 }
 :root[data-ui="brutal"] .btn {
   border: var(--border-width) solid var(--line);

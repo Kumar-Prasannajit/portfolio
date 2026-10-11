@@ -60,7 +60,6 @@ export default function Hero() {
           AI-powered products, based in Hyderabad, India.
         </p>
         <div className="meta-row">
-          <span className="meta-chip">[ HYDERABAD, IN ]</span>
           <Magnetic>
             <a className="btn btn-primary" href={`mailto:${SOCIAL_LINKS.email}`}>
               Get in touch
