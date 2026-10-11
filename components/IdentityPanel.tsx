@@ -29,10 +29,10 @@ const DATE_EM: Record<string, number> = {
 
 let nowSecond = 0; // epoch seconds; 0 until the first tick on the client
 
-// The panel only exists on wide screens (CSS hides it below this width), so
-// the clock only ticks there instead of running for nothing on a phone.
-const PANEL_MEDIA = "(min-width: 1024px)";
-
+// Ticks at every width: below 1024px the panel is the compact strip at the
+// top of the page (the "HOME PANELS" block in globals.css), not hidden. It
+// used to tick only at >= 1024px, from when phones didn't show the panel,
+// which left the strip on "--:--" / "-- ---" for good.
 function subscribeClock(onChange: () => void) {
   const tick = () => {
     const s = Math.floor(Date.now() / 1000);
@@ -41,22 +41,9 @@ function subscribeClock(onChange: () => void) {
       onChange();
     }
   };
-  const query = window.matchMedia(PANEL_MEDIA);
-  let id: ReturnType<typeof setInterval> | undefined;
-  const sync = () => {
-    clearInterval(id);
-    id = undefined;
-    if (query.matches) {
-      tick();
-      id = setInterval(tick, 250);
-    }
-  };
-  sync();
-  query.addEventListener("change", sync);
-  return () => {
-    query.removeEventListener("change", sync);
-    clearInterval(id);
-  };
+  tick();
+  const id = setInterval(tick, 250);
+  return () => clearInterval(id);
 }
 
 const formatter = new Intl.DateTimeFormat("en-US", {

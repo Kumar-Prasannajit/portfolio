@@ -3060,8 +3060,22 @@ html.lenis {
     border-top: none;
     border-left: 2px solid var(--border);
   }
+  /* A tile is ~97px wide on a 390px phone and ~73px at 320px, too narrow
+     for "LOCAL TIME" on one line (~84px), and the tile clips its overflow.
+     The label wraps instead: two lines end ~36px down, well above the value
+     (which starts ~72px down). TODAY and VIEWERS still fit on one line. */
   .side-left .stat-head {
     top: 8px;
+    left: 10px;
+    right: 10px;
+    white-space: normal;
+  }
+  /* Hanging indent: a wrapped second line starts under the first word, not
+     under the 6px square + 7px gap of .stat-label::before. */
+  .side-left .stat-label {
+    line-height: 1.4;
+    padding-left: 13px;
+    text-indent: -13px;
   }
   .side-left .stat-meta {
     display: none;
@@ -3091,6 +3105,15 @@ html.lenis {
      always the last thing in the scroll. */
   footer {
     margin-bottom: 56px;
+  }
+}
+
+/* Below 360px "VIEWERS" in the mobile identity strip (one word, so it can't
+   wrap) would reach its tile's clipping edge; tighter tracking keeps it
+   inside down to 320px. */
+@media (max-width: 359px) {
+  .side-left .stat-head {
+    letter-spacing: 0.06em;
   }
 }
 
