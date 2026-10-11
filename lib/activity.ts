@@ -123,7 +123,7 @@ export function nextWeeklyNumber(filenames: string[]): string {
 
 /* --------------------------------- Ideas --------------------------------- */
 
-const UNTICKED = /^\s*-\s*\[ \]\s*(.+?)\s*$/;
+const UNTICKED = /^\s*-\s*\[ \]\s*(\S.*?)\s*$/;
 
 /**
  * The first unticked `- [ ]` line of content/ideas.md. `index` is its 0-based
@@ -133,8 +133,15 @@ export function pickIdea(
   markdown: string,
 ): { index: number; topic: string; notes: string } | null {
   const lines = markdown.split(/\r?\n/);
+  let inComment = false;
   for (let index = 0; index < lines.length; index++) {
-    const match = UNTICKED.exec(lines[index]);
+    const line = lines[index];
+    // Lines inside an HTML comment (the file's format notes) are examples, not ideas.
+    const wasInComment = inComment;
+    if (line.includes("<!--")) inComment = true;
+    if (line.includes("-->")) inComment = false;
+    if (wasInComment || line.includes("<!--")) continue;
+    const match = UNTICKED.exec(line);
     if (!match) continue;
     const [topic, ...notes] = match[1].split("—");
     return { index, topic: topic.trim(), notes: notes.join("—").trim() };

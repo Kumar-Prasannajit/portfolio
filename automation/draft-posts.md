@@ -29,12 +29,21 @@ You draft; the owner approves. **Never merge a PR, and never push to `main`.**
   `{/* CHECK: what to verify */}`. (MDX has no HTML comments, so don't write
   `<!-- -->`. It would break the site build.)
 - **Dates** are in Asia/Kolkata (IST), written as quoted `"YYYY-MM-DD"`.
+- **Braces.** The site drops anything in `{…}` from the rendered post. Write
+  `{` and `}` only inside backticks or code fences. The one exception is the
+  CHECK marker, which belongs in the body, never in frontmatter.
+- **No employer in the PR either.** The title, branch name, body and commit
+  messages follow the same rule as the post. Don't copy a commit message that
+  mentions the company; the collector already drops those.
 
 ## 1. Setup
 
 1. `node --version` must be 22.18 or newer. If not, stop and log that.
 2. If `node_modules` is missing, run `npm ci`.
-3. Work out the run date (IST):
+3. Run `npm run check:content`. It must pass before you draft anything; if it
+   doesn't, stop and log the output (an existing post is broken, and the dates
+   used below would be wrong).
+4. Work out the run date (IST):
 
    ```bash
    node --input-type=module -e 'import { istDate } from "./lib/activity.ts"; console.log(istDate(new Date()))'
@@ -73,11 +82,13 @@ JS
 - Run `npm run collect:activity -- --since <since>`. The window starts at 00:00
   IST on `since` and ends now.
   - Exit status 1 means every GitHub call failed: stop and log the `errors`.
-  - No `commits`: stop and log "no activity since <since>".
+  - No `commits`: stop and log "no activity since <since>", **followed by the
+    `errors`**. A missing token or a failed owner listing can look like a quiet week.
   - Some `errors` but commits: carry on, and list the errors in the PR under
     **Please check**.
 - Write `content/weekly/<nextNumber>-<slug>.mdx`, where `<slug>` is kebab-case
-  from the title.
+  from the title. If that file or the branch `draft/weekly-<nextNumber>` already
+  exists (locally or on `origin`), stop and log it. Never overwrite.
   - **Length:** about 250 to 500 words.
   - **Content:** what shipped and why, in the owner's voice, **grouped by
     project, not by commit**. Read the changed files of an allowed repo when a
@@ -114,7 +125,9 @@ node --input-type=module -e 'import fs from "node:fs"; import { pickIdea } from 
   status and `errors` are handled as in weekly mode), then pick the most
   substantial thread: a new integration, a tricky fix, or a design decision with
   trade-offs. If nothing qualifies, stop and log that. Make no PR.
-- Write `content/blog/<slug>.mdx` (kebab-case slug from the title).
+- Write `content/blog/<slug>.mdx` (kebab-case slug from the title). If that file
+  or the branch `draft/blog-<slug>` already exists (locally or on `origin`),
+  stop and log it. Never overwrite a post.
   - **Length:** about 600 to 1,000 words.
   - **Content:** one idea, argued with concrete details from the owner's own work.
 - If an idea was used, tick it in the same commit (this keeps the file's line

@@ -16,14 +16,16 @@ import { assertNode } from "./nodeVersion.mjs";
 
 assertNode();
 
-const { ALLOWED_OWNERS, ALLOWED_REPOS, USER_LOGIN, isAllowedRepo, repoListUrl } =
+const { ALLOWED_OWNERS, ALLOWED_REPOS, USER_LOGIN, isAllowedRepo, pickRecentRepos, repoListUrl } =
   await import("../lib/githubTools.ts");
+const { mentionsEmployer } = await import("../lib/contentCheck.ts");
 const { githubHeaders } = await import("../lib/githubHeaders.ts");
 const { addDays, istDate, istMidnightIso, pageWarning, toCommits } =
   await import("../lib/activity.ts");
 
 const PER_PAGE = 100;
-const DATE = /^\d{4}-\d{2}-\d{2}$/;
+const TIMEOUT_MS = 30_000;
+const isDate = (d) => /^\d{4}-\d{2}-\d{2}$/.test(d) && addDays(d, 0) === d;
 
 function arg(name) {
   const i = process.argv.indexOf(`--${name}`);
@@ -32,7 +34,7 @@ function arg(name) {
 
 const since = arg("since");
 const until = arg("until") ?? istDate(new Date());
-if (!since || !DATE.test(since) || !DATE.test(until)) {
+if (!since || !isDate(since) || !isDate(until) || until < since) {
   console.error("usage: collect-activity.mjs --since <YYYY-MM-DD> [--until <YYYY-MM-DD>]");
   process.exit(2);
 }
@@ -40,6 +42,13 @@ const sinceIso = istMidnightIso(since);
 const untilIso = istMidnightIso(addDays(until, 1));
 
 const errors = [];
+// Without a token the lists quietly shrink to public repos; say so.
+if (!process.env.GITHUB_TOKEN) {
+  errors.push("GITHUB_TOKEN not set: private repos of " + USER_LOGIN + " are not listed");
+}
+if (!process.env.GITHUB_TOKEN_SALONJAA) {
+  errors.push("GITHUB_TOKEN_SALONJAA not set: private salonjaa-digital-solution repos are not readable");
+}
 let requests = 0;
 let failures = 0;
 
@@ -47,7 +56,7 @@ let failures = 0;
 async function getJson(url, headers) {
   requests++;
   try {
-    const res = await fetch(url, { headers });
+    const res = await fetch(url, { headers, signal: AbortSignal.timeout(TIMEOUT_MS) });
     if (res.ok) return await res.json();
     errors.push(`${url}: HTTP ${res.status}`);
   } catch (err) {
@@ -79,17 +88,19 @@ const named = await Promise.all(
   ),
 );
 
-const repos = new Map();
-for (const repo of [...lists.flat(), ...named]) {
-  const name = repo?.full_name;
-  if (typeof name !== "string" || typeof repo.pushed_at !== "string") continue;
-  if (!allowed(name) || repo.pushed_at < sinceIso) continue;
-  repos.set(name.toLowerCase(), name);
-}
+// Same filter as the Stack section: allowed owners or named repos only, and no
+// forks (a fork of an employer repo sits under the user's own account),
+// archived repos or the profile repo.
+const repos = [
+  ...pickRecentRepos(lists.flat(), Infinity, ALLOWED_OWNERS, ALLOWED_REPOS),
+  ...pickRecentRepos(named, ALLOWED_REPOS.length, [], ALLOWED_REPOS),
+]
+  .filter((repo) => allowed(repo.full_name) && repo.pushed_at >= sinceIso)
+  .map((repo) => repo.full_name);
 
 // 2. Commits by the user in the window, per repo.
 const perRepo = await Promise.all(
-  [...repos.values()].map(async (name) => {
+  [...new Set(repos)].map(async (name) => {
     const query = new URLSearchParams({
       author: USER_LOGIN,
       since: sinceIso,
@@ -108,6 +119,14 @@ const perRepo = await Promise.all(
   }),
 );
 
-const commits = perRepo.flat().sort((a, b) => a.date.localeCompare(b.date));
+// Defence in depth: the term list is also enforced on what gets collected, so
+// an employer reference in an allowed repo never reaches a PR body.
+const all = perRepo.flat();
+const commits = all
+  .filter((c) => !mentionsEmployer(`${c.repo} ${c.message} ${c.url}`))
+  .sort((a, b) => a.date.localeCompare(b.date));
+if (commits.length < all.length) {
+  errors.push(`dropped ${all.length - commits.length} commit(s) that mention an employer term`);
+}
 console.log(JSON.stringify({ since, until, commits, errors }, null, 2));
 if (requests > 0 && failures === requests) process.exit(1);

@@ -18,7 +18,7 @@ assertNode();
 // failure to load the .ts modules.
 const { default: matter } = await import("gray-matter");
 const { compile } = await import("@mdx-js/mdx");
-const { checkContent } = await import("../lib/contentCheck.ts");
+const { checkContent, mentionsEmployer } = await import("../lib/contentCheck.ts");
 
 const args = process.argv.slice(2);
 const rootFlag = args.indexOf("--root");
@@ -28,23 +28,30 @@ const root =
     : path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const files = [];
+const parseProblems = [];
+let foundDir = false;
 for (const kind of ["blog", "weekly"]) {
   const dir = path.join(root, "content", kind);
   if (!fs.existsSync(dir)) continue;
+  foundDir = true;
   for (const filename of fs.readdirSync(dir).sort()) {
     if (!/\.mdx?$/.test(filename)) continue;
-    const { data, content } = matter(fs.readFileSync(path.join(dir, filename), "utf8"));
-    files.push({
-      kind,
-      path: path.posix.join("content", kind, filename),
-      filename,
-      data,
-      body: content,
-    });
+    const filePath = path.posix.join("content", kind, filename);
+    try {
+      const { data, content } = matter(fs.readFileSync(path.join(dir, filename), "utf8"));
+      files.push({ kind, path: filePath, filename, data, body: content });
+    } catch (err) {
+      const firstLine = String(err?.message ?? err).split("\n")[0];
+      parseProblems.push({ path: filePath, message: `frontmatter does not parse: ${firstLine}` });
+    }
   }
 }
+if (!foundDir) {
+  console.log(`no content/blog or content/weekly under ${root}`);
+  process.exit(1);
+}
 
-const problems = checkContent(files);
+const problems = [...parseProblems, ...checkContent(files)];
 
 for (const file of files) {
   try {
@@ -53,6 +60,14 @@ for (const file of files) {
     const firstLine = String(err?.message ?? err).split("\n")[0];
     problems.push({ path: file.path, message: `MDX does not compile: ${firstLine}` });
   }
+}
+
+// The idea backlog is never rendered, but it is public in the repo and feeds
+// the blog prompt, so it gets the employer-term check too.
+const ideasPath = path.join(root, "content", "ideas.md");
+if (fs.existsSync(ideasPath)) {
+  const term = mentionsEmployer(fs.readFileSync(ideasPath, "utf8"));
+  if (term) problems.push({ path: "content/ideas.md", message: `mentions "${term}"` });
 }
 
 if (problems.length > 0) {

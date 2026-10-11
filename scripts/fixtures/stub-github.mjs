@@ -18,6 +18,9 @@ const routes = [
     { full_name: `${ME}/portfolio`, pushed_at: "2026-10-10T00:00:00Z" },
     { full_name: "AIdeas-Tech-Solutions-Private-Limited/secret", pushed_at: "2026-10-10T00:00:00Z" },
     { full_name: `${ME}/stale`, pushed_at: "2026-01-01T00:00:00Z" },
+    { full_name: `${ME}/aideas-fork`, fork: true, pushed_at: "2026-10-10T00:00:00Z" },
+    { full_name: `${ME}/old-thing`, archived: true, pushed_at: "2026-10-10T00:00:00Z" },
+    { full_name: `${ME}/${ME}`, pushed_at: "2026-10-10T00:00:00Z" },
   ]],
   [/\/orgs\/salonjaa-digital-solution\/repos\?/, [
     { full_name: "salonjaa-digital-solution/site", pushed_at: "2026-10-09T00:00:00Z" },
@@ -28,6 +31,7 @@ const routes = [
   [/\/repos\/Kumar-Prasannajit\/portfolio\/commits\?/, [
     commit("aaaaaaa1", ME, "feat: one"),
     commit("aaaaaaa2", ME, "Merge pull request #1", 2),
+    commit("aaaaaaa3", ME, "chore: notes from AIdeas work"),
   ]],
   [/\/repos\/salonjaa-digital-solution\/site\/commits\?/, [
     commit("bbbbbbb1", "someone-else", "not mine"),
@@ -40,6 +44,9 @@ globalThis.fetch = async (input) => {
   fs.appendFileSync(process.env.STUB_LOG, `${url}\n`);
   const reply = (body, status = 200) => new Response(JSON.stringify(body), { status });
   if (process.env.STUB_MODE === "down") return reply({ message: "Bad credentials" }, 401);
+  if (process.env.STUB_MODE === "full" && /portfolio\/commits\?/.test(url)) {
+    return reply(Array.from({ length: 100 }, (_, i) => commit(`ccc${String(i).padStart(4, "0")}`, ME, `feat: ${i}`)));
+  }
   const route = routes.find(([pattern]) => pattern.test(url));
   return route ? reply(route[1]) : reply({ message: "Not Found" }, 404);
 };

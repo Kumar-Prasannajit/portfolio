@@ -48,3 +48,25 @@ test("fails on a rule problem", () => {
   assert.equal(res.status, 1);
   assert.ok(res.stdout.includes("`date` must be a quoted YYYY-MM-DD string"), res.stdout);
 });
+
+test("reports malformed frontmatter by file instead of crashing", () => {
+  const res = run({ "blog/a.mdx": '---\ntitle: "A: b\n---\n\nBody\n', "blog/b.mdx": blogFile("Fine") });
+  assert.equal(res.status, 1);
+  assert.match(res.stdout, /a\.mdx: frontmatter does not parse: /);
+  assert.ok(!res.stderr.includes("YAMLException"), res.stderr);
+});
+
+test("fails when there is no content directory", () => {
+  const res = run({});
+  assert.equal(res.status, 1);
+  assert.match(res.stdout, /no content\/blog or content\/weekly/);
+});
+
+test("scans content/ideas.md for employer terms", () => {
+  const res = run({
+    "blog/a.mdx": blogFile("Hello"),
+    "ideas.md": "# Blog ideas\n\n- [ ] A story from AIdeas\n",
+  });
+  assert.equal(res.status, 1);
+  assert.match(res.stdout, /content\/ideas\.md: mentions "aideas"/);
+});

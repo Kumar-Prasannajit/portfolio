@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { checkContent, type ContentFile } from "./contentCheck.ts";
+import { checkContent, mentionsEmployer, type ContentFile } from "./contentCheck.ts";
 
 const blog = (over: Partial<ContentFile> = {}): ContentFile => ({
   kind: "blog", path: "content/blog/a.mdx", filename: "a.mdx", body: "Hello",
@@ -41,4 +41,19 @@ test("duplicate slug", () => {
 test("employer term in body or frontmatter, any case", () => {
   assert.deepEqual(messages([blog({ body: "At AIdeas we..." })]), ['mentions "aideas"']);
   assert.deepEqual(messages([blog({ data: { ...blog().data, linkedin: "aideas" } })]), ['mentions "aideas"']);
+});
+
+test("employer term variants and zero-width tricks are caught", () => {
+  assert.deepEqual(messages([blog({ body: "at AI-Ideas Tech" })]), ['mentions "ai-ideas"']);
+  assert.deepEqual(messages([blog({ body: "at A​Ideas" })]), ['mentions "aideas"']);
+  assert.deepEqual(messages([blog({ body: "Some AI ideas for the data pipeline" })]), []);
+});
+test("braces outside code are rejected (the site strips them), comments and code are fine", () => {
+  assert.deepEqual(messages([blog({ body: "Route is /blog/{slug}" })]),
+    ["body has `{…}` outside code; the site strips it, so put it in backticks"]);
+  assert.deepEqual(messages([blog({ body: "ok {/* CHECK: x */} and `{a}`\n\n```js\nconst x = {};\n```" })]), []);
+});
+test("mentionsEmployer", () => {
+  assert.equal(mentionsEmployer("notes about AIdeas"), "aideas");
+  assert.equal(mentionsEmployer("fine"), null);
 });

@@ -71,3 +71,9 @@ test("pickIdea and tickIdea handle CRLF and keep it", () => {
     "# Blog ideas\r\n- [x] Topic — notes → /blog/topic\r\n- [ ] Next\r\n",
   );
 });
+
+test("pickIdea ignores blank topics and lines inside an HTML comment", () => {
+  assert.deepEqual(pickIdea("- [ ]   \n- [ ] Real\n"), { index: 1, topic: "Real", notes: "" });
+  const md = "# Blog ideas\n<!--\n- [ ] example — format\n-->\n- [ ] Real one\n";
+  assert.deepEqual(pickIdea(md), { index: 4, topic: "Real one", notes: "" });
+});

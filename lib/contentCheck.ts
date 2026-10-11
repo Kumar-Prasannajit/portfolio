@@ -15,7 +15,18 @@ export type ContentFile = {
 export type Problem = { path: string; message: string };
 
 /** Case-insensitive substrings that must never appear in a post. Add terms here. */
-export const EMPLOYER_TERMS: readonly string[] = ["aideas"];
+export const EMPLOYER_TERMS: readonly string[] = ["aideas", "ai-ideas", "ai ideas tech"];
+
+// Zero-width and soft-hyphen characters that could hide a term from a substring match.
+const INVISIBLE = /[\u200B-\u200D\u2060\uFEFF\u00AD]/g;
+
+const normalize = (text: string) => text.replace(INVISIBLE, "").toLowerCase();
+
+/** The first employer term `text` contains, or null. Also used on content/ideas.md. */
+export function mentionsEmployer(text: string): string | null {
+  const t = normalize(text);
+  return EMPLOYER_TERMS.find((term) => t.includes(term)) ?? null;
+}
 
 const REQUIRED: Record<ContentFile["kind"], readonly string[]> = {
   blog: ["title", "date", "tags", "excerpt"],
@@ -66,9 +77,20 @@ function fileProblems(file: ContentFile): string[] {
     out.push(`\`linkedin\` must be text of at most ${LINKEDIN_MAX} characters`);
   }
 
-  const text = `${JSON.stringify(data)}\n${file.body}`.toLowerCase();
+  // next-mdx-remote (what the site renders with) drops `{…}` expressions, so
+  // text in braces would silently vanish from the published post. Code and
+  // {/* comments */} are fine.
+  const prose = file.body
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/`[^`\n]*`/g, "")
+    .replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
+  if (prose.includes("{")) {
+    out.push("body has `{…}` outside code; the site strips it, so put it in backticks");
+  }
+
+  const text = normalize(`${JSON.stringify(data)}\n${file.body}`);
   for (const term of EMPLOYER_TERMS) {
-    if (text.includes(term.toLowerCase())) out.push(`mentions "${term}"`);
+    if (text.includes(term)) out.push(`mentions "${term}"`);
   }
   return out;
 }
