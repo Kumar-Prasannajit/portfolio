@@ -1,0 +1,83 @@
+---
+title: "A three-pane redesign, a red-and-black re-skin, and downloadable receipts"
+date: "2026-10-11"
+summary: "Four weeks of the portfolio turning into a three-pane app with a case-study section and a brutal theme, plus PDF receipts and an SEO pass for Salonjaa."
+cover: "004"
+linkedin: |
+  I stopped counting at around 80 commits over four weeks, and they were split between my portfolio and a client's payments app.
+
+  The portfolio went from a single scrolling page to a three-pane layout: a fixed identity panel, the content in the middle, and live stats on the right. It also got a computed Stack section, case-study pages with real screenshots, a playable Snake game on the GitHub contribution grid, and a red-and-black "brutal" theme.
+
+  The less glamorous half was a client project for Salonjaa. Customers can now download a payment receipt as a real PDF. That took six commits, because the first version used browser print, then html2canvas choked on modern color functions, then the page layout was off.
+
+  The lesson I keep relearning: the feature that sounds like one afternoon is usually a chain of small fixes, and each link only shows up after the previous one works.
+
+  #nextjs #buildinpublic #webdev
+---
+
+It's been a while since the last entry. Four weeks, a lot of commits, two projects.
+Grouped by project below, not by day.
+
+## Portfolio
+
+The big shape change: the site stopped being one scrolling page and became a three-pane
+layout. A fixed identity panel on the left (portrait, live time, date, where the viewer
+is watching from), the content in the middle, and a stats and theme rail on the right.
+I wrote a spec for it first and then built it in nine numbered phases, which kept each
+commit reviewable.
+
+- **Theme tokens.** The first phase was a three-axis token architecture, so the layout
+  work didn't have to touch colors.
+- **Right rail.** Live stats, ambient ASCII, and a theme accordion with a character
+  image per panel. The portrait gets tinted per character theme.
+- **Stack.** The Stack section is now computed and ranks itself, and "last used" is
+  derived from recent GitHub activity. I later made the tiles read-only and dropped the
+  Stack-to-Work filter, which was more interaction than it was worth.
+- **Work.** An in-flow Work section, `/work/[slug]` routes, and case-study pages with
+  real screenshots.
+- **Brutal mode.** A red-and-black re-skin on top of the three-pane class names, plus a
+  hard-cut toggle between looks.
+- **Smaller things.** A terminal-style boot preloader, scroll reveals and hero
+  parallax on one motion system, a playable Snake on the contribution grid, and a
+  recolored heatmap. I also added interaction sounds and then removed them the next day.
+  {/* CHECK: is "removed them the next day" right? Sound added 2026-09-20, removed 2026-09-21 per commits. */}
+
+The cursor needed two rounds. It now uses `mix-blend-mode: difference` on a square
+cursor, and the blend sits on the outer wrapper so nav items invert instead of
+vanishing. I dropped the grid-snap and idle-blink ideas after trying them.
+
+### SEO and housekeeping
+
+Per-page canonicals, generated Open Graph images for home, blog and weekly pages, RSS
+feeds, sitemap dates, and Vercel analytics. A Lighthouse pass covered contrast, focus
+and touch targets. I also fixed a theme hydration mismatch, and returning visitors now
+keep their light/dark choice.
+
+I also started on automation that drafts these posts from my GitHub activity into pull
+requests, with the allowlist of repos it may read written down in code. This entry is
+the first one it produced, so I'll be reviewing it with that in mind.
+{/* CHECK: confirm it's fine to say this entry came from the automation. */}
+
+## Salonjaa
+
+Most of the work was receipts. Customers can download a payment receipt, and the admin
+side can too.
+
+- First version used browser print, which is not a download. Switched to generating a
+  real PDF.
+- That broke on the logo (`next/image` doesn't survive html2canvas), then on modern
+  color functions, so I swapped to `html2canvas-pro`.
+- Then the layout: it now renders on a real A4 page with margins.
+
+Around that: a password visibility toggle, a payment thank-you email, an invoice card,
+viewable payment requests with soft-cancel, and admin client-form changes (editable
+email, a server-generated password, a +91 phone field). Changing a client's email
+resets their password. Deleting a client now works like deleting a repo on GitHub.
+{/* CHECK: "like deleting a repo on GitHub" is my reading of "GitHub-style client delete"; confirm the confirm-by-typing behavior. */}
+The latest push was an SEO overhaul with service landing pages and real project
+screenshots.
+
+## What's next
+
+Finish the brutal-mode polish and see how the automation does over a normal week.
+{/* CHECK: confirm the "what's next" plans, they aren't in the activity data. */}
