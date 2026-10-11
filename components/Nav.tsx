@@ -16,7 +16,7 @@ import {
 } from "./icons";
 import PaneTitle from "./PaneTitle";
 import NowPlayingWidget from "./NowPlayingWidget";
-import { NAV_LINKS, SOCIAL_LINKS, type NavLink } from "@/lib/data";
+import { MOBILE_EXTRA_LINKS, NAV_LINKS, SOCIAL_LINKS, type NavLink } from "@/lib/data";
 import { useTheme } from "@/lib/useTheme";
 import { useActiveSection, type SectionId } from "@/lib/useActiveSection";
 import { useCommandPalette } from "./CommandPaletteContext";
@@ -278,7 +278,7 @@ export default function Nav() {
               <div className="nav-mobile-drawer" role="dialog" aria-label="Site navigation">
                 <div className="nav-mobile-links">
                   <ul>
-                    {NAV_LINKS.map((link) => (
+                    {[...NAV_LINKS, ...MOBILE_EXTRA_LINKS].map((link) => (
                       <li key={link.href}>
                         <NavLinkItem
                           link={link}

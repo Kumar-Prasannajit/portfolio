@@ -13,6 +13,13 @@ export const NAV_LINKS: readonly NavLink[] = [
   { href: "/gallery", label: "Gallery" },
 ];
 
+// Pages the desktop nav has no room for, reached there through the ⌘K
+// palette. Phones have no palette shortcut, so the menu drawer lists them
+// after NAV_LINKS (components/Nav.tsx).
+export const MOBILE_EXTRA_LINKS: readonly NavLink[] = [
+  { href: "/specs", label: "Specs" },
+];
+
 // Quips. Two of them ride in the live telemetry strip (components/Marquee.tsx).
 // Case is intentional per-line — most
 // are all-caps but "console.log" reads as an actual code identifier, so
