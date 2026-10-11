@@ -63,43 +63,57 @@ and log "draft already open: #<number>". Make no new PR.
 node --input-type=module <<'JS'
 import fs from "node:fs";
 import matter from "gray-matter";
-import { istDate, weeklySince, alreadyPostedToday, nextWeeklyNumber } from "./lib/activity.ts";
+import { istDate, weeklySince, weeklyChunks, alreadyPostedToday, nextWeeklyNumber } from "./lib/activity.ts";
 
 const files = fs.readdirSync("content/weekly").filter((n) => /\.mdx?$/.test(n));
 const dates = files.map((n) => matter(fs.readFileSync(`content/weekly/${n}`, "utf8")).data.date);
 const runDate = istDate(new Date());
+const since = weeklySince(dates, runDate);
 console.log(JSON.stringify({
   runDate,
-  since: weeklySince(dates, runDate),
+  since,
+  weeks: weeklyChunks(since, runDate),
   alreadyPostedToday: alreadyPostedToday(dates, runDate),
   nextNumber: nextWeeklyNumber(files),
 }));
 JS
 ```
 
+**One post per week.** `weeks` splits the window into Monday-Sunday weeks
+(IST). A normal Sunday run has one week; after missed Sundays there are
+several, and each week that has commits gets its own short post, all in one PR.
+
 - If `alreadyPostedToday` is true, stop and log it. An entry already carries
   today's date, so a second one would double up.
-- Run `npm run collect:activity -- --since <since>`. The window starts at 00:00
-  IST on `since` and ends now.
+- For each week, oldest first, run
+  `npm run collect:activity -- --since <start> --until <end>`.
   - Exit status 1 means every GitHub call failed: stop and log the `errors`.
-  - No `commits`: stop and log "no activity since <since>", **followed by the
-    `errors`**. A missing token or a failed owner listing can look like a quiet week.
+  - A week with no `commits` gets no post.
+  - No week has `commits`: stop and log "no activity since <since>",
+    **followed by the `errors`**. A missing token or a failed owner listing can
+    look like a quiet week.
   - Some `errors` but commits: carry on, and list the errors in the PR under
     **Please check**.
-- Write `content/weekly/<nextNumber>-<slug>.mdx`, where `<slug>` is kebab-case
-  from the title. If that file or the branch `draft/weekly-<nextNumber>` already
-  exists (locally or on `origin`), stop and log it. Never overwrite.
-  - **Length:** about 250 to 500 words.
-  - **Content:** what shipped and why, in the owner's voice, **grouped by
-    project, not by commit**. Read the changed files of an allowed repo when a
-    commit message isn't enough to say what actually changed.
+- Number the posts in order: the oldest week with commits gets `nextNumber`,
+  the next one `nextNumber` + 1, and so on, zero-padded to 3 digits (`004`).
+- Write `content/weekly/<NNN>-<slug>.mdx` for each, where `<slug>` is kebab-case
+  from its title. If any of those files or the branch `draft/weekly-<NNN of the
+  first post>` already exists (locally or on `origin`), stop and log it. Never
+  overwrite.
+  - **Date:** the week's `end` (its Sunday, or the run date for a partial week).
+  - **Cover:** the number in two digits, like the existing `"01"` to `"03"`:
+    `004` becomes `"04"` (`coverLabel` in `lib/activity.ts`).
+  - **Length:** about 200 to 250 words per post.
+  - **Content:** only that week's commits. What shipped and why, in the owner's
+    voice, **grouped by project, not by commit**. Read the changed files of an
+    allowed repo when a commit message isn't enough to say what actually changed.
 
 ```yaml
 ---
 title: "..."
-date: "<runDate>"
+date: "<the week's end>"
 summary: "One sentence for the index card."
-cover: "<nextNumber>"
+cover: "<NN>"
 linkedin: |
   ...
 ---
@@ -170,17 +184,25 @@ it still fails, **make no PR**: stop and log the full output.
 
 ## 8. The PR
 
-1. Branch `draft/weekly-<NNN>` or `draft/blog-<slug>`, created from `main`.
-   Commit the post (and `content/ideas.md` in blog mode), then push the branch.
+1. Branch `draft/weekly-<NNN of the first post>` or `draft/blog-<slug>`,
+   created from `main`. Commit the post or posts (and `content/ideas.md` in blog
+   mode), then push the branch.
 2. Open a pull request against `main` (an ordinary one, not GitHub's "draft" state):
-   - **Title:** `Draft: Weekly #<NNN> — <title>` or `Draft: Blog — <title>`.
+   - **Title:** `Draft: Weekly #<NNN> — <title>` for one post,
+     `Draft: Weekly #<first NNN>–#<last NNN>` for several, or
+     `Draft: Blog — <title>`.
    - **Label:** `draft-post`. Create the label first if it doesn't exist.
 3. The body has these sections, in this order:
-   1. A one-paragraph summary.
-   2. **Sources:** the commits used, as links, grouped by repo.
+   1. A one-paragraph summary (with several weekly posts, one line per post:
+      number, week, title).
+   2. **Sources:** **every** commit you used, as links, grouped by post and then
+      by repo; not a sample. When one repo has more than 10 commits in a post,
+      put its list in `<details><summary><repo> (<n> commits)</summary>` …
+      `</details>`. This list is what the owner checks the post against.
    3. **Please check:** each `CHECK` marker quoted, plus every line of the
       collector's `errors`. If there are none, write "nothing flagged".
-   4. **LinkedIn caption:** the `linkedin` text, for reading.
+   4. **LinkedIn caption:** each post's `linkedin` text, for reading, headed by
+      its number.
    5. "Approve by reviewing the Vercel preview and merging."
 
 ## 9. Finish

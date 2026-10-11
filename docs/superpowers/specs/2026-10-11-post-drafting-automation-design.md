@@ -76,6 +76,7 @@ Either can be started with "Run now". The first weekly run is started by hand ri
 
 **Windows:**
 - **Weekly:** `since` = the `date` of the newest entry in `content/weekly`, **inclusive** (from 00:00 IST that day), so work done after that entry on the same day isn't lost. `until` = the run time. A missed Sunday is therefore covered by the next run.
+- **One post per week** (changed 2026-10-11 after the first run produced one 600-word catch-up): `weeklyChunks(since, runDate)` splits the window into Monday–Sunday IST weeks. Each week with commits gets its own post, dated the week's end (its Sunday, or the run date for a partial week), numbered in date order, all in one PR. When `since` is a Sunday (the previous entry's own date) it joins the following week, so a normal Sunday run still makes one post.
 - All dates written into frontmatter, and "the run date", are in **Asia/Kolkata (IST)**.
 - **Blog:** the last 14 days. This is only used when no idea is waiting (section 3).
 
@@ -107,7 +108,7 @@ The instructions file is versioned in the repo, so the user can edit it like cod
 - no hype words, no emoji, no closing call-to-action.
 
 **Length:**
-- **Weekly:** about 250–500 words. It covers what shipped and why, in the user's words, grouped by project rather than by commit.
+- **Weekly:** about 200–250 words per post. It covers what shipped and why, in the user's words, grouped by project rather than by commit.
 - **Blog:** about 600–1000 words. One idea, argued with concrete details from the user's own work.
 
 **Truthfulness:**
@@ -115,7 +116,7 @@ The instructions file is versioned in the repo, so the user can edit it like cod
 - Anything the model is unsure of gets a `<!-- CHECK: what to verify -->` comment at that spot.
 - Never mention AIdeas or employer work.
 
-**Weekly file:** `content/weekly/<NNN>-<slug>.mdx`, where `NNN` is the next number (zero-padded to 3) and `<slug>` is kebab-case from the title. Frontmatter is `title`, `date` (run date), `summary`, `cover` (`"NNN"`) and `linkedin`.
+**Weekly file:** `content/weekly/<NNN>-<slug>.mdx`, where `NNN` is the next number (zero-padded to 3) and `<slug>` is kebab-case from the title. Frontmatter is `title`, `date` (the week's end), `summary`, `cover` (the number in two digits, `"04"`, like the existing `"01"`–`"03"`; `coverLabel`) and `linkedin`.
 
 **Blog file:** `content/blog/<slug>.mdx`. Frontmatter is `title`, `date`, `tags` (1–3, lowercase), `excerpt` and `linkedin`.
 
@@ -150,12 +151,12 @@ The script prints `path: problem` lines and exits 1 on any problem.
 
 ## 6. The PR
 
-- **Branch:** `draft/weekly-NNN` or `draft/blog-<slug>`.
-- **Title:** `Draft: Weekly #NNN — <title>` or `Draft: Blog — <title>`.
+- **Branch:** `draft/weekly-NNN` (the first post's number) or `draft/blog-<slug>`.
+- **Title:** `Draft: Weekly #NNN — <title>`, `Draft: Weekly #NNN–#MMM` when one run makes several weekly posts, or `Draft: Blog — <title>`.
 - **Label:** `draft-post`, created if missing.
 - **Body, in this order:**
   1. A one-paragraph summary.
-  2. **Sources:** the commits used, as links, grouped by repo.
+  2. **Sources:** every commit used (not a sample), as links, grouped by post and then by repo; a repo with more than 10 commits in a post is collapsed in `<details>`.
   3. **Please check:** every `CHECK` comment, quoted.
   4. **LinkedIn caption:** the `linkedin` text, for reading.
   5. How to approve: review the Vercel preview and merge.

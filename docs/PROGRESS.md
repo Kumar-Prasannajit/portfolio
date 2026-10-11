@@ -550,6 +550,36 @@ Decisions:
 - The rail 3 height budget in brutal was re-measured at 1600x768 (f5ec980): 663px of fixed
   rows against 676px available, with no overflow.
 
+## Post automation (part a)
+Status: live (2026-10-11). Code in #4 and #5, per-week weeklies in the PR with this entry.
+Spec: `docs/superpowers/specs/2026-10-11-post-drafting-automation-design.md` ·
+Instructions: `automation/draft-posts.md`
+Routines (claude.ai/code/routines, model `claude-sonnet-5-5`, repo `Kumar-Prasannajit/portfolio`):
+- `portfolio-weekly-draft` (`trig_01HhqxoR5VU9JMAPs7wgupZe`): Sunday 18:00 IST, cron
+  `30 12 * * 0` UTC.
+- `portfolio-blog-draft` (`trig_01TzjuYkK8JnAgGuDqtVLKVu`): Friday 18:00 IST, cron
+  `30 12 * * 5` UTC.
+- Both run in the cloud environment `portfolio-routines` (network Trusted, one env var
+  `GITHUB_TOKEN`) with **no connectors**. A routine created through the API gets every
+  claude.ai connector attached by default; they were cleared with `clear_mcp_connections`.
+Decisions:
+- The collector reads **public repos only** (a missing `private` flag counts as private): a
+  private repo's commit messages would land in a public PR and post.
+- So one fine-grained token with "Public repositories (read-only)" access is enough;
+  `GITHUB_TOKEN_SALONJAA` isn't used by the routines. GitHub hosts can't be network secrets,
+  so the token is a plain environment variable of that environment.
+- Cloud sessions send all GitHub traffic through a proxy scoped to the session's repos. A
+  real `GITHUB_TOKEN` in the environment passes through it (verified: all 3 repos read). With
+  no token set, the variable reads `proxy-injected` and every call fails; the collector now
+  says so.
+- Drafts push `draft/*` branches and open PRs with the built-in GitHub tools (`gh pr` is
+  GraphQL, which the proxy blocks).
+- Weekly posts are one per Monday–Sunday IST week, 200–250 words, dated the week's end, with a
+  two-digit `cover`; the PR body lists every source commit. Changed after the first run.
+Acceptance: the first "Run now" opened #6 (`Draft: Weekly #004 — …`, green `content-check` and
+Vercel preview, no employer reference). It was one 600-word post for four weeks, which led to
+the per-week change; #6 is closed and the weekly routine re-run to produce #004–#007.
+
 ## Phase 10 — QA pass
 Status: not started
 

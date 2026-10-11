@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   istDate, istMidnightIso, addDays, weeklySince, blogSince, alreadyPostedToday,
-  toCommits, pageWarning, nextWeeklyNumber, pickIdea, tickIdea,
+  toCommits, pageWarning, nextWeeklyNumber, pickIdea, tickIdea, weeklyChunks, coverLabel,
 } from "./activity.ts";
 
 test("addDays crosses month and year boundaries", () => {
@@ -20,6 +20,35 @@ test("istMidnightIso is 00:00 IST in UTC", () => {
 test("weeklySince is the newest entry date, inclusive", () => {
   assert.equal(weeklySince(["2026-09-01", "2026-09-14", "2026-08-20"], "2026-10-11"), "2026-09-14");
   assert.equal(weeklySince([], "2026-10-11"), "2026-10-04");
+});
+test("weeklyChunks splits a catch-up into Monday-Sunday weeks", () => {
+  assert.deepEqual(weeklyChunks("2026-09-14", "2026-10-11"), [
+    { start: "2026-09-14", end: "2026-09-20" },
+    { start: "2026-09-21", end: "2026-09-27" },
+    { start: "2026-09-28", end: "2026-10-04" },
+    { start: "2026-10-05", end: "2026-10-11" },
+  ]);
+});
+test("weeklyChunks folds the previous entry's Sunday into the next week", () => {
+  assert.deepEqual(weeklyChunks("2026-10-11", "2026-10-18"), [{ start: "2026-10-11", end: "2026-10-18" }]);
+  // A manual run mid-week ends the last chunk on the run date.
+  assert.deepEqual(weeklyChunks("2026-10-11", "2026-10-14"), [{ start: "2026-10-11", end: "2026-10-14" }]);
+  assert.deepEqual(weeklyChunks("2026-10-11", "2026-10-11"), [{ start: "2026-10-11", end: "2026-10-11" }]);
+});
+test("weeklyChunks starts mid-week after an older entry, and crosses the year", () => {
+  assert.deepEqual(weeklyChunks("2026-09-16", "2026-09-27"), [
+    { start: "2026-09-16", end: "2026-09-20" },
+    { start: "2026-09-21", end: "2026-09-27" },
+  ]);
+  assert.deepEqual(weeklyChunks("2026-12-28", "2027-01-10"), [
+    { start: "2026-12-28", end: "2027-01-03" },
+    { start: "2027-01-04", end: "2027-01-10" },
+  ]);
+});
+test("coverLabel matches the existing two-digit covers", () => {
+  assert.equal(coverLabel("004"), "04");
+  assert.equal(coverLabel("010"), "10");
+  assert.equal(coverLabel("100"), "100");
 });
 test("blogSince is 14 days back", () => {
   assert.equal(blogSince("2026-10-16"), "2026-10-02");
