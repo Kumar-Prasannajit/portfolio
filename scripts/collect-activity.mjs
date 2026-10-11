@@ -49,6 +49,9 @@ const errors = [];
 // any token can read public repos.
 if (!process.env.GITHUB_TOKEN) {
   errors.push("GITHUB_TOKEN not set: unauthenticated, 60 requests/hour and only 30 repos of " + USER_LOGIN + " listed");
+} else if (process.env.GITHUB_TOKEN === "proxy-injected") {
+  // What a Claude Code cloud session sees when its environment sets no token.
+  errors.push("GITHUB_TOKEN is the cloud placeholder \"proxy-injected\": set a real token in the routine's environment");
 }
 let requests = 0;
 let failures = 0;
