@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   istDate, istMidnightIso, addDays, weeklySince, blogSince, alreadyPostedToday,
-  toCommits, pageWarning, nextWeeklyNumber, pickIdea, tickIdea, weeklyChunks, coverLabel,
+  toCommits, pageWarning, nextWeeklyNumber, pickIdea, tickIdea, weeklyChunks, coverLabel, sourcesMarkdown,
 } from "./activity.ts";
 
 test("addDays crosses month and year boundaries", () => {
@@ -105,4 +105,36 @@ test("pickIdea ignores blank topics and lines inside an HTML comment", () => {
   assert.deepEqual(pickIdea("- [ ]   \n- [ ] Real\n"), { index: 1, topic: "Real", notes: "" });
   const md = "# Blog ideas\n<!--\n- [ ] example — format\n-->\n- [ ] Real one\n";
   assert.deepEqual(pickIdea(md), { index: 4, topic: "Real one", notes: "" });
+});
+
+const commitAt = (repo: string, n: number, message = `feat: ${n}`) => ({
+  repo, sha: `abc${String(n).padStart(4, "0")}`, date: `2026-10-0${(n % 9) + 1}T10:00:00Z`,
+  message, url: `https://github.com/${repo}/commit/abc${String(n).padStart(4, "0")}`,
+});
+test("sourcesMarkdown links every commit, grouped by repo", () => {
+  const md = sourcesMarkdown("#004 · 2026-09-14 → 2026-09-20", [
+    commitAt("o/site", 1), commitAt("me/app", 2), commitAt("o/site", 3),
+  ]);
+  assert.equal(md, [
+    "### #004 · 2026-09-14 → 2026-09-20",
+    "",
+    "**me/app** (1 commit)",
+    "- [abc0002](https://github.com/me/app/commit/abc0002) feat: 2",
+    "",
+    "**o/site** (2 commits)",
+    "- [abc0001](https://github.com/o/site/commit/abc0001) feat: 1",
+    "- [abc0003](https://github.com/o/site/commit/abc0003) feat: 3",
+    "",
+  ].join("\n"));
+});
+test("sourcesMarkdown collapses a repo past 10 commits and escapes HTML", () => {
+  const many = Array.from({ length: 11 }, (_, i) => commitAt("me/app", i, i === 0 ? "fix: <Nav> & co" : undefined));
+  const md = sourcesMarkdown("#005", many);
+  assert.match(md, /<details><summary>me\/app \(11 commits\)<\/summary>\n\n- \[abc0000\]/);
+  assert.match(md, /fix: &lt;Nav&gt; &amp; co/);
+  assert.equal(md.match(/^- \[/gm)?.length, 11);
+  assert.match(md, /\n<\/details>\n$/);
+});
+test("sourcesMarkdown says so when a post has no commits", () => {
+  assert.equal(sourcesMarkdown("#006", []), "### #006\n\nNo commits.\n");
 });

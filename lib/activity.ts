@@ -131,6 +131,32 @@ export function pageWarning(repo: string, count: number, perPage: number): strin
   return count >= perPage ? `${repo}: ${count} commits, results may be truncated` : null;
 }
 
+const escapeHtml = (text: string) =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/**
+ * A draft PR's Sources for one post: every commit as a link, grouped by repo
+ * (alphabetical, commits in the given order). A repo with more than 10 is
+ * collapsed in <details>. Generated in code so the list is never a summary.
+ */
+export function sourcesMarkdown(heading: string, commits: Commit[]): string {
+  const lines = [`### ${heading}`, ""];
+  if (commits.length === 0) return [...lines, "No commits.", ""].join("\n");
+  const byRepo = new Map<string, Commit[]>();
+  for (const commit of commits) byRepo.set(commit.repo, [...(byRepo.get(commit.repo) ?? []), commit]);
+  for (const repo of [...byRepo.keys()].sort()) {
+    const list = byRepo.get(repo)!;
+    const count = `${list.length} commit${list.length === 1 ? "" : "s"}`;
+    const items = list.map((c) => `- [${c.sha}](${c.url}) ${escapeHtml(c.message)}`);
+    if (list.length > 10) {
+      lines.push(`<details><summary>${repo} (${count})</summary>`, "", ...items, "", "</details>", "");
+    } else {
+      lines.push(`**${repo}** (${count})`, ...items, "");
+    }
+  }
+  return lines.join("\n");
+}
+
 /* ------------------------------ Weekly files ----------------------------- */
 
 /** The next `NNN` after the highest `NNN-` filename prefix, zero-padded. */

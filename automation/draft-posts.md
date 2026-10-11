@@ -86,7 +86,8 @@ several, and each week that has commits gets its own short post, all in one PR.
 - If `alreadyPostedToday` is true, stop and log it. An entry already carries
   today's date, so a second one would double up.
 - For each week, oldest first, run
-  `npm run collect:activity -- --since <start> --until <end>`.
+  `npm run -s collect:activity -- --since <start> --until <end> > /tmp/week-<start>.json`
+  and read that file. Keep the files: the PR's Sources are generated from them.
   - Exit status 1 means every GitHub call failed: stop and log the `errors`.
   - A week with no `commits` gets no post.
   - No week has `commits`: stop and log "no activity since <since>",
@@ -135,7 +136,8 @@ node --input-type=module -e 'import fs from "node:fs"; import { pickIdea } from 
   node --input-type=module -e 'import { istDate, blogSince } from "./lib/activity.ts"; console.log(blogSince(istDate(new Date())))'
   ```
 
-  Run `npm run collect:activity -- --since <that date>` (the collector's exit
+  Run `npm run -s collect:activity -- --since <that date> > /tmp/blog.json` and
+  read that file (the collector's exit
   status and `errors` are handled as in weekly mode), then pick the most
   substantial thread: a new integration, a tricky fix, or a design decision with
   trade-offs. If nothing qualifies, stop and log that. Make no PR.
@@ -195,10 +197,13 @@ it still fails, **make no PR**: stop and log the full output.
 3. The body has these sections, in this order:
    1. A one-paragraph summary (with several weekly posts, one line per post:
       number, week, title).
-   2. **Sources:** **every** commit you used, as links, grouped by post and then
-      by repo; not a sample. When one repo has more than 10 commits in a post,
-      put its list in `<details><summary><repo> (<n> commits)</summary>` …
-      `</details>`. This list is what the owner checks the post against.
+   2. **Sources:** paste, **unchanged**, the output of
+      `npm run -s sources:markdown -- "#<NNN>=/tmp/week-<start>.json" ...`
+      with one argument per post, in post order (blog mode:
+      `"Blog=/tmp/blog.json"`). It links every commit, grouped by repo. Don't
+      summarise, shorten or retype it: this list is what the owner checks the
+      post against. A blog written only from an idea's notes, with no collector
+      run, says "None: written from the idea's notes."
    3. **Please check:** each `CHECK` marker quoted, plus every line of the
       collector's `errors`. If there are none, write "nothing flagged".
    4. **LinkedIn caption:** each post's `linkedin` text, for reading, headed by
