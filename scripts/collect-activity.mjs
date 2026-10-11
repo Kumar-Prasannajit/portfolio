@@ -1,9 +1,10 @@
 // Prints the user's recent commits as JSON, for the post-drafting routines.
-// Plain code, not AI. Reads only repos that pass isAllowedRepo (lib/githubTools.ts):
+// Plain code, not AI. Reads only public repos that pass isAllowedRepo (lib/githubTools.ts):
 // the allowed owners' repos are listed with that owner's own token
 // (lib/githubHeaders.ts), the single named repos are fetched by name, and
 // toCommits drops anything not allowed a second time. Nothing from an
-// employer's repos is ever requested.
+// employer's repos is ever requested. Private repos are skipped too, even
+// allowed ones: their commit messages would land in a public PR and post.
 //
 //   node scripts/collect-activity.mjs --since <YYYY-MM-DD> [--until <YYYY-MM-DD>]
 //
@@ -42,12 +43,13 @@ const sinceIso = istMidnightIso(since);
 const untilIso = istMidnightIso(addDays(until, 1));
 
 const errors = [];
-// Without a token the lists quietly shrink to public repos; say so.
+// Only public repos are read, but without a token GitHub allows 60 requests an
+// hour per IP (shared in the cloud) and lists just 30 of the user's repos; say so.
 if (!process.env.GITHUB_TOKEN) {
-  errors.push("GITHUB_TOKEN not set: private repos of " + USER_LOGIN + " are not listed");
+  errors.push("GITHUB_TOKEN not set: unauthenticated, 60 requests/hour and only 30 repos of " + USER_LOGIN + " listed");
 }
 if (!process.env.GITHUB_TOKEN_SALONJAA) {
-  errors.push("GITHUB_TOKEN_SALONJAA not set: private salonjaa-digital-solution repos are not readable");
+  errors.push("GITHUB_TOKEN_SALONJAA not set: salonjaa-digital-solution is read with GITHUB_TOKEN or unauthenticated");
 }
 let requests = 0;
 let failures = 0;
@@ -90,12 +92,13 @@ const named = await Promise.all(
 
 // Same filter as the Stack section: allowed owners or named repos only, and no
 // forks (a fork of an employer repo sits under the user's own account),
-// archived repos or the profile repo.
+// archived repos or the profile repo. Plus public only: a repo without an
+// explicit private: false is treated as private.
 const repos = [
   ...pickRecentRepos(lists.flat(), Infinity, ALLOWED_OWNERS, ALLOWED_REPOS),
   ...pickRecentRepos(named, ALLOWED_REPOS.length, [], ALLOWED_REPOS),
 ]
-  .filter((repo) => allowed(repo.full_name) && repo.pushed_at >= sinceIso)
+  .filter((repo) => allowed(repo.full_name) && repo.private === false && repo.pushed_at >= sinceIso)
   .map((repo) => repo.full_name);
 
 // 2. Commits by the user in the window, per repo.

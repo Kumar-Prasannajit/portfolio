@@ -49,6 +49,13 @@ test("never requests anything about a repo outside the allowlist", () => {
   assert.ok(requested.every((u) => !u.includes("/stale/commits")));
 });
 
+test("reads public repos only: never a private repo, nor one without the flag", () => {
+  const { res, requested } = run(["--since", "2026-09-14"]);
+  assert.equal(res.status, 0, res.stderr);
+  assert.ok(!res.stdout.includes("private work"));
+  assert.ok(requested.every((u) => !/side-project|no-flag|\/crm\//.test(u)), requested.join("\n"));
+});
+
 test("exits 1 but still prints the errors when every request fails", () => {
   const { res } = run(["--since", "2026-09-14"], { STUB_MODE: "down" });
   assert.equal(res.status, 1);
@@ -77,7 +84,7 @@ test("warns when a repo returns a full page of commits", () => {
   assert.ok(JSON.parse(res.stdout).errors.includes("Kumar-Prasannajit/portfolio: 100 commits, results may be truncated"));
 });
 
-test("says so when a token is missing instead of silently undercounting", () => {
+test("says so when a token is missing (rate limit, shorter repo list)", () => {
   const { res } = run(["--since", "2026-09-14"], { GITHUB_TOKEN: "", GITHUB_TOKEN_SALONJAA: "" });
   const errors = JSON.parse(res.stdout).errors;
   assert.ok(errors.some((e) => e.startsWith("GITHUB_TOKEN not set")), errors.join("\n"));

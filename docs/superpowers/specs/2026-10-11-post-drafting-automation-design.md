@@ -42,7 +42,7 @@ Either can be started with "Run now". The first weekly run is started by hand ri
 
 **Environment:**
 - Network level **Trusted**, which allows GitHub and the npm registry.
-- `GITHUB_TOKEN` and `GITHUB_TOKEN_SALONJAA`: the same two read-only fine-grained tokens the site uses (Metadata + Contents read). They are stored in the routine's cloud environment, so private Salonjaa repos can be read.
+- `GITHUB_TOKEN` and `GITHUB_TOKEN_SALONJAA`: the same two read-only fine-grained tokens the site uses (Metadata + Contents read). They are stored in the routine's cloud environment. They only lift GitHub's 60/hour unauthenticated limit: the collector reads **public repos only** (decided 2026-10-11), because a private repo's commit messages would end up in a public PR and post.
 - PRs are opened through the Claude GitHub App on the portfolio repo.
 - **Node ≥ 22.18.** The scripts import the `lib/*.ts` modules directly through Node's native TypeScript support, as `npm test` already does. The setup checks `node --version` and stops with a clear message if it is older.
 
@@ -68,7 +68,7 @@ Either can be started with "Run now". The first weekly run is started by hand ri
 ```
 
 **How it works:**
-- **Listing repos:** it lists repos per allowed owner the same way `lib/githubActivity.ts` does (`/user/repos?affiliation=owner`, `/orgs/<org>/repos`), plus the `ALLOWED_REPOS` by name. It keeps repos with `pushed_at >= since`.
+- **Listing repos:** it lists repos per allowed owner the same way `lib/githubActivity.ts` does (`/user/repos?affiliation=owner`, `/orgs/<org>/repos`), plus the `ALLOWED_REPOS` by name. It keeps repos with `private: false` (a missing flag counts as private) and `pushed_at >= since`.
 - **Commits:** for each repo it calls `GET /repos/{r}/commits?author=Kumar-Prasannajit&since=…&until=…`, with the token chosen by `githubHeaders(owner)`.
 - **Filtering:** commits go through `isAllowedRepo`. Merge commits (those with more than one parent) are dropped.
 - **Pure core:** the testable parts live in `lib/activity.ts`. They are the window computation, the commit filtering and mapping, the next weekly number, and choosing the next idea. They import nothing from Next and run under `node --test`, like `lib/githubTools.ts`.
