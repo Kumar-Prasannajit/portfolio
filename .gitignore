@@ -43,3 +43,9 @@ next-env.d.ts
 
 # local dev viewer counter (lib/viewCount.ts)
 /.data
+
+# agent worktrees
+/.worktrees
+
+# local agent files (skills, scratch screenshots/baselines)
+/.claude/

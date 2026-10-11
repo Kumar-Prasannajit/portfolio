@@ -1,5 +1,23 @@
 /* ============ TOKENS ============ */
+/* Three independent axes stamp <html> (see app/layout.tsx's inline script
+   and docs/redesign-spec.md phase 1):
+     data-theme  zoro | luffy | news | shanks — character palette, ACCENT
+                 ONLY (borders, active states, index numbers, hover, the
+                 focus ring). Never body text, never a large fill behind
+                 text — that's what keeps every theme x mode combination
+                 readable without hand-tuning each one.
+     data-mode   light | dark — every neutral (background/panel/ink/border)
+                 lives here, untouched by which character theme is active.
+     data-ui     default | brutal — see the BRUTAL MODE block below.
+   Neutrals and accents are deliberately split into separate blocks: neutrals
+   only ever vary by data-mode, accents only ever vary by data-theme x
+   data-mode. Zero rule in this file targets a specific theme+mode
+   combination together — that combinatorial explosion is exactly what this
+   split avoids. */
+
 :root {
+  /* ---- neutrals: dark mode (base default, also the no-data-mode-attribute
+     fallback before the prefers-color-scheme block below resolves) ---- */
   color-scheme: dark;
   --bg: #0b0d10;
   --panel: #14171c;
@@ -10,29 +28,47 @@
   --ink-dim: #8b929b;
   --ink-faint: #80878f; /* text: 5.4:1 on --bg */
   --line-strong: #565c64; /* the old faint grey: borders and pixel fills only */
-  --red: #e8404a; /* accent: red text/lines on dark surfaces */
-  --red-solid: #b01c26; /* red SURFACES that carry light text (buttons, bands) */
-  --red-dim: #a92329;
-  --red-ink: #fff4f1;
-  --heat-0: #1c2027;
-  --heat-1: #45151b;
-  --heat-2: #7a1b23;
-  --heat-3: #b01c26;
-  --heat-4: #e8404a;
   --shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
+
+  /* ---- accent: shanks (default theme), dark mode ---- */
+  --accent: #e8404a;
+  --accent-solid: #b01c26; /* SURFACES that carry light text (buttons, bands) */
+  --accent-dim: #a92329;
+  --accent-ink: #fff4f1;
+
+  /* Contribution-graph heat scale, derived from --accent so every theme
+     gets a correct scale for free with no per-theme hex values to hand-tune. */
+  --heat-0: color-mix(in srgb, var(--accent) 4%, var(--panel-2));
+  --heat-1: color-mix(in srgb, var(--accent) 28%, var(--panel-2));
+  --heat-2: color-mix(in srgb, var(--accent) 55%, var(--panel-2));
+  --heat-3: var(--accent-solid);
+  --heat-4: var(--accent);
+
+  /* ---- brutal mode axis: default (data-ui="default") values. Overridden
+     as a block under [data-ui="brutal"] near the bottom of this file —
+     every border/radius/shadow/display-weight declaration in this file
+     should read from these four variables rather than a literal value, so
+     brutal mode composes with all four palettes for free. ---- */
+  --border-width: 1px;
+  --radius: 12px;
+  --font-weight-display: 400;
+  --tracking-display: -0.01em;
+
   --font-display: var(--font-archivo-black), "Arial Black", sans-serif;
-  --font-body: var(--font-ibm-plex-sans), -apple-system, "Segoe UI", sans-serif;
+  /* System stack: IBM Plex Sans was dropped because Google's variable-width
+     build of it fails `next build` under Turbopack (font-stretch faces). */
+  --font-body: -apple-system, "Segoe UI", sans-serif;
   --font-mono: var(--font-ibm-plex-mono), "SFMono-Regular", Consolas, monospace;
   /* Same face as --font-mono (IBM Plex Mono) — kept as its own token
      since it's a distinct semantic slot (nav tagline/links accent) that
      may diverge again later, not because the face itself differs today. */
   --font-accent: var(--font-ibm-plex-mono), "SFMono-Regular", Consolas,
     monospace;
-  /* The nav's typewriter tagline — same plain face as nav links now. */
-  --font-tagline: var(--font-body);
 }
+
+/* ---- neutrals: light mode ---- */
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
+  :root:not([data-mode="dark"]) {
     color-scheme: light;
     --bg: #f1f1ee;
     --panel: #ffffff;
@@ -43,19 +79,10 @@
     --ink-dim: #565c63;
     --ink-faint: #5f656b; /* text: 5.2:1 on --bg */
     --line-strong: #8b9096;
-    --red: #c81e28;
-    --red-solid: #c81e28;
-    --red-dim: #a3161f;
-    --red-ink: #fff7f5;
-    --heat-0: #e9ebed;
-    --heat-1: #f3b4b8;
-    --heat-2: #e5737a;
-    --heat-3: #d13842;
-    --heat-4: #9e141d;
     --shadow: 0 20px 50px -24px rgba(20, 20, 20, 0.25);
   }
 }
-:root[data-theme="light"] {
+:root[data-mode="light"] {
   color-scheme: light;
   --bg: #f1f1ee;
   --panel: #ffffff;
@@ -66,18 +93,9 @@
   --ink-dim: #565c63;
   --ink-faint: #5f656b; /* text: 5.2:1 on --bg */
   --line-strong: #8b9096;
-  --red: #c81e28;
-  --red-solid: #c81e28;
-  --red-dim: #a3161f;
-  --red-ink: #fff7f5;
-  --heat-0: #e9ebed;
-  --heat-1: #f3b4b8;
-  --heat-2: #e5737a;
-  --heat-3: #d13842;
-  --heat-4: #9e141d;
   --shadow: 0 20px 50px -24px rgba(20, 20, 20, 0.25);
 }
-:root[data-theme="dark"] {
+:root[data-mode="dark"] {
   color-scheme: dark;
   --bg: #0b0d10;
   --panel: #14171c;
@@ -88,16 +106,263 @@
   --ink-dim: #8b929b;
   --ink-faint: #80878f; /* text: 5.4:1 on --bg */
   --line-strong: #565c64; /* the old faint grey: borders and pixel fills only */
-  --red: #e8404a; /* accent: red text/lines on dark surfaces */
-  --red-solid: #b01c26; /* red SURFACES that carry light text (buttons, bands) */
-  --red-dim: #a92329;
-  --red-ink: #fff4f1;
-  --heat-0: #1c2027;
-  --heat-1: #45151b;
-  --heat-2: #7a1b23;
-  --heat-3: #b01c26;
-  --heat-4: #e8404a;
   --shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
+}
+
+/* ---- accent: shanks, light mode (also doubles as the no-JS/no-data-theme
+   fallback, same reasoning as the neutral fallback above — shanks is the
+   default theme, so "no explicit theme" resolves to it in pure CSS too) ---- */
+@media (prefers-color-scheme: light) {
+  :root:not([data-mode="dark"]):not([data-theme="zoro"]):not([data-theme="luffy"]):not([data-theme="news"]):not([data-ui="brutal"]) {
+    --accent: #c81e28;
+    --accent-solid: #c81e28;
+    --accent-dim: #a3161f;
+    --accent-ink: #fff7f5;
+  }
+}
+:root[data-theme="shanks"][data-mode="light"]:not([data-ui="brutal"]) {
+  --accent: #c81e28;
+  --accent-solid: #c81e28;
+  --accent-dim: #a3161f;
+  --accent-ink: #fff7f5;
+}
+:root[data-theme="shanks"][data-mode="dark"]:not([data-ui="brutal"]) {
+  --accent: #e8404a;
+  --accent-solid: #b01c26;
+  --accent-dim: #a92329;
+  --accent-ink: #fff4f1;
+}
+
+/* ---- accent: zoro (green) ---- */
+:root[data-theme="zoro"] {
+  /* dark-mode value; also the fallback before data-mode resolves */
+  --accent: #3ecf6e;
+  --accent-solid: #166b34;
+  --accent-dim: #1c7a3d;
+  --accent-ink: #f2fff6;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-theme="zoro"]:not([data-mode="dark"]):not([data-ui="brutal"]) {
+    --accent: #166b34;
+    --accent-solid: #166b34;
+    --accent-dim: #124f27;
+    --accent-ink: #f2fff6;
+  }
+}
+:root[data-theme="zoro"][data-mode="light"]:not([data-ui="brutal"]) {
+  --accent: #166b34;
+  --accent-solid: #166b34;
+  --accent-dim: #124f27;
+  --accent-ink: #f2fff6;
+}
+:root[data-theme="zoro"][data-mode="dark"]:not([data-ui="brutal"]) {
+  --accent: #3ecf6e;
+  --accent-solid: #166b34;
+  --accent-dim: #1c7a3d;
+  --accent-ink: #f2fff6;
+}
+
+/* ---- accent: luffy (orange) — flagged in the spec as most likely to fail
+   contrast. Verified by hand against --bg/--panel in both modes (>=5.4:1);
+   re-check with the phase 10 QA pass if these hexes ever move. ---- */
+:root[data-theme="luffy"] {
+  --accent: #f2871f;
+  --accent-solid: #8a4610;
+  --accent-dim: #a35510;
+  --accent-ink: #fff8f1;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-theme="luffy"]:not([data-mode="dark"]):not([data-ui="brutal"]) {
+    --accent: #9a4c0f;
+    --accent-solid: #9a4c0f;
+    --accent-dim: #7a3d0c;
+    --accent-ink: #fff8f1;
+  }
+}
+:root[data-theme="luffy"][data-mode="light"]:not([data-ui="brutal"]) {
+  --accent: #9a4c0f;
+  --accent-solid: #9a4c0f;
+  --accent-dim: #7a3d0c;
+  --accent-ink: #fff8f1;
+}
+:root[data-theme="luffy"][data-mode="dark"]:not([data-ui="brutal"]) {
+  --accent: #f2871f;
+  --accent-solid: #8a4610;
+  --accent-dim: #a35510;
+  --accent-ink: #fff8f1;
+}
+
+/* ---- accent: news — pure black-and-white, no character hue. The accent
+   IS the foreground: derived from --ink/--bg/--ink-dim so it inherits
+   whatever contrast those neutrals already guarantee, in both modes, for
+   free — no hex values to hand-tune at all. ---- */
+:root[data-theme="news"] {
+  --accent: var(--ink);
+  --accent-solid: var(--ink);
+  --accent-dim: var(--ink-dim);
+  --accent-ink: var(--bg);
+}
+
+/* ---- accordion identity swatches ----
+   Rail 3's theme accordion (phase 3) shows all four characters' colours at
+   once, so — unlike every other accent value in this file — these can't be
+   gated by data-theme: the zoro panel must read green even while shanks is
+   the page's active theme. Deliberately mode-agnostic (one value, not a
+   light/dark pair) since they're small decorative identity marks, not body
+   content; this does not reintroduce the "combination-specific rule" the
+   token-discipline rule above guards against; no rule here needs to know
+   both data-theme AND data-mode at once. */
+:root {
+  --swatch-shanks: #e8404a;
+  --swatch-zoro: #3ecf6e;
+  --swatch-luffy: #f2871f;
+  --swatch-news: var(--ink);
+}
+
+/* ============ BRUTAL MODE ============ */
+/* A re-skin of the current three-pane UI, not a swap
+   (docs/superpowers/specs/2026-10-08-brutal-reskin-design.md): same DOM,
+   recoloured and re-bordered. Primary is the selected character's accent as
+   a bright tint, secondary is black (ink, every line, every hard shadow).
+   The axes stay separate, exactly as in the header comment:
+     data-theme  changes --primary and nothing else
+     data-mode   changes the neutral/accent block
+   so no rule here targets a theme x mode pair. The accent contract the rest
+   of the file already uses is reused, not replaced: --accent-solid is a
+   SURFACE and --accent-ink is the text on it. Dark mode: the page is the
+   primary tint, emphasis blocks are black with primary text. Light mode:
+   the page is white, emphasis blocks are primary with black text. --accent
+   (accent used as text or a mark on the page) is ink in both modes, since a
+   bright tint is unreadable as text on white. The component rules that read
+   these tokens are in the BRUTAL MODE COMPONENTS block at the end of the
+   file. The theme-specific accent blocks above are gated with
+   :not([data-ui="brutal"]) so they cannot out-specify these. */
+:root[data-ui="brutal"] {
+  /* primary tint: shanks, also the fallback; each tint is >= 4.5:1 against
+     black, which is what makes black body text on the dark-mode page pass.
+     redblack used #ff5757 for the same reason. */
+  --primary: #ff5757;
+  --black: #000000;
+  --white: #ffffff;
+
+  /* geometry (ported from redblack) */
+  --border-width: 3px;
+  --bw-thin: 2px;
+  --bw-thick: 4px;
+  --off-sm: 3px;
+  --off: 5px;
+  --off-lg: 8px;
+  --off-xl: 12px;
+  --radius: 0px;
+  --font-weight-display: 900;
+  --tracking-display: -0.03em;
+
+  /* ink and lines: black in both modes. Every border token the file already
+     reads resolves to --line, so the existing rules go black for free. */
+  --ink: var(--black);
+  --line: var(--black);
+  --border: var(--line);
+  --border-2: var(--line);
+  --line-strong: var(--line);
+  --shadow-color: var(--black);
+  --shadow-sm: var(--off-sm) var(--off-sm) 0 0 var(--shadow-color);
+  --shadow: var(--off) var(--off) 0 0 var(--shadow-color);
+  --shadow-lg: var(--off-lg) var(--off-lg) 0 0 var(--shadow-color);
+  /* Secondary text: ink softened toward the page, never a grey of its own.
+     Black at 78% leaves >= 5.5:1 on every primary tint and on white. */
+  --ink-dim: color-mix(in srgb, var(--ink) 78%, var(--bg));
+  --ink-faint: var(--ink-dim);
+  --hatch: color-mix(in srgb, var(--ink) 10%, transparent);
+
+  /* ---- neutrals + accent: dark mode (also the no-data-mode fallback, like
+     the neutral block at the top of this file) ---- */
+  color-scheme: light; /* the page is bright in both modes */
+  --bg: var(--primary);
+  --panel: var(--primary);
+  --panel-2: var(--primary);
+  --accent: var(--ink);
+  --accent-solid: var(--black);
+  --accent-ink: var(--primary);
+  --accent-dim: color-mix(in srgb, var(--accent-solid) 80%, var(--accent-ink));
+  /* contribution graph: ink over the primary page, light to full black */
+  --heat-0: color-mix(in srgb, var(--ink) 10%, var(--panel-2));
+  --heat-1: color-mix(in srgb, var(--ink) 28%, var(--panel-2));
+  --heat-2: color-mix(in srgb, var(--ink) 52%, var(--panel-2));
+  --heat-3: color-mix(in srgb, var(--ink) 78%, var(--panel-2));
+  --heat-4: var(--ink);
+}
+/* per-theme primary tint: the ONLY thing data-theme changes in brutal.
+   news has no character hue, so its tint is a plain light grey. */
+:root[data-ui="brutal"][data-theme="zoro"] {
+  --primary: #3ecf6e;
+}
+:root[data-ui="brutal"][data-theme="luffy"] {
+  --primary: #f2871f;
+}
+:root[data-ui="brutal"][data-theme="news"] {
+  --primary: #c4c4c4;
+}
+/* ---- neutrals + accent: light mode (same media + attribute pair the
+   neutral block above uses, so the first paint is right before hydration) */
+@media (prefers-color-scheme: light) {
+  :root[data-ui="brutal"]:not([data-mode="dark"]) {
+    --bg: var(--white);
+    --panel: var(--white);
+    --panel-2: color-mix(in srgb, var(--primary) 14%, var(--white));
+    --accent-solid: var(--primary);
+    --accent-ink: var(--black);
+    --accent-dim: color-mix(in srgb, var(--accent-solid) 80%, var(--accent-ink));
+    --heat-0: color-mix(in srgb, var(--ink) 8%, var(--panel));
+    --heat-1: color-mix(in srgb, var(--primary) 45%, var(--panel));
+    --heat-2: var(--primary);
+    --heat-3: color-mix(in srgb, var(--primary) 45%, var(--ink));
+    --heat-4: var(--ink);
+  }
+}
+:root[data-ui="brutal"][data-mode="light"] {
+  --bg: var(--white);
+  --panel: var(--white);
+  --panel-2: color-mix(in srgb, var(--primary) 14%, var(--white));
+  --accent-solid: var(--primary);
+  --accent-ink: var(--black);
+  --accent-dim: color-mix(in srgb, var(--accent-solid) 80%, var(--accent-ink));
+  --heat-0: color-mix(in srgb, var(--ink) 8%, var(--panel));
+  --heat-1: color-mix(in srgb, var(--primary) 45%, var(--panel));
+  --heat-2: var(--primary);
+  --heat-3: color-mix(in srgb, var(--primary) 45%, var(--ink));
+  --heat-4: var(--ink);
+}
+
+/* Palette changes (data-theme / data-mode) crossfade over ~200ms; the
+   brutal toggle (data-ui) hard-cuts with no transition — the snap is
+   intentional. Scoped to colour-ish properties only, so it never eases
+   border-width/radius/shadow, and a component's own `transition` (higher
+   specificity) simply replaces this one instead of fighting it. */
+*,
+*::before,
+*::after {
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease,
+    fill 200ms ease,
+    stroke 200ms ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none;
+  }
+}
+/* BRUTAL re-colours the page, so the toggle would crossfade like a palette
+   change. useUiMode stamps data-ui-cut on <html> for the frames around the
+   flip so it hard-cuts instead; !important because component rules carry
+   their own `transition` at higher specificity. */
+:root[data-ui-cut] *,
+:root[data-ui-cut] *::before,
+:root[data-ui-cut] *::after {
+  transition: none !important;
 }
 
 *,
@@ -142,11 +407,11 @@ body {
    only hides the mouse pointer (cursor: none), never focus. Red on the red
    Contact band would vanish, so it switches to the light ink there. */
 :focus-visible {
-  outline: 3px solid var(--red);
+  outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
 .contact-band :focus-visible {
-  outline-color: var(--red-ink);
+  outline-color: var(--accent-ink);
 }
 main:focus {
   outline: none; /* the skip link's target; not a control */
@@ -157,8 +422,8 @@ main:focus {
   left: 8px;
   z-index: 10000;
   padding: 13px 16px;
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--accent-solid);
+  color: var(--accent-ink);
   font-family: var(--font-mono);
   font-size: 0.85rem;
   font-weight: 600;
@@ -172,61 +437,109 @@ main:focus {
 
 /* ============ CUSTOM CURSOR ============ */
 /* Replaces the system pointer everywhere (fine-pointer devices only —
-   see CustomCursor.tsx, which skips touch and prefers-reduced-motion)
-   with the same pixel-block, color-cycling caret used by the nav's
-   typewriter effect. Shares its cursor-cycle-dark/light keyframes,
-   declared alongside .typewriter-cursor further down. */
+   see CustomCursor.tsx, which skips touch and prefers-reduced-motion).
+   Phase 4 (docs/redesign-spec.md): keeps the pixel-block shape but
+   changes the behaviour entirely —
+     - mix-blend-mode: difference against a plain white fill, so it
+       inverts whatever's beneath it and stays visible over screenshots,
+       the red contact block, and all 16 theme combinations with zero
+       per-theme work (this is the same trick the nav morph reveal below
+       already used; the base cursor now shares it).
+     - a transparent white square that follows the pointer exactly (no
+       grid snapping, no idle blink — both made it hard to find/laggy).
+     - two nested elements: .custom-cursor (outer) is positioned purely
+       via `transform: translate3d()` inside a rAF loop — never top/left;
+       .custom-cursor-shape (inner) carries every visual state (scale,
+       tint, morph) so its own transition never fights the outer element's
+       un-eased position updates. */
 html.custom-cursor-active,
 html.custom-cursor-active * {
   cursor: none;
+}
+/* Hygiene: editing text keeps the real system caret — a monospace-grid
+   block standing in for it would cost precision for no benefit. Higher
+   specificity than the universal `cursor: none` above (element selector
+   beats `*`), so it wins without `!important`. Excludes the accordion's
+   own radio input: that's a control, not something you type into. */
+html.custom-cursor-active
+  input:not([type="radio"]):not([type="checkbox"]):not([type="button"]):not(
+    [type="submit"]
+  ),
+html.custom-cursor-active textarea,
+html.custom-cursor-active [contenteditable="true"] {
+  cursor: text;
 }
 .custom-cursor {
   position: fixed;
   top: 0;
   left: 0;
-  width: 14px;
-  height: 14px;
-  border: 1.5px solid var(--border-2);
-  border-radius: 2px;
-  background: var(--ink);
+  width: 0;
+  height: 0;
   pointer-events: none;
   z-index: 9999;
-  transform: translate(-50%, -50%) scale(1);
-  transition:
-    transform 150ms ease,
-    opacity 150ms ease;
-  animation: cursor-cycle-dark 900ms steps(1, end) infinite;
+  /* The blend has to live on this outer, position: fixed element: it is its
+     own stacking context, so a mix-blend-mode on the inner shape only ever
+     blended against the (empty) wrapper — i.e. painted plain white over the
+     nav item instead of inverting it. */
+  mix-blend-mode: difference;
+  transition: opacity 150ms ease;
 }
-.custom-cursor.is-hovering {
-  transform: translate(-50%, -50%) scale(1.8);
+/* Tinted / labelled states are true colours, not inversions. */
+.custom-cursor:has(.is-tinted, .is-labelled) {
+  mix-blend-mode: normal;
 }
 .custom-cursor.is-hidden {
   opacity: 0;
 }
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .custom-cursor {
-    animation-name: cursor-cycle-light;
-  }
+.custom-cursor-shape {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 0;
+  background: #ffffff;
+  --cursor-scale: 1;
+  transform: translate(-50%, -50%) scale(var(--cursor-scale));
+  will-change: transform;
+  transition: transform 120ms ease;
 }
-:root[data-theme="light"] .custom-cursor {
-  animation-name: cursor-cycle-light;
+/* "Slightly larger over anything clickable" — the resting shape above is
+   the thin caret; this is the one state it grows into. */
+.custom-cursor-shape.is-hovering {
+  --cursor-scale: 1.5;
 }
-:root[data-theme="dark"] .custom-cursor {
-  animation-name: cursor-cycle-dark;
+/* "Quick shrink on mousedown." Only touches the scale custom property, so
+   it composes with is-hovering/is-tinted's own width/height/background
+   instead of overriding them, and .is-morphed's explicit `transform: none`
+   below still wins outright while a nav section is active. */
+.custom-cursor-shape.is-pressed {
+  --cursor-scale: 0.7;
+  transition-duration: 80ms;
+}
+/* Theme accordion panels (RailThree.tsx): "tinted to the theme colour...
+   so the cursor itself previews the palette" — a literal colour preview,
+   so this is the one state that switches the blend off rather than
+   inverting through it. --cursor-tint is set from JS to
+   `var(--swatch-<theme>)` per panel. */
+.custom-cursor-shape.is-tinted {
+  background: var(--cursor-tint, #ffffff);
+  mix-blend-mode: normal;
 }
 /* Label state (data-cursor="View", set from CustomCursor.tsx): the block
-   turns into a small red pixel tag carrying the word. Written as
-   `:root .custom-cursor.is-labelled` so it out-ranks the per-theme
-   animation-name rules above, which would otherwise keep the colour cycle
-   running. Never applies to touch: the whole cursor is hidden there. */
-:root .custom-cursor.is-labelled {
+   turns into a small red pixel tag carrying the word. Explicitly back to
+   mix-blend-mode: normal — the base shape above is now diff-blended, and
+   this tag needs to render as true accent colour, not an inversion.
+   Never applies to touch: the whole cursor is hidden there. */
+.custom-cursor-shape.is-labelled {
   width: auto;
   height: auto;
   padding: 6px 10px;
-  border: 2px solid var(--red-ink);
+  border: 2px solid var(--accent-ink);
   border-radius: 0;
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--accent-solid);
+  mix-blend-mode: normal;
+  color: var(--accent-ink);
   box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
   font-family: var(--font-mono);
   font-size: 0.68rem;
@@ -235,10 +548,9 @@ html.custom-cursor-active * {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
-  animation: none;
   transform: translate(-50%, -50%) scale(1);
 }
-:root .custom-cursor.is-labelled::after {
+.custom-cursor-shape.is-labelled::after {
   content: attr(data-label) " \2192";
 }
 
@@ -258,11 +570,12 @@ html.custom-cursor-active * {
 }
 
 /* Nav sections (dark mode): the cursor snaps onto the hovered section's
-   own rect (left/top/width/height set from JS, instantly — no transition
-   on those) and clip-reveals it with a circle that grows from wherever
-   the pointer actually entered the section out to its farthest corner
-   (--morph-x/--morph-y/--morph-r, set from JS), same idea as the theme
-   toggle's wave transition. A plain white fill under
+   own rect (the outer .custom-cursor is translated to its origin, the
+   inner .custom-cursor-shape sized to match — both instantly, no
+   transition on either) and clip-reveals it with a circle that grows
+   from wherever the pointer actually entered the section out to its
+   farthest corner (--morph-x/--morph-y/--morph-r, set from JS), same idea
+   as the theme toggle's wave transition. A plain white fill under
    mix-blend-mode: difference inverts whatever's under it, so the
    icon/text stays fully legible (contrast is preserved by the invert)
    instead of being covered up. Against this site's near-black/near-white
@@ -276,17 +589,13 @@ html.custom-cursor-active * {
    difference blend can't be made to land on a clean white from a red
    source, so there the cursor box itself is switched off and the real
    section underneath is painted red directly. */
-.custom-cursor.is-morphed {
+.custom-cursor-shape.is-morphed {
   border: none;
   border-radius: 3px;
   background: #ffffff;
-  mix-blend-mode: difference;
-  animation: none;
   transform: none;
   clip-path: circle(var(--morph-r, 0px) at var(--morph-x, 50%) var(--morph-y, 50%));
-  transition:
-    clip-path 380ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 150ms ease;
+  transition: clip-path 380ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 /* Boxes the whole page in a bordered frame; the diagonal hatch on <body>
    only shows through in the gutters outside it. */
@@ -295,8 +604,8 @@ html.custom-cursor-active * {
   min-height: 100vh;
   margin: 0 auto;
   background: var(--bg);
-  border-left: 1px solid var(--border);
-  border-right: 1px solid var(--border);
+  border-left: var(--border-width) solid var(--border);
+  border-right: var(--border-width) solid var(--border);
 }
 h1,
 h2,
@@ -312,8 +621,8 @@ img {
   display: block;
 }
 ::selection {
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--accent-solid);
+  color: var(--accent-ink);
 }
 
 .wrap {
@@ -338,7 +647,7 @@ img {
   margin-bottom: 18px;
 }
 .eyebrow .idx {
-  color: var(--red);
+  color: var(--accent);
   font-weight: 600;
 }
 .eyebrow::after {
@@ -403,7 +712,7 @@ header.site-nav {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto auto;
   grid-template-rows: auto auto;
-  border: 1px solid var(--border-2);
+  border: var(--border-width) solid var(--border-2);
   background: var(--panel);
 }
 .nav-cell {
@@ -435,23 +744,23 @@ header.site-nav {
   opacity: 0.8;
 }
 /* Theme-specific elements. Dark is the default; light applies for an explicit
-   data-theme="light", or with no explicit choice when the system prefers
+   data-mode="light", or with no explicit choice when the system prefers
    light — the same rule the palette variables above use. Pure CSS, so the
    first paint is right before React hydrates. */
 .theme-light-only {
   display: none;
 }
-:root[data-theme="light"] .theme-dark-only {
+:root[data-mode="light"] .theme-dark-only {
   display: none;
 }
-:root[data-theme="light"] .theme-light-only {
+:root[data-mode="light"] .theme-light-only {
   display: revert;
 }
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .theme-dark-only {
+  :root:not([data-mode="dark"]) .theme-dark-only {
     display: none;
   }
-  :root:not([data-theme="dark"]) .theme-light-only {
+  :root:not([data-mode="dark"]) .theme-light-only {
     display: revert;
   }
 }
@@ -494,78 +803,30 @@ header.site-nav {
 .nav-cell-top.nav-cell-main {
   display: flex;
   align-items: center;
-  /* Left-anchored, not centered — a typewriter effect needs a fixed
-     starting edge to grow from; re-centering on every keystroke would
-     make the whole line jump around instead of reading as typed. */
+  /* Left-anchored: the path grows from a fixed edge as it rewrites. */
   justify-content: flex-start;
   overflow: hidden;
 }
-.nav-tagline {
+.nav-pane-title {
   margin: 0;
   padding: 0 14px;
-  font-family: var(--font-tagline);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   line-height: 1;
   font-weight: 600;
   letter-spacing: 0.03em;
-  word-spacing: 0.08em;
-  /* No text-transform — case is authored per line (see NAV_TAGLINES),
-     since "sudo make it happen" is deliberately lowercase. */
   color: var(--ink-dim);
   text-align: left;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-/* A slim bar caret. It doesn't fade in/out; it hard-cuts (steps(1))
-   between two solid colors, like a retro terminal cursor: ink↔red while
-   idle, and while a line is actively being typed/deleted it holds solid
-   red — a little "recording" cue that reads the same in either theme,
-   since --red is itself theme-aware. */
-.typewriter-cursor {
-  display: inline-block;
-  width: 0.16em;
-  height: 0.85em;
-  margin-left: 4px;
-  background: var(--ink);
-  vertical-align: -0.1em;
-  animation: cursor-cycle-dark 900ms steps(1, end) infinite;
-}
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .typewriter-cursor {
-    animation-name: cursor-cycle-light;
-  }
-}
-:root[data-theme="light"] .typewriter-cursor {
-  animation-name: cursor-cycle-light;
-}
-:root[data-theme="dark"] .typewriter-cursor {
-  animation-name: cursor-cycle-dark;
-}
-.typewriter-cursor.is-typing {
-  animation: none;
-  background: var(--red);
-}
-/* Dark theme: cycles white (--ink resolves near-white here) ↔ red. */
-@keyframes cursor-cycle-dark {
-  0%,
-  49.9% {
-    background: var(--ink);
-  }
-  50%,
-  100% {
-    background: var(--red);
-  }
-}
-/* Light theme: cycles black (--ink resolves near-black here) ↔ red —
-   mirrors the dark theme's ink/red pairing instead of black/white. */
-@keyframes cursor-cycle-light {
-  0%,
-  49.9% {
-    background: var(--ink);
-  }
-  50%,
-  100% {
-    background: var(--red);
-  }
+.nav-pane-title .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 /* Links row shares its cell with the command trigger, pinned to the
    right edge — both sit inside the tagline/links box, not a column
@@ -602,8 +863,23 @@ header.site-nav {
   font-weight: 500;
   transition: color 0.15s ease;
 }
-.nav-links a:hover {
+.nav-links a:hover,
+.nav-links a[aria-current] {
   color: var(--ink);
+}
+/* Active item: a rule under the label, the one place the accent shows up in
+   the links (the text itself stays a neutral token). */
+.nav-links a {
+  position: relative;
+}
+.nav-links a[aria-current]::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 0;
+  height: var(--border-width);
+  background: var(--accent-solid);
 }
 
 /* ⌘ hint, right-aligned in the nav-links row — one bordered container,
@@ -630,7 +906,7 @@ header.site-nav {
 }
 .nav-cmd-kbd {
   font-size: 0.95rem;
-  color: var(--red);
+  color: var(--accent);
 }
 
 /* Now-playing (NowPlayingWidget.tsx): a music-icon button in the nav that
@@ -678,7 +954,7 @@ header.site-nav {
   right: -4px;
   width: 5px;
   height: 5px;
-  background: var(--red);
+  background: var(--accent);
   animation: blink 1.1s steps(1) infinite;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -713,7 +989,7 @@ header.site-nav {
   border: 2px solid var(--line-strong);
   border-radius: 0;
   background: var(--panel);
-  box-shadow: 4px 4px 0 var(--red-dim);
+  box-shadow: 4px 4px 0 var(--accent-dim);
   font-family: var(--font-mono);
   color: var(--ink-dim);
 }
@@ -731,8 +1007,8 @@ header.site-nav {
   letter-spacing: 0.08em;
 }
 .np-pop.live .np-tag {
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--accent-solid);
+  color: var(--accent-ink);
 }
 
 /* Four pixel bars that jump between heights; frozen and dim when nothing
@@ -750,7 +1026,7 @@ header.site-nav {
   background: var(--line-strong);
 }
 .np-pop.live .np-eq i {
-  background: var(--red);
+  background: var(--accent);
   animation: np-bar 0.9s steps(1, end) infinite;
 }
 .np-pop.live .np-eq i:nth-child(2) {
@@ -840,9 +1116,9 @@ header.site-nav {
 .np-link {
   align-self: flex-start;
   font-size: 0.74rem;
-  color: var(--red);
+  color: var(--accent);
   text-decoration: none;
-  border-bottom: 2px solid var(--red-dim);
+  border-bottom: 2px solid var(--accent-dim);
 }
 .np-fallback p {
   margin: 0;
@@ -877,7 +1153,7 @@ header.site-nav {
   transition: color 0.15s ease;
 }
 .theme-toggle-btn:hover {
-  color: var(--red);
+  color: var(--accent);
 }
 /* Under the morphed cursor, pre-invert instead of neutralizing — same
    trick as .cursor-invert-target near .nav-cmd-kbd — so both the ring
@@ -919,7 +1195,7 @@ header.site-nav {
 }
 .nav-cell-top.nav-cell-social a:hover {
   background: var(--panel-2);
-  color: var(--red);
+  color: var(--accent);
 }
 /* Pre-invert just the icon under the morphed cursor — same reasoning as
    the theme toggle's rule near it — so the hover-red icon cancels back
@@ -990,7 +1266,7 @@ header.site-nav {
   transition: color 0.15s ease;
 }
 .nav-hamburger-btn:hover {
-  color: var(--red);
+  color: var(--accent);
 }
 .nav-hamburger-btn svg {
   width: 22px;
@@ -1063,9 +1339,13 @@ header.site-nav {
     color 0.15s ease,
     background 0.15s ease;
 }
-.nav-mobile-links a:hover {
+.nav-mobile-links a:hover,
+.nav-mobile-links a[aria-current] {
   color: var(--ink);
   background: var(--panel-2);
+}
+.nav-mobile-links a[aria-current] {
+  box-shadow: inset var(--border-width) 0 0 var(--accent-solid);
 }
 .nav-mobile-gif {
   height: 160px;
@@ -1089,21 +1369,21 @@ header.site-nav {
    from the same --morph-x/-y/-r JS sets on the global cursor for the
    dark-mode reveal (see enterMorph in CustomCursor.tsx), so both themes
    get the identical fluid, entry-point-anchored wipe. Content (color:
-   var(--red-ink), or the white-mark logo asset — see Nav.tsx) is real
+   var(--accent-ink), or the white-mark logo asset — see Nav.tsx) is real
    page content painted after the pseudo-element in source order, so it
    sits on top with no z-index juggling — the pseudo gets z-index: -1
    only to stay below it. Dark mode is untouched and keeps the
    diff-blend look above. */
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .custom-cursor.is-morphed {
+  :root:not([data-mode="dark"]) .custom-cursor-shape.is-morphed {
     background: transparent;
     mix-blend-mode: normal;
   }
-  :root:not([data-theme="dark"]) .nav-cell-logo.cursor-invert-target,
-  :root:not([data-theme="dark"]) .nav-cmd-trigger.cursor-invert-target,
-  :root:not([data-theme="dark"]) .theme-toggle-btn.cursor-invert-target,
-  :root:not([data-theme="dark"]) .nav-links a.cursor-invert-target,
-  :root:not([data-theme="dark"])
+  :root:not([data-mode="dark"]) .nav-cell-logo.cursor-invert-target,
+  :root:not([data-mode="dark"]) .nav-cmd-trigger.cursor-invert-target,
+  :root:not([data-mode="dark"]) .theme-toggle-btn.cursor-invert-target,
+  :root:not([data-mode="dark"]) .nav-links a.cursor-invert-target,
+  :root:not([data-mode="dark"])
     .nav-cell-top.nav-cell-social
     a.cursor-invert-target {
     position: relative;
@@ -1114,85 +1394,85 @@ header.site-nav {
        .nav-grid's own opaque background instead of just behind this
        element's own icon/text. */
     isolation: isolate;
-    color: var(--red-ink);
+    color: var(--accent-ink);
     opacity: 1;
   }
-  :root:not([data-theme="dark"]) .cursor-invert-target::before {
+  :root:not([data-mode="dark"]) .cursor-invert-target::before {
     content: "";
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: var(--red);
+    background: var(--accent);
     clip-path: circle(
       var(--morph-r, 0px) at var(--morph-x, 50%) var(--morph-y, 50%)
     );
     transition: clip-path 380ms cubic-bezier(0.22, 1, 0.36, 1);
   }
-  :root:not([data-theme="dark"]) .cursor-invert-target .nav-cmd-kbd {
-    color: var(--red-ink);
+  :root:not([data-mode="dark"]) .cursor-invert-target .nav-cmd-kbd {
+    color: var(--accent-ink);
     filter: none;
   }
-  :root:not([data-theme="dark"]) .theme-toggle-btn.cursor-invert-target {
+  :root:not([data-mode="dark"]) .theme-toggle-btn.cursor-invert-target {
     filter: none;
   }
-  :root:not([data-theme="dark"])
+  :root:not([data-mode="dark"])
     .theme-toggle-btn.cursor-invert-target
     svg
     path {
-    fill: var(--red-ink);
+    fill: var(--accent-ink);
   }
-  :root:not([data-theme="dark"])
+  :root:not([data-mode="dark"])
     .nav-cell-top.nav-cell-social
     a.cursor-invert-target
     svg {
     filter: none;
   }
-  :root:not([data-theme="dark"]) .cursor-invert-target .nav-logo-img-hover {
+  :root:not([data-mode="dark"]) .cursor-invert-target .nav-logo-img-hover {
     filter: none;
   }
 }
-:root[data-theme="light"] .custom-cursor.is-morphed {
+:root[data-mode="light"] .custom-cursor-shape.is-morphed {
   background: transparent;
   mix-blend-mode: normal;
 }
-:root[data-theme="light"] .nav-cell-logo.cursor-invert-target,
-:root[data-theme="light"] .nav-cmd-trigger.cursor-invert-target,
-:root[data-theme="light"] .theme-toggle-btn.cursor-invert-target,
-:root[data-theme="light"] .nav-links a.cursor-invert-target,
-:root[data-theme="light"] .nav-cell-top.nav-cell-social a.cursor-invert-target {
+:root[data-mode="light"] .nav-cell-logo.cursor-invert-target,
+:root[data-mode="light"] .nav-cmd-trigger.cursor-invert-target,
+:root[data-mode="light"] .theme-toggle-btn.cursor-invert-target,
+:root[data-mode="light"] .nav-links a.cursor-invert-target,
+:root[data-mode="light"] .nav-cell-top.nav-cell-social a.cursor-invert-target {
   position: relative;
   isolation: isolate;
-  color: var(--red-ink);
+  color: var(--accent-ink);
   opacity: 1;
 }
-:root[data-theme="light"] .cursor-invert-target::before {
+:root[data-mode="light"] .cursor-invert-target::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: var(--red);
+  background: var(--accent);
   clip-path: circle(
     var(--morph-r, 0px) at var(--morph-x, 50%) var(--morph-y, 50%)
   );
   transition: clip-path 380ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-:root[data-theme="light"] .cursor-invert-target .nav-cmd-kbd {
-  color: var(--red-ink);
+:root[data-mode="light"] .cursor-invert-target .nav-cmd-kbd {
+  color: var(--accent-ink);
   filter: none;
 }
-:root[data-theme="light"] .theme-toggle-btn.cursor-invert-target {
+:root[data-mode="light"] .theme-toggle-btn.cursor-invert-target {
   filter: none;
 }
-:root[data-theme="light"] .theme-toggle-btn.cursor-invert-target svg path {
-  fill: var(--red-ink);
+:root[data-mode="light"] .theme-toggle-btn.cursor-invert-target svg path {
+  fill: var(--accent-ink);
 }
-:root[data-theme="light"]
+:root[data-mode="light"]
   .nav-cell-top.nav-cell-social
   a.cursor-invert-target
   svg {
   filter: none;
 }
-:root[data-theme="light"] .cursor-invert-target .nav-logo-img-hover {
+:root[data-mode="light"] .cursor-invert-target .nav-logo-img-hover {
   filter: none;
 }
 
@@ -1237,7 +1517,7 @@ header.site-nav {
   z-index: 9000; /* over the nav (50) and panels, under the custom cursor (9999) */
   overflow: hidden;
   background: var(--bg);
-  border-top: 3px solid var(--red);
+  border-top: 3px solid var(--accent);
   color: var(--ink-dim);
   will-change: transform;
   animation: boot-wipe 0.3s steps(8, end) 1.15s forwards;
@@ -1283,7 +1563,7 @@ html[data-boot="done"] .boot {
     forwards;
 }
 .boot-ok {
-  color: var(--red);
+  color: var(--accent);
   font-weight: 600;
 }
 .boot-bar {
@@ -1295,7 +1575,7 @@ html[data-boot="done"] .boot {
 .boot-bar span {
   display: block;
   height: 100%;
-  background: var(--red);
+  background: var(--accent);
   transform-origin: left;
   transform: scaleX(0);
   animation: boot-fill 0.9s steps(16, end) 0.1s forwards;
@@ -1311,7 +1591,7 @@ html[data-boot="done"] .boot {
   height: 1.1em;
   margin-left: 6px;
   vertical-align: text-bottom;
-  background: var(--red);
+  background: var(--accent);
   animation: blink 1.1s steps(1) infinite;
 }
 @keyframes boot-type {
@@ -1396,7 +1676,7 @@ html[data-boot="done"] .boot {
   display: inline-block;
   width: 8px;
   height: 1.1em;
-  background: var(--red);
+  background: var(--accent);
   animation: blink 1.1s steps(1) infinite;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1414,7 +1694,8 @@ html[data-boot="done"] .boot {
   font-family: var(--font-display);
   text-transform: uppercase;
   line-height: 0.86;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-display);
+  font-weight: var(--font-weight-display);
   font-size: clamp(2.4rem, 7.4vw, 5.4rem);
   /* Sized off the hero column itself (it is narrower than the viewport on
      the three-panel home layout): the name is ~7.9em wide. */
@@ -1423,7 +1704,7 @@ html[data-boot="done"] .boot {
 }
 
 .hero h1 .l2 {
-  color: var(--red);
+  color: var(--accent);
 }
 
 .hero-sub {
@@ -1485,11 +1766,11 @@ html[data-boot="done"] .boot {
   transform: translateY(-2px);
 }
 .btn-primary {
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--accent-solid);
+  color: var(--accent-ink);
 }
 .btn-primary:hover {
-  background: var(--red-dim);
+  background: var(--accent-dim);
 }
 .btn-ghost {
   border-color: var(--border-2);
@@ -1497,7 +1778,7 @@ html[data-boot="done"] .boot {
   background: transparent;
 }
 .btn-ghost:hover {
-  border-color: var(--red);
+  border-color: var(--accent);
 }
 .btn-icon {
   width: 44px;
@@ -1509,7 +1790,7 @@ html[data-boot="done"] .boot {
   border-radius: 10px;
 }
 .btn-icon:hover {
-  border-color: var(--red);
+  border-color: var(--accent);
   color: var(--ink);
 }
 .btn-icon svg {
@@ -1520,8 +1801,8 @@ html[data-boot="done"] .boot {
 /* ============ MARQUEE ============ */
 .marquee-band {
   position: relative;
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--accent-solid);
+  color: var(--accent-ink);
 }
 .marquee-clip {
   overflow: hidden;
@@ -1567,7 +1848,7 @@ html[data-boot="done"] .boot {
     transform: translateX(calc(var(--marquee-ramp-shift) - 50%));
   }
 }
-.marquee-track span {
+.marquee-track > span {
   font-family: var(--font-mono);
   font-weight: 600;
   font-size: 0.92rem;
@@ -1578,7 +1859,7 @@ html[data-boot="done"] .boot {
   align-items: center;
   gap: 28px;
 }
-.marquee-track span::after {
+.marquee-track > span::after {
   content: "✶";
   opacity: 0.7;
   font-size: 0.8em;
@@ -1593,32 +1874,45 @@ html[data-boot="done"] .boot {
   text-transform: uppercase;
   font-size: clamp(1.5rem, 2.6vw, 2.15rem);
   line-height: 1.05;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-display);
+  font-weight: var(--font-weight-display);
   margin-bottom: 18px;
 }
 
 /* ============ ABOUT ============ */
-.about-grid {
-  display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  gap: clamp(32px, 5vw, 72px);
-  align-items: start;
-}
-@media (max-width: 820px) {
-  .about-grid {
-    grid-template-columns: 1fr;
-  }
-}
+/* One wide column (phase 5). Body text stays a neutral token; the accent only
+   underlines the live variables. */
 .about-copy p {
-  font-size: 0.96rem;
-  line-height: 1.7;
+  font-size: clamp(1rem, 1.4vw, 1.12rem);
+  line-height: 1.8;
   color: var(--ink-dim);
-  max-width: 60ch;
-  margin: 0 0 16px;
+  max-width: 62ch;
+  margin: 0 0 20px;
+}
+.about-copy p:last-child {
+  margin-bottom: 0;
 }
 .about-copy strong {
   color: var(--ink);
   font-weight: 600;
+}
+/* A live word. Mono so scrambling glyphs never change its width, nowrap so a
+   line break can't split it, sr-only copy carries the real value for
+   assistive tech (the visible glyphs are aria-hidden while they cycle). */
+.about-var {
+  position: relative;
+  color: var(--ink);
+  font-size: 0.92em;
+  white-space: nowrap;
+  border-bottom: 1px dashed var(--accent);
+}
+.about-var-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .term-card {
@@ -1661,24 +1955,6 @@ html[data-boot="done"] .boot {
   font-family: var(--font-mono);
   font-size: 0.86rem;
 }
-.term-row {
-  display: grid;
-  grid-template-columns: 84px 1fr;
-  gap: 14px;
-  padding: 7px 0;
-  border-bottom: 1px dashed var(--border);
-  line-height: 1.5;
-}
-.term-row:last-child {
-  border-bottom: none;
-}
-.term-row .k {
-  color: var(--red);
-}
-.term-row .v {
-  color: var(--ink-dim);
-}
-
 /* ============ STACK ============ */
 .stack-group {
   margin-bottom: 30px;
@@ -1712,9 +1988,101 @@ html[data-boot="done"] .boot {
     color 0.15s ease;
 }
 .pill:hover {
-  border-color: var(--red);
+  border-color: var(--accent);
   transform: translateY(-2px);
   color: var(--ink);
+}
+
+/* Ranked stack (phase 6). --w is 0..1 tool weight, set inline; 0 for every
+   tool while the row is flat, so one rule covers both states. Tiles are
+   read-only (no hover or selected state); text stays a neutral token. */
+.stack-board {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+.stack-tool {
+  --w: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+  color: var(--ink);
+  background: var(--panel);
+  border: var(--border-width) solid var(--border-2);
+  border-radius: var(--radius);
+  padding: calc(10px + var(--w) * 8px) calc(14px + var(--w) * 10px);
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+/* Read-only tiles: the spoken "name, N projects, last used" lives here. */
+.stack-tool .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.stack-tool-name {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  letter-spacing: var(--tracking-display);
+  text-transform: uppercase;
+  font-size: calc(0.95rem + var(--w) * 1.3rem);
+  line-height: 1.05;
+}
+.stack-tool-meta {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+}
+.stack-filter-note {
+  margin: 16px 0 0;
+  font-size: 0.76rem;
+  color: var(--ink-faint);
+}
+.stack-filter-note button {
+  font: inherit;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 3px;
+}
+.stack-learning {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--border-2);
+}
+.stack-learning .stack-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse-dot 2.8s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  50% {
+    opacity: 0.25;
+    transform: scale(0.7);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pulse-dot {
+    animation: none;
+  }
 }
 
 /* ============ EXPERIENCE ============ */
@@ -1747,7 +2115,7 @@ html[data-boot="done"] .boot {
   height: 11px;
   border-radius: 50%;
   background: var(--bg);
-  border: 2px solid var(--red);
+  border: 2px solid var(--accent);
 }
 .tl-top {
   display: flex;
@@ -1768,7 +2136,7 @@ html[data-boot="done"] .boot {
   white-space: nowrap;
 }
 .tl-org {
-  color: var(--red);
+  color: var(--accent);
   font-weight: 600;
   font-size: 0.95rem;
   margin-bottom: 12px;
@@ -1790,17 +2158,6 @@ html[data-boot="done"] .boot {
   margin-bottom: 0;
 }
 
-/* ============ PROJECTS ============ */
-.proj-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 22px;
-}
-@media (max-width: 980px) {
-  .proj-grid {
-    grid-template-columns: 1fr;
-  }
-}
 .card {
   border: 1px solid var(--border-2);
   border-radius: 16px;
@@ -1815,7 +2172,7 @@ html[data-boot="done"] .boot {
     box-shadow 0.2s ease;
 }
 .card:hover {
-  border-color: var(--red);
+  border-color: var(--accent);
   transform: translateY(-4px);
   box-shadow: var(--shadow);
 }
@@ -1875,8 +2232,8 @@ html[data-boot="done"] .boot {
   padding: 8px 0 4px;
 }
 .card-links a:hover {
-  color: var(--red);
-  border-color: var(--red);
+  color: var(--accent);
+  border-color: var(--accent);
 }
 .card-links svg {
   width: 12px;
@@ -1893,8 +2250,8 @@ html[data-boot="done"] .boot {
   font-family: var(--font-mono);
   font-size: 0.68rem;
   letter-spacing: 0.06em;
-  color: var(--red);
-  border: 1px solid var(--red-dim);
+  color: var(--accent);
+  border: 1px solid var(--accent-dim);
   border-radius: 999px;
   padding: 3px 9px;
   white-space: nowrap;
@@ -1917,7 +2274,7 @@ html[data-boot="done"] .boot {
   white-space: pre-wrap;
 }
 .term-line-prompt {
-  color: var(--red);
+  color: var(--accent);
 }
 
 /* ============ GALLERY ============ */
@@ -1976,14 +2333,14 @@ html[data-boot="done"] .boot {
     box-shadow 0.2s ease;
 }
 .place-card:hover {
-  border-color: var(--red);
+  border-color: var(--accent);
   transform: translateY(-4px);
   box-shadow: var(--shadow);
 }
 .place-idx {
   font-family: var(--font-mono);
   font-size: 0.74rem;
-  color: var(--red);
+  color: var(--accent);
   margin-bottom: 8px;
 }
 .place-card h2 {
@@ -2026,7 +2383,7 @@ html[data-boot="done"] .boot {
   font-weight: 700;
 }
 .gh-total span {
-  color: var(--red);
+  color: var(--accent);
 }
 .gh-link {
   font-family: var(--font-mono);
@@ -2042,8 +2399,8 @@ html[data-boot="done"] .boot {
   min-height: 44px;
 }
 .gh-link:hover {
-  color: var(--red);
-  border-color: var(--red);
+  color: var(--accent);
+  border-color: var(--accent);
 }
 .gh-link svg {
   width: 12px;
@@ -2144,27 +2501,91 @@ html[data-boot="done"] .boot {
   --cell: 10px;
 }
 
+/* Commit-graph game. Idle = the graph exactly as before; only the PLAY
+   button exists. While a run is active the classes below are toggled on the
+   real cells (!important because each cell's heat colour is an inline style).
+   Snake is solid accent, the trail it leaves is a tint of it, food is a
+   hollow square — three states that stay distinct even in the `news` theme,
+   where the accent is the ink itself. */
+.gh-game {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: auto;
+}
+.gh-play {
+  min-height: 32px;
+  padding: 0 12px;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--ink-dim);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+.gh-play:hover {
+  color: var(--ink);
+}
+.gh-play[aria-pressed="true"] {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+}
+.gh-score {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+.gh-game .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.gh-weeks .gh-cell.is-trail {
+  background: color-mix(in srgb, var(--accent-solid) 40%, var(--panel)) !important;
+}
+.gh-weeks .gh-cell.is-snake {
+  background: var(--accent-solid) !important;
+}
+.gh-weeks .gh-cell.is-food {
+  background: var(--panel) !important;
+  outline: 2px solid var(--accent-solid);
+  outline-offset: -2px;
+}
+/* Small screens: the graph scrolls sideways and there are no arrow keys, so
+   the game is hidden rather than shipped cramped. */
+@media (max-width: 1023px), (pointer: coarse) {
+  .gh-game {
+    display: none;
+  }
+}
+
 /* ============ CONTACT ============ */
 .contact-band {
-  background: var(--red-solid);
-  color: var(--red-ink);
+  background: var(--accent-solid);
+  color: var(--accent-ink);
 }
 .contact-band .eyebrow {
-  color: var(--red-ink);
+  color: var(--accent-ink);
   opacity: 0.92;
 }
 .contact-band .eyebrow::after {
   background: rgba(255, 255, 255, 0.35);
 }
 .contact-band .eyebrow .idx {
-  color: var(--red-ink);
+  color: var(--accent-ink);
 }
 .contact-h {
   font-family: var(--font-display);
   text-transform: uppercase;
   font-size: clamp(1.9rem, 5vw, 3.7rem);
   line-height: 0.96;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-display);
+  font-weight: var(--font-weight-display);
   margin-bottom: 20px;
 }
 .contact-sub {
@@ -2175,25 +2596,25 @@ html[data-boot="done"] .boot {
   line-height: 1.6;
 }
 .contact-band .btn-primary {
-  background: var(--red-ink);
-  color: var(--red-solid);
+  background: var(--accent-ink);
+  color: var(--accent-solid);
 }
 .contact-band .btn-primary:hover {
   background: #fff;
 }
 .contact-band .btn-ghost {
   border-color: rgba(255, 255, 255, 0.5);
-  color: var(--red-ink);
+  color: var(--accent-ink);
 }
 .contact-band .btn-ghost:hover {
-  border-color: var(--red-ink);
+  border-color: var(--accent-ink);
 }
 .contact-band .btn-icon {
   border-color: rgba(255, 255, 255, 0.5);
-  color: var(--red-ink);
+  color: var(--accent-ink);
 }
 .contact-band .btn-icon:hover {
-  border-color: var(--red-ink);
+  border-color: var(--accent-ink);
   background: rgba(255, 255, 255, 0.08);
 }
 .contact-email {
@@ -2236,7 +2657,7 @@ footer {
   margin: -8px 0;
 }
 .foot-inner a:hover {
-  color: var(--red);
+  color: var(--accent);
 }
 
 @media (max-width: 880px) {
@@ -2266,9 +2687,6 @@ footer {
   }
   .hero-bin {
     display: none;
-  }
-  .term-row {
-    grid-template-columns: 72px 1fr;
   }
 }
 
@@ -2312,50 +2730,18 @@ footer {
 }
 
 /* ============ HOME PANELS ============ */
-/* HomeShell.tsx: on wide screens the middle column is the page and the two
-   gutters become fixed side panels (the right one has its own Lenis scroller).
-   ≥1280px  three columns (left identity · middle page · right project loop)
-   1024–1279px  middle + ONE side panel with PROFILE / PROJECTS tabs
-   <1024px  no panels — one stacked page, ordered by the `order` rules below */
+/* HomeShell.tsx: on wide screens the middle column is the page — the only
+   scroll container (docs/redesign-spec.md phase 2) — and the two gutters
+   become FIXED, non-scrolling side panels.
+   ≥1024px  three columns, always: left identity · middle page · right rail
+   <1024px  no panels — one stacked page, ordered by the `order` rules below,
+            with rail 1 collapsed to a top strip and rail 3's controls to a
+            fixed bottom bar (see the max-width: 1023px block). */
 html.lenis {
   scroll-behavior: auto;
 }
-.panel-tabs,
-.panel-status {
-  display: none;
-}
 .panel-head .path {
   white-space: nowrap;
-}
-.panel-tabs {
-  gap: 6px;
-  margin-left: auto;
-}
-.panel-tabs button {
-  padding: 4px 8px;
-  border: 2px solid var(--line-strong);
-  border-radius: 0;
-  background: transparent;
-  color: var(--ink-dim);
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-}
-.panel-tabs button[aria-selected="true"] {
-  border-color: var(--red);
-  background: var(--red-solid);
-  color: var(--red-ink);
-}
-.panel-status {
-  margin-left: auto;
-  padding: 2px 6px;
-  border: 2px solid var(--line-strong);
-  color: var(--ink-dim);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
 }
 
 @media (min-width: 1024px) {
@@ -2364,8 +2750,9 @@ html.lenis {
        and on the fixed panels a % resolves against the viewport width WITHOUT
        the page scrollbar, which is what the layout needs, and it is right on
        the first frame. (100vw includes the scrollbar; correcting that from JS
-       moved the whole layout ~15px once the page hydrated.) */
-    --panel-w: clamp(300px, calc((100% - 64rem) / 2), 460px);
+       moved the whole layout ~15px once the page hydrated.) 240px minimum —
+       spec open decision 2 — gives the middle ~800px on a 1280px laptop. */
+    --panel-w: clamp(240px, calc((100% - 64rem) / 2), 460px);
     --frame-w: min(64rem, calc(100% - 2 * var(--panel-w)));
     max-width: var(--frame-w);
   }
@@ -2389,7 +2776,9 @@ html.lenis {
   }
 
   /* Same height as the nav, with the same 2px rule under it, so the three
-     columns share one header line. */
+     columns share one header line — the one crossbar guaranteed to align
+     across all three panes at every scroll position, since the nav is
+     sticky and both rails are fixed. */
   .panel-head {
     flex: none;
     /* The fallback is the nav's real height, so the panel headers don't jump
@@ -2399,49 +2788,6 @@ html.lenis {
     padding-top: 0;
     padding-bottom: 0;
     border-bottom: 2px solid var(--border);
-  }
-  .panel-scroll {
-    flex: 1;
-    min-height: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-  .panel-content {
-    position: relative;
-  }
-  /* The right panel moves by itself; a scrollbar would just twitch. */
-  .side-right .panel-scroll {
-    scrollbar-width: none;
-  }
-  .side-right .panel-scroll::-webkit-scrollbar {
-    display: none;
-  }
-  .side-right .panel-status {
-    display: inline-block;
-  }
-
-  /* The project cards were designed for the full-width column: tighten them
-     for a 300–460px panel. */
-  .side-panel .section {
-    padding: 28px 0 34px;
-  }
-  .side-panel .wrap {
-    padding: 0 20px;
-  }
-  .side-panel .proj-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-  .side-panel .card {
-    height: auto;
-    padding: 20px;
-  }
-  .side-right .band.alt {
-    background: transparent;
-  }
-  .side-right .section {
-    padding: 20px 0;
   }
 }
 
@@ -2473,6 +2819,23 @@ html.lenis {
 .ident-img {
   object-fit: cover;
   object-position: 55% 38%;
+  transition: filter 400ms ease;
+}
+/* The portrait's red is the shanks baseline; the other themes recolour it
+   with a filter. Follows the live data-theme, so hover previews it too. */
+:root[data-theme="zoro"] .ident-img {
+  filter: hue-rotate(115deg) saturate(1.1);
+}
+:root[data-theme="luffy"] .ident-img {
+  filter: hue-rotate(28deg) saturate(1.25) brightness(1.05);
+}
+:root[data-theme="news"] .ident-img {
+  filter: grayscale(1) contrast(1.1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ident-img {
+    transition: none;
+  }
 }
 /* Faint scanlines tie the photo to the site's hatched, pixel look. */
 .ident-photo::after {
@@ -2539,7 +2902,7 @@ html.lenis {
 }
 /* The place name itself is the one red word in the header. */
 .stat-place {
-  color: var(--red);
+  color: var(--accent);
   font-weight: 700;
 }
 .stat-label::before {
@@ -2548,7 +2911,7 @@ html.lenis {
   width: 6px;
   height: 6px;
   margin-right: 7px;
-  background: var(--red);
+  background: var(--accent);
 }
 .stat-value {
   position: absolute;
@@ -2562,7 +2925,7 @@ html.lenis {
   white-space: nowrap;
 }
 .stat-red .stat-value {
-  color: var(--red);
+  color: var(--accent);
 }
 /* Fixed-width digits so a ticking clock doesn't jitter. */
 .dg {
@@ -2579,7 +2942,7 @@ html.lenis {
   display: inline-block;
   width: 0.34em;
   text-align: center;
-  color: var(--red);
+  color: var(--accent);
   animation: blink 1s steps(1) infinite;
 }
 .sp {
@@ -2588,7 +2951,7 @@ html.lenis {
 }
 /* The seconds live in the tile's header, in red. */
 .stat-sec {
-  color: var(--red);
+  color: var(--accent);
   font-weight: 700;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -2610,55 +2973,22 @@ html.lenis {
   }
 }
 
-/* One side panel at a time, switched by the PROFILE / PROJECTS tabs. */
-@media (min-width: 1024px) and (max-width: 1279px) {
-  .site-frame:has(.home-shell) {
-    --panel-w: 340px;
-    --frame-w: calc(100% - var(--panel-w));
-    margin: 0;
-  }
-  .side-left,
-  .side-right {
-    left: auto;
-    right: 0;
-    border-left: 1px solid var(--border);
-    border-right: none;
-  }
-  .home-shell[data-tab="profile"] .side-right,
-  .home-shell[data-tab="projects"] .side-left {
-    display: none;
-  }
-  .panel-tabs {
-    display: flex;
-  }
-  .panel-head .path,
-  .side-right .panel-status {
-    display: none;
-  }
-}
-
-/* No panels: flatten the wrappers and lay the sections out in one column,
-   in reading order. `display: contents` makes each section a direct flex
-   item of .home-shell so `order` can interleave the three groups. */
+/* No fixed panels below 1024px: flatten .home-main's wrapper so its sections
+   become direct flex items of .home-shell and `order` can place them, while
+   rail 1 collapses into a compact top strip (order: 0, ahead of everything)
+   and rail 3's controls become a fixed bottom bar (position: fixed removes
+   it from flex flow entirely, so it needs no order of its own). Nothing
+   about either rail's own component changes — only how this shell presents
+   them at this width. */
 @media (max-width: 1023px) {
   .home-shell {
     display: flex;
     flex-direction: column;
   }
-  .home-main,
-  .side-panel,
-  .panel-scroll,
-  .panel-content {
+  .home-main {
     display: contents;
   }
-  .panel-head,
-  .loop-clone {
-    display: none;
-  }
-  /* The looping ticker and the identity panel are for wide screens; stacked,
-     the Work section (#work, below) is the one list of projects. */
-  .side-left,
-  .side-right {
+  .panel-head {
     display: none;
   }
   .hero {
@@ -2685,20 +3015,480 @@ html.lenis {
   #contact {
     order: 8;
   }
+
+  /* Rail 1: fixed becomes static, column becomes row — the photo shrinks to
+     a 96px thumbnail beside the three stat tiles instead of stacking above
+     them. Every box in the chain is pinned to the same 96px explicitly
+     (rather than left to grid/flex stretch) so it can't drift under content
+     changes. IdentityPanel.tsx itself is untouched; only this shell-level
+     presentation changes at this width. */
+  .side-left {
+    order: 0;
+    position: static;
+    width: auto;
+    height: 96px;
+    border-left: none;
+    border-bottom: 2px solid var(--border);
+  }
+  .side-left .panel-fixed {
+    height: 96px;
+  }
+  .side-left .ident {
+    height: 96px;
+    grid-template-rows: 96px;
+    grid-template-columns: 96px 1fr;
+  }
+  .side-left .ident-photo {
+    height: 96px;
+    border-bottom: none;
+    border-right: 2px solid var(--border);
+  }
+  .side-left .ident-tag {
+    display: none;
+  }
+  .side-left .ident-stats {
+    height: 96px;
+    grid-template-rows: 96px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .side-left .stat + .stat {
+    border-top: none;
+    border-left: 2px solid var(--border);
+  }
+  .side-left .stat-head {
+    top: 8px;
+  }
+  .side-left .stat-meta {
+    display: none;
+  }
+
+  /* Rail 3: fixed bottom bar with just the phase-3 controls (theme accordion,
+     BRUTAL) — the ASCII block and Stats are dropped, per the spec, rather
+     than squeezed inline. Same explicit-height approach as rail 1 above. */
+  .side-right {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    width: auto;
+    height: 56px;
+    z-index: 40;
+    border-right: none;
+    border-top: 2px solid var(--border);
+  }
+  .side-right .panel-fixed {
+    height: 56px;
+  }
+  /* .home-main is display: contents (no box of its own, so no padding of
+     its own) — the trailing gap that keeps the fixed bottom bar from
+     covering the last of the page goes on the footer instead, since it's
+     always the last thing in the scroll. */
+  footer {
+    margin-bottom: 56px;
+  }
 }
 
-/* ============ WORK SECTION ============ */
-/* WorkSection.tsx: the in-flow list behind /#work. One stretched link per
-   card, so the whole card is clickable. */
-.work-grid {
+/* ============ RAIL THREE ============ */
+/* RailThree.tsx: the fixed, non-scrolling right panel (docs/redesign-spec.md
+   phase 3). Top-to-bottom, mirroring rail 1: ASCII block (largest, flexible,
+   opposite rail 1's photo) -> Stats (fixed-height rows, live data) -> theme
+   accordion (hover-preview/click-commit, one of the spec's three named
+   motion exceptions) -> BRUTAL button. Fit-checked at a 768px-tall viewport
+   with the accordion in its one real state — always exactly one panel
+   expanded: 96 (ascii min) + 168 (3x56 stats) + 344 (200 + 3x48 accordion) +
+   52 (brutal) = 660px, under the 681px budget the worst-case ~87px nav
+   height leaves at 768px total.
+   BRUTAL mode re-measured at 1600x768 (where the nav is tallest): rows keep
+   their fixed heights (border-box, so thicker rules cost nothing inside
+   them), the accordion's own top rule grows 1px -> 3px (+2px) and the thick
+   nav rules make the nav ~92px, leaving 676px. 96 + 168 + 347 + 52 = 663px,
+   13px of slack; the ASCII block measured 109px (min 96), overflow 0. */
+.rail3 {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* AsciiFlow.tsx cycles pre-generated frames into this <pre>; this file only
+   lays out and colours it. Single colour from --accent (never a mix), so
+   every theme re-colours it for free. overflow:hidden means the absolute
+   worst case (narrowest nav-height bracket stacked on the shortest budgeted
+   viewport) crops a row or two of ambient texture rather than breaking the
+   fixed-height layout below it. */
+.rail3-ascii {
+  flex: 1;
+  min-height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-bottom: var(--border-width) solid var(--border);
+  background: var(--panel-2);
+}
+.rail3-ascii-frame {
+  margin: 0;
+  color: var(--accent);
+  font-size: 7px;
+  line-height: 1.2;
+  white-space: pre;
+  opacity: 0.85;
+  user-select: none;
+}
+
+/* Three fixed-height rows so a live value (an anime title, a repo name)
+   never shoves the layout — ScrambleText's value is truncated, not
+   wrapped, and the row itself never grows. */
+.rail3-stats {
+  flex: none;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 22px;
+  grid-template-rows: repeat(3, 56px);
 }
-.work-card {
+.rail3-stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 16px;
+  min-width: 0;
+}
+.rail3-stat + .rail3-stat {
+  border-top: var(--border-width) solid var(--border);
+}
+/* aria-label on a role-less div is ignored, so the spoken row lives here. */
+.rail3-stat .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.rail3-stat-label {
+  flex: none;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.rail3-stat-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+}
+
+/* Theme accordion: a real radiogroup (RailThree.tsx). Exactly one panel is
+   ever expanded — whichever is hovered, else the committed theme — so
+   grid-template-rows only ever holds one 200px band among three 48px ones,
+   set inline from React and animated here on the parent (never the panels'
+   own heights), keeping all four perfectly complementary with no sub-pixel
+   gap. ~400ms, one ease, per spec. */
+.rail3-accordion {
+  flex: none;
+  display: grid;
+  border-top: var(--border-width) solid var(--border);
+  transition: grid-template-rows 400ms ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rail3-accordion {
+    transition: none;
+  }
+}
+.rail3-accordion-panel {
   position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--panel);
 }
-.work-card-link {
+.rail3-accordion-panel + .rail3-accordion-panel {
+  border-top: var(--border-width) solid var(--border);
+}
+.rail3-accordion-panel:focus-within {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+/* Stays in the tab order and keyboard-operable (arrow keys move the native
+   radio group) but is visually replaced by the label + texture below —
+   never display:none, which would drop it from the a11y tree too. */
+.rail3-accordion-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  opacity: 0;
+}
+.rail3-accordion-texture {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.55;
+  filter: grayscale(0.6);
+  transition: opacity 400ms ease, filter 400ms ease;
+}
+.rail3-accordion-panel.is-active .rail3-accordion-texture,
+.rail3-accordion-panel:hover .rail3-accordion-texture {
+  opacity: 1;
+  filter: none;
+}
+/* Character artwork per panel (public/<name>.jpg). The news theme's panel
+   uses sanji.jpg. A bottom scrim keeps the label readable over any image. */
+.rail3-accordion-panel[data-swatch="shanks"] .rail3-accordion-texture {
+  background-image: url("/shanks.jpg");
+}
+.rail3-accordion-panel[data-swatch="zoro"] .rail3-accordion-texture {
+  background-image: url("/zoro.jpg");
+}
+.rail3-accordion-panel[data-swatch="luffy"] .rail3-accordion-texture {
+  background-image: url("/luffy.jpg");
+}
+.rail3-accordion-panel[data-swatch="news"] .rail3-accordion-texture {
+  background-image: url("/sanji.jpg");
+}
+.rail3-accordion-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.55), transparent 60%);
+  pointer-events: none;
+}
+/* Rotated 90°, reading bottom-to-top — the vertical-rl + rotate(180deg)
+   trick, wider-supported than writing-mode: sideways-lr. Sized to fit the
+   48px collapsed band ("SHANKS", the longest name, is ~43px tall at this
+   size/tracking) — collapsed is the default state for 3 of 4 panels, so
+   this is the label read most. position:relative + later DOM order than
+   the texture above is what keeps it painted on top, not a z-index. */
+.rail3-accordion-label {
+  position: relative;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+  z-index: 1;
+}
+.rail3-accordion-panel.is-active .rail3-accordion-label {
+  color: #fff;
+  font-weight: 700;
+}
+
+.rail3-brutal {
+  flex: none;
+  width: 100%;
+  height: 52px;
+  border: none;
+  border-top: var(--border-width) solid var(--border);
+  background: var(--panel);
+  color: var(--ink-dim);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+.rail3-brutal:hover {
+  color: var(--ink);
+}
+.rail3-brutal[aria-pressed="true"] {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+}
+
+/* Mobile: only the phase-3 controls survive, as a horizontal bottom bar —
+   the ASCII block and Stats are dropped rather than squeezed inline. No
+   hover to preview with on touch, so panels are flat, equal-width tap
+   targets; the expand/collapse choreography above is desktop-only, so the
+   inline gridTemplateRows React still sets (it doesn't know about this
+   breakpoint) is overridden here. */
+@media (max-width: 1023px) {
+  .rail3 {
+    flex-direction: row;
+    height: 56px;
+  }
+  .rail3-ascii,
+  .rail3-stats {
+    display: none;
+  }
+  .rail3-accordion {
+    flex: 1;
+    height: 56px;
+    grid-template-rows: 56px !important;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: none;
+    transition: none;
+  }
+  .rail3-accordion-panel {
+    justify-content: center;
+    padding: 0 4px;
+  }
+  .rail3-accordion-panel + .rail3-accordion-panel {
+    border-top: none;
+    border-left: var(--border-width) solid var(--border);
+  }
+  .rail3-accordion-label {
+    writing-mode: horizontal-tb;
+    transform: none;
+    font-size: 0.56rem;
+  }
+  .rail3-brutal {
+    flex: none;
+    width: 72px;
+    height: 56px;
+    border-top: none;
+    border-left: var(--border-width) solid var(--border);
+  }
+}
+
+/* ============ WORK FEED ============ */
+/* WorkGrid.tsx (phase 7): three columns, mixed footprints, one hue. Frame
+   treatment (fill / outline / invert) and size vary per card; screenshots are
+   duotoned into --accent so four different sites read as one set. One
+   stretched link per card. */
+.feed-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.feed-chip,
+.feed-chip-static {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: var(--border-width) solid var(--border);
+  border-radius: calc(var(--radius) / 2);
+  padding: 4px 9px;
+  color: var(--ink-dim);
+  background: none;
+}
+.feed-chip {
+  min-height: 32px;
+  cursor: pointer;
+}
+.feed-chip-n {
+  color: var(--ink-faint);
+  margin-left: 4px;
+}
+.feed-chip[aria-pressed="true"] {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  border-color: var(--accent-solid);
+}
+.feed-chip[aria-pressed="true"] .feed-chip-n {
+  color: inherit;
+}
+.feed-chip:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.feed-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-flow: dense;
+  gap: 16px;
+  margin-top: 20px;
+}
+.feed-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: var(--border-width) solid var(--border-2);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--ink);
+}
+.feed-card[data-size="wide"] {
+  grid-column: span 2;
+}
+.feed-card[data-size="tall"] {
+  grid-row: span 2;
+}
+.feed-card[data-frame="fill"] {
+  background: var(--accent-solid);
+  border-color: var(--accent-solid);
+  color: var(--accent-ink);
+}
+.feed-card[data-frame="invert"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+.feed-card[data-frame="outline"] {
+  background: transparent;
+}
+.feed-shot {
+  position: relative;
+  flex: none;
+  aspect-ratio: 3 / 2;
+  background: var(--accent);
+  overflow: hidden;
+}
+.feed-card[data-size="wide"] .feed-shot {
+  aspect-ratio: 16 / 9;
+}
+.feed-card[data-size="tall"] .feed-shot {
+  aspect-ratio: 4 / 5;
+}
+/* Duotone: greyscale multiplied onto the accent, so whites become the accent
+   and blacks stay black. Re-themes with no per-theme rule. */
+.feed-shot img {
+  object-fit: cover;
+  object-position: top;
+  filter: grayscale(1) contrast(1.15);
+  mix-blend-mode: multiply;
+}
+.feed-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+}
+.feed-meta,
+.feed-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.feed-card[data-frame="fill"] .feed-chip-static,
+.feed-card[data-frame="invert"] .feed-chip-static {
+  color: inherit;
+  border-color: currentColor;
+}
+.feed-title {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  letter-spacing: var(--tracking-display);
+  text-transform: uppercase;
+  font-size: 1.35rem;
+  line-height: 1.05;
+  margin: 0;
+}
+.feed-card[data-size="wide"] .feed-title {
+  font-size: 1.8rem;
+}
+.feed-summary {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: inherit;
+  opacity: 0.85;
+}
+.feed-link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -2707,136 +3497,619 @@ html.lenis {
   font-family: var(--font-mono);
   font-size: 0.8rem;
   font-weight: 500;
-  color: var(--ink);
+  color: inherit;
   text-decoration: none;
 }
-.work-card-link::after {
+.feed-link::after {
   content: "";
   position: absolute;
   inset: 0;
 }
-.work-card:hover .work-card-link {
-  color: var(--red);
+.feed-card:hover {
+  box-shadow: var(--shadow);
 }
-.work-card:has(.work-card-link:focus-visible) {
-  outline: 3px solid var(--red);
+.feed-card:has(.feed-link:focus-visible) {
+  outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
-
-/* ============ PROJECT CARDS ============ */
-/* ProjectCard.tsx. At rest a card is only its landing-page screenshot in a
-   pixel frame. On hover / keyboard focus (or a tap on touch screens, which
-   adds .is-revealed) a dark scrim wipes in over the image in pixel rows,
-   carrying the project name and a "Click me" button. Pixel rules throughout:
-   square corners, 2px border, hard shadow, stepped animation. */
-.pcard {
-  position: relative;
-  overflow: hidden;
-  container-type: inline-size; /* the name sizes off the card, not the viewport */
-  border: 2px solid var(--line-strong);
-  border-radius: 0;
-  background: var(--panel);
-  box-shadow: 4px 4px 0 var(--red-dim);
-  /* Taps toggle the card — don't flash a tap highlight or start a selection. */
-  -webkit-tap-highlight-color: transparent;
-}
-.pcard-media {
-  aspect-ratio: 4 / 3;
-}
-.pcard-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  user-select: none;
+@media (max-width: 720px) {
+  .feed-grid {
+    grid-template-columns: 1fr;
+  }
+  .feed-card[data-size="wide"],
+  .feed-card[data-size="tall"] {
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .feed-card[data-size="tall"] .feed-shot {
+    aspect-ratio: 16 / 9;
+  }
 }
 
-.pcard-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 16px;
-  /* Dark enough for the text to read, thin enough that the screenshot still
-     shows through underneath. */
-  background: color-mix(in srgb, var(--bg) 72%, transparent);
-  clip-path: inset(100% 0 0 0);
-  transition: clip-path 0.26s steps(6, end);
+/* ============ BRUTAL MODE COMPONENTS ============ */
+/* The look of redblack (docs/superpowers/specs/2026-10-08-brutal-reskin-design.md)
+   on the three-pane's own class names. Everything is scoped to
+   [data-ui="brutal"], so normal mode is untouched, and every colour comes
+   from the BRUTAL MODE tokens above: no literal colours, and nothing here
+   names a theme or a mode. Rules that must flip between a black block on
+   the primary page (dark) and a primary block on a white page (light) use
+   the --accent-solid / --accent-ink pair, which already means "surface" and
+   "text on it". */
+
+/* ---- page, frame, focus ---- */
+:root[data-ui="brutal"] {
+  scrollbar-color: var(--ink) var(--bg);
 }
-.pcard-name {
-  margin: 0;
-  max-width: 100%;
-  font-family: var(--font-display);
-  font-size: clamp(1rem, 7.5cqw, 1.6rem);
-  line-height: 1.05;
-  letter-spacing: -0.01em;
-  text-transform: uppercase;
-  text-align: center;
+:root[data-ui="brutal"] body {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--hatch) 0,
+    var(--hatch) 2px,
+    transparent 2px,
+    transparent 13px
+  );
+}
+/* Full-bleed section rules take the thick stroke. */
+:root[data-ui="brutal"] :is(.band, .contact-band, .marquee-band, footer)::before,
+:root[data-ui="brutal"] :is(.marquee-band, header.site-nav)::after {
+  height: var(--bw-thick);
+}
+/* Every square corner, including the literal radii the base rules carry. */
+:root[data-ui="brutal"]
+  :is(
+    .meta-chip,
+    .btn,
+    .btn-icon,
+    .pill,
+    .term-card,
+    .tag,
+    .card,
+    .card-badge,
+    .gallery-item,
+    .place-card,
+    .tdot,
+    .pulse-dot
+  ) {
+  border-radius: var(--radius);
+}
+:root[data-ui="brutal"] .tl-item::before {
+  border-radius: var(--radius);
+}
+
+/* ---- nav: solid, thick bottom rule, ruled cells ---- */
+:root[data-ui="brutal"] header.site-nav {
+  background: var(--bg);
+  backdrop-filter: none;
+}
+:root[data-ui="brutal"] .nav-cell {
+  border-right: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .nav-cell-social {
+  border-right: none;
+}
+:root[data-ui="brutal"] .nav-cell-bottom {
+  border-top: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] :is(.nav-command, .np-nav) {
+  border-left: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .nav-cell-top.nav-cell-social a {
+  border-left: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .nav-cell-top.nav-cell-social a:first-child {
+  border-left: none;
+}
+/* The logo is a flat black mark on the page in both modes. */
+:root[data-ui="brutal"] .nav-logo-img {
+  filter: brightness(0);
+}
+:root[data-ui="brutal"] .nav-logo-img-hover {
+  display: none;
+}
+:root[data-ui="brutal"] .nav-cell-logo:hover,
+:root[data-ui="brutal"] .nav-mobile-logo:hover {
+  opacity: 1;
+  box-shadow: inset 0 0 0 var(--bw-thin) var(--line);
+}
+:root[data-ui="brutal"] .nav-links a {
   color: var(--ink);
-  /* Hard, un-blurred shadow: reads as a pixel drop-shadow. */
-  text-shadow: 2px 2px 0 var(--red-dim);
+  font-weight: 600;
 }
-.pcard-cta {
-  padding: 9px 16px;
-  border: 2px solid var(--red-ink);
-  border-radius: 0;
-  background: var(--red-solid);
-  color: var(--red-ink);
-  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+:root[data-ui="brutal"] .nav-links a:hover {
+  box-shadow: inset 0 0 0 var(--bw-thin) var(--line);
 }
-/* Invisible link over the whole card. Keyboard focus lands here and the
-   :focus-within rule below reveals the overlay. */
-.pcard-link {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
+/* Current page: a solid block, not just a colour change. */
+:root[data-ui="brutal"] .nav-links a[aria-current] {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  box-shadow: inset 0 0 0 var(--bw-thin) var(--line);
 }
-.pcard-link:focus-visible {
-  outline: 3px solid var(--red);
+:root[data-ui="brutal"] .nav-links a[aria-current]::after {
+  display: none;
+}
+/* Icon cells: ink at rest, a solid block on hover/focus, and a hard inset
+   shadow when pressed (they sit in a ruled grid, so they cannot translate
+   like .btn does). The shadow and the focus ring use the block's own text
+   colour so they stay visible on it in both modes. */
+:root[data-ui="brutal"]
+  :is(
+    .nav-cmd-trigger,
+    .theme-toggle-btn,
+    .nav-hamburger-btn,
+    .np-btn,
+    .np-btn-mobile,
+    .nav-cell-top.nav-cell-social a
+  ) {
+  color: var(--ink);
+}
+:root[data-ui="brutal"]
+  :is(
+    .nav-cmd-trigger,
+    .theme-toggle-btn,
+    .nav-hamburger-btn,
+    .np-btn,
+    .np-btn-mobile,
+    .nav-cell-top.nav-cell-social a
+  ):is(:hover, :focus-visible) {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+}
+:root[data-ui="brutal"]
+  :is(
+    .nav-cmd-trigger,
+    .theme-toggle-btn,
+    .nav-hamburger-btn,
+    .np-btn,
+    .np-btn-mobile,
+    .nav-cell-top.nav-cell-social a
+  ):focus-visible {
+  outline-color: var(--accent-ink);
   outline-offset: -6px;
 }
-/* Touch: the first tap only reveals the overlay (ProjectCard's onClick), so
-   the link ignores taps until then. */
-@media (hover: none) {
-  .pcard-link {
-    pointer-events: none;
+:root[data-ui="brutal"]
+  :is(
+    .nav-cmd-trigger,
+    .theme-toggle-btn,
+    .nav-hamburger-btn,
+    .np-btn,
+    .np-btn-mobile,
+    .nav-cell-top.nav-cell-social a
+  ):active {
+  box-shadow: inset var(--off-sm) var(--off-sm) 0 0 var(--accent-ink);
+}
+:root[data-ui="brutal"] .nav-cmd-trigger:is(:hover, :focus-visible) .nav-cmd-kbd {
+  color: inherit;
+}
+:root[data-ui="brutal"] .np-btn:is(:hover, :focus-visible) .np-live-dot {
+  background: var(--accent-ink);
+}
+/* The nav's cursor morph (a diff-blend box in dark, a clipped wash in light)
+   is a different mode's look; brutal answers hover with the solid block
+   above, so the morph pieces are switched off. */
+:root[data-ui="brutal"] .custom-cursor-shape.is-morphed,
+:root[data-ui="brutal"] .cursor-invert-target::before {
+  display: none;
+}
+:root[data-ui="brutal"] .cursor-invert-target,
+:root[data-ui="brutal"] .cursor-invert-target svg,
+:root[data-ui="brutal"] .cursor-invert-target .nav-cmd-kbd {
+  filter: none;
+}
+:root[data-ui="brutal"] .nav-cell-top.nav-cell-social a.cursor-invert-target svg {
+  filter: none;
+}
+/* The nav's decorative strip: flattened to greys, multiplied by the page. */
+:root[data-ui="brutal"] :is(.nav-hatch, .nav-mobile-gif) {
+  position: relative;
+  filter: grayscale(1) contrast(1.15);
+}
+:root[data-ui="brutal"] :is(.nav-hatch, .nav-mobile-gif)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--panel);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* Now-playing popover. */
+:root[data-ui="brutal"] .np-pop {
+  border: var(--border-width) solid var(--line);
+  box-shadow: var(--shadow);
+}
+:root[data-ui="brutal"] .np-art {
+  border: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .np-link {
+  color: var(--ink);
+  font-weight: 700;
+  border-bottom: var(--bw-thin) solid var(--line);
+}
+
+/* Mobile nav bar and drawer. */
+:root[data-ui="brutal"] .nav-mobile-bar {
+  border: var(--border-width) solid var(--line);
+  min-height: calc(44px + 2 * var(--border-width));
+}
+:root[data-ui="brutal"] .nav-mobile-actions {
+  border-left: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .nav-mobile-actions .theme-toggle-btn,
+:root[data-ui="brutal"] .np-btn-mobile {
+  border-right: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .nav-mobile-drawer {
+  border-left: var(--border-width) solid var(--line);
+}
+:root[data-ui="brutal"] .nav-mobile-links {
+  border-bottom: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .nav-mobile-links li + li {
+  border-top: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .nav-mobile-links a {
+  color: var(--ink);
+}
+:root[data-ui="brutal"] .nav-mobile-links a:hover,
+:root[data-ui="brutal"] .nav-mobile-links a[aria-current] {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  box-shadow: none;
+}
+
+/* ---- side panels: ruled with the thick stroke ---- */
+:root[data-ui="brutal"] .term-head {
+  border-bottom: var(--border-width) solid var(--line);
+}
+:root[data-ui="brutal"] .term-head .tdot {
+  background: var(--ink);
+}
+:root[data-ui="brutal"] .ident-photo {
+  border-bottom: var(--border-width) solid var(--line);
+}
+:root[data-ui="brutal"] .stat + .stat {
+  border-top: var(--border-width) solid var(--line);
+}
+/* The accent tile is an emphasis block: the tokens are re-bound inside it
+   so every descendant (numerals, labels, the clock colon) reads on it. */
+:root[data-ui="brutal"] .stat-red {
+  background: var(--accent-solid);
+  --ink: var(--accent-ink);
+  --accent: var(--accent-ink);
+  --ink-dim: color-mix(in srgb, var(--accent-ink) 88%, var(--accent-solid));
+  --ink-faint: var(--ink-dim);
+}
+@media (min-width: 1024px) {
+  :root[data-ui="brutal"] .side-left {
+    border-left: var(--border-width) solid var(--line);
   }
-  .pcard.is-revealed .pcard-link {
-    pointer-events: auto;
+  :root[data-ui="brutal"] .side-right {
+    border-right: var(--border-width) solid var(--line);
+  }
+  /* Same height as the nav and the same thick rule under it, so the three
+     columns still share one header line. */
+  :root[data-ui="brutal"] .panel-head {
+    border-bottom: var(--bw-thick) solid var(--line);
+  }
+}
+@media (max-width: 1023px) {
+  :root[data-ui="brutal"] .side-left {
+    border-bottom: var(--border-width) solid var(--line);
+  }
+  :root[data-ui="brutal"] .side-left .ident-photo {
+    border-right: var(--border-width) solid var(--line);
+  }
+  :root[data-ui="brutal"] .side-left .stat + .stat {
+    border-left: var(--border-width) solid var(--line);
+  }
+  :root[data-ui="brutal"] .side-right {
+    border-top: var(--border-width) solid var(--line);
   }
 }
 
-/* Reveal: hover only on devices that have it (on touch, :hover sticks after
-   a tap and would fight the tap toggle), plus keyboard focus and the tap
-   state. The link is focusable while the overlay is hidden so focusing it reveals it. */
-@media (hover: hover) {
-  .pcard:hover {
-    border-color: var(--red);
-  }
-  .pcard:hover .pcard-cta {
-    background: var(--red-dim);
-  }
-  .pcard:hover .pcard-overlay {
-    clip-path: inset(0);
-  }
+/* ---- rail 3 ---- */
+:root[data-ui="brutal"] .rail3-ascii-frame {
+  opacity: 1;
 }
-.pcard:focus-within .pcard-overlay,
-.pcard.is-revealed .pcard-overlay {
-  clip-path: inset(0);
+:root[data-ui="brutal"] .rail3-stat-value {
+  color: var(--ink);
 }
-.pcard.is-revealed {
-  border-color: var(--red);
+:root[data-ui="brutal"] .rail3-brutal {
+  color: var(--ink);
+}
+:root[data-ui="brutal"] .rail3-brutal[aria-pressed="true"] {
+  color: var(--accent-ink);
+}
+:root[data-ui="brutal"] .rail3-brutal:active {
+  box-shadow: inset var(--off-sm) var(--off-sm) 0 0 var(--accent-ink);
+}
+
+/* ---- hero and buttons ---- */
+/* An accent word is a solid chip, not coloured text (the tint cannot be read
+   as text on white). */
+:root[data-ui="brutal"] .hero h1 .l2 {
+  display: inline-block;
+  padding: 0.04em 0.1em 0;
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+}
+:root[data-ui="brutal"] .meta-chip {
+  border: var(--bw-thin) solid var(--line);
+  color: var(--ink);
+  font-weight: 600;
+}
+:root[data-ui="brutal"] .btn {
+  border: var(--border-width) solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  font-weight: 700;
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+:root[data-ui="brutal"] .btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: calc(var(--off) + 2px) calc(var(--off) + 2px) 0 0
+    var(--shadow-color);
+}
+/* Pressable: the button travels into its own shadow. */
+:root[data-ui="brutal"] .btn:active {
+  transform: translate(var(--off-sm), var(--off-sm));
+  box-shadow: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .pcard-overlay {
+  :root[data-ui="brutal"] .btn,
+  :root[data-ui="brutal"] .btn:hover,
+  :root[data-ui="brutal"] .btn:active {
+    transform: none;
     transition: none;
   }
+}
+:root[data-ui="brutal"] .btn-primary,
+:root[data-ui="brutal"] .btn-primary:hover {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+}
+:root[data-ui="brutal"] .btn-icon {
+  color: var(--ink);
+}
+
+/* ---- headings, eyebrows, chips ---- */
+:root[data-ui="brutal"] .h2 {
+  display: inline-block;
+  padding-bottom: 6px;
+  border-bottom: var(--bw-thick) solid var(--line);
+}
+:root[data-ui="brutal"] .eyebrow {
+  color: var(--ink);
+}
+:root[data-ui="brutal"] .eyebrow .idx {
+  padding: 1px 7px;
+  background: var(--accent-solid);
+  border: var(--bw-thin) solid var(--line);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+:root[data-ui="brutal"] .eyebrow::after {
+  height: var(--bw-thin);
+  background: var(--line);
+}
+:root[data-ui="brutal"] .about-var {
+  border-bottom: var(--bw-thin) dashed var(--line);
+}
+:root[data-ui="brutal"] :is(.pill, .tag) {
+  border: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .pill {
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+:root[data-ui="brutal"] .pill:hover {
+  border-color: var(--line);
+  transform: translate(-2px, -2px);
+}
+:root[data-ui="brutal"] .card-badge,
+:root[data-ui="brutal"] .place-idx,
+:root[data-ui="brutal"] .tl-org,
+:root[data-ui="brutal"] .gh-total span {
+  display: inline-block;
+  padding: 1px 8px;
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+:root[data-ui="brutal"] .card-badge {
+  border: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] .tl-org span {
+  color: inherit;
+}
+
+/* ---- stack ---- */
+:root[data-ui="brutal"] .stack-tool {
+  box-shadow: var(--shadow-sm);
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+:root[data-ui="brutal"] .stack-learning {
+  border-top: var(--bw-thin) dashed var(--line);
+}
+
+/* ---- experience ---- */
+:root[data-ui="brutal"] .tl::before {
+  left: 4px;
+  width: var(--bw-thin);
+  background: var(--line);
+}
+:root[data-ui="brutal"] .tl-item::before {
+  border: var(--bw-thin) solid var(--line);
+}
+
+/* ---- cards ---- */
+:root[data-ui="brutal"] :is(.card, .place-card, .term-card) {
+  border: var(--border-width) solid var(--line);
+  box-shadow: var(--shadow);
+}
+:root[data-ui="brutal"] :is(.card, .place-card) {
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+:root[data-ui="brutal"] :is(.card, .place-card):hover {
+  border-color: var(--line);
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-lg);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ui="brutal"] :is(.card, .place-card):hover {
+    transform: none;
+  }
+}
+:root[data-ui="brutal"] .gallery-item {
+  border: var(--border-width) solid var(--line);
+  box-shadow: var(--shadow-sm);
+}
+:root[data-ui="brutal"] :is(.card-links a, .gh-link) {
+  border-bottom: var(--bw-thin) solid var(--line);
+}
+:root[data-ui="brutal"] :is(.card-links a, .gh-link, .foot-inner a):hover {
+  background: var(--accent-solid);
+  border-color: var(--line);
+  color: var(--accent-ink);
+}
+
+/* ---- work feed ---- */
+:root[data-ui="brutal"] :is(.feed-chip, .feed-chip-static) {
+  border-width: var(--bw-thin);
+  border-color: var(--line);
+  color: var(--ink);
+}
+:root[data-ui="brutal"] .feed-chip {
+  background: var(--panel);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+:root[data-ui="brutal"] .feed-chip:hover {
+  transform: translate(-2px, -2px);
+}
+:root[data-ui="brutal"] .feed-chip[aria-pressed="true"] {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  transform: translate(var(--off-sm), var(--off-sm));
+  box-shadow: none;
+}
+:root[data-ui="brutal"] .feed-card {
+  border-color: var(--line);
+  box-shadow: var(--shadow);
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+:root[data-ui="brutal"] .feed-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-lg);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ui="brutal"] .feed-card:hover {
+    transform: none;
+  }
+}
+:root[data-ui="brutal"] .feed-card:is([data-frame="fill"], [data-frame="invert"]) {
+  border-color: var(--line);
+}
+:root[data-ui="brutal"]
+  .feed-card:is([data-frame="fill"], [data-frame="invert"])
+  .feed-chip-static {
+  color: inherit;
+  border-color: currentColor;
+}
+/* Screenshots are greyscale multiplied onto a bright fill, so the fill has
+   to be the tint itself (the accent is ink here, and ink x grey is black). */
+:root[data-ui="brutal"] .feed-shot {
+  background: var(--primary);
+  border-bottom: var(--border-width) solid var(--line);
+}
+
+/* ---- contribution graph ---- */
+:root[data-ui="brutal"] .gh-play {
+  box-shadow: var(--shadow-sm);
+  color: var(--ink);
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+:root[data-ui="brutal"] .gh-play[aria-pressed="true"] {
+  color: var(--accent-ink);
+  transform: translate(var(--off-sm), var(--off-sm));
+  box-shadow: none;
+}
+:root[data-ui="brutal"] .gh-weeks .gh-cell.is-snake {
+  outline: var(--bw-thin) solid var(--accent-ink);
+  outline-offset: -2px;
+}
+:root[data-ui="brutal"] .gh-weeks .gh-cell.is-food {
+  outline-color: var(--line);
+}
+
+/* ---- contact band: an emphasis block, so its own lines, shadows and
+   buttons are re-bound to the block's text colour (black would vanish on it
+   in dark mode). The stroke tokens are re-declared here because a custom
+   property that references another is resolved where it is declared. ---- */
+:root[data-ui="brutal"] .contact-band {
+  --line: var(--accent-ink);
+  --shadow-color: var(--accent-ink);
+}
+:root[data-ui="brutal"] .contact-band {
+  --border: var(--line);
+  --border-2: var(--line);
+  --line-strong: var(--line);
+  --shadow-sm: var(--off-sm) var(--off-sm) 0 0 var(--shadow-color);
+  --shadow: var(--off) var(--off) 0 0 var(--shadow-color);
+  --shadow-lg: var(--off-lg) var(--off-lg) 0 0 var(--shadow-color);
+}
+:root[data-ui="brutal"] .contact-band .eyebrow {
+  color: var(--accent-ink);
+  opacity: 1;
+}
+:root[data-ui="brutal"] .contact-band .eyebrow::after {
+  background: var(--accent-ink);
+}
+:root[data-ui="brutal"] .contact-band .eyebrow .idx {
+  background: var(--accent-ink);
+  border-color: var(--accent-ink);
+  color: var(--accent-solid);
+}
+:root[data-ui="brutal"] .contact-band .btn-primary,
+:root[data-ui="brutal"] .contact-band .btn-primary:hover {
+  background: var(--accent-ink);
+  color: var(--accent-solid);
+}
+:root[data-ui="brutal"] .contact-band .btn-ghost,
+:root[data-ui="brutal"] .contact-band .btn-icon,
+:root[data-ui="brutal"] .contact-band .btn-ghost:hover,
+:root[data-ui="brutal"] .contact-band .btn-icon:hover {
+  background: var(--accent-solid);
+  border-color: var(--line);
+  color: var(--accent-ink);
+}
+
+/* ---- cursor: a square that does not blend (a difference blend would turn
+   the primary page cyan/magenta). Tinted and labelled states keep their own
+   look. ---- */
+:root[data-ui="brutal"] .custom-cursor {
+  mix-blend-mode: normal;
+}
+:root[data-ui="brutal"]
+  .custom-cursor-shape:not(.is-tinted, .is-labelled, .is-morphed) {
+  background: var(--ink);
+  border: var(--bw-thin) solid var(--bg);
+}
+:root[data-ui="brutal"] .custom-cursor-shape.is-tinted {
+  border: var(--bw-thin) solid var(--line);
 }

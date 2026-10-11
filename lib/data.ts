@@ -13,8 +13,8 @@ export const NAV_LINKS: readonly NavLink[] = [
   { href: "/gallery", label: "Gallery" },
 ];
 
-// Rotates in the nav's tagline slot via a GSAP letter-scatter transition
-// (see components/TaglineCycler.tsx). Case is intentional per-line — most
+// Quips. Two of them ride in the live telemetry strip (components/Marquee.tsx).
+// Case is intentional per-line — most
 // are all-caps but "console.log" reads as an actual code identifier, so
 // it stays lowercase.
 export const NAV_TAGLINES = [
@@ -50,33 +50,11 @@ export const SOCIAL_LINKS = {
   email: "kumarprasannajitsahu@gmail.com",
 } as const;
 
-export const TERM_ROWS = [
-  { k: "NAME", v: "Kumar Prasannajit Sahu" },
-  { k: "ROLE", v: "Full Stack Developer — backend focus" },
-  { k: "STACK", v: "MongoDB · Express · React · Node" },
-  { k: "NOW", v: "Aideas Tech Solutions, Hyderabad" },
-  { k: "BASED", v: "Hyderabad, India" },
-  { k: "DEGREE", v: "B.Tech ECE, GIET University" },
-] as const;
-
-export const STACK_GROUPS = [
-  {
-    label: "Languages & Frontend",
-    items: ["JavaScript", "TypeScript", "React", "Next.js", "Tailwind CSS"],
-  },
-  {
-    label: "Backend & APIs",
-    items: ["Node.js", "Express.js", "REST APIs", "JWT Auth"],
-  },
-  {
-    label: "Data & Infra",
-    items: ["MongoDB", "PostgreSQL", "Redis", "Docker"],
-  },
-  {
-    label: "Tooling & Payments",
-    items: ["Git & GitHub", "Razorpay", "Vercel", "Postman"],
-  },
-] as const;
+// The Stack section's "learning now" row (phase 6) — the one hand-written part,
+// since a tool being learned hasn't shipped in a project yet. Empty hides the
+// row entirely rather than showing invented tools.
+//   TODO(content): name the tools currently being learned.
+export const LEARNING_NOW: readonly string[] = [];
 
 export const EXPERIENCE = [
   {
@@ -119,6 +97,11 @@ export type Project = {
   summary: string;
   description: string;
   tags: readonly string[];
+  // ISO date of last real work. Overrides the GitHub push date the Stack
+  // section otherwise reads from the Source link; the only way a project with
+  // no public repo (Manima) gets a "last used".
+  //   TODO(content): set for Manima.
+  lastWorked?: string;
   links: readonly ProjectLink[];
   sourceNote?: string;
   // --- case study ---
@@ -255,8 +238,8 @@ export const PROJECTS: readonly Project[] = [
   },
 ];
 
-// /specs page. Same shape as STACK_GROUPS (label + pill items) so the page
-// reuses Stack.tsx's exact pill-row rendering. Machine/OS/Editor rows are
+// /specs page. Label + pill items, rendered with the .stack-group/.pill-row
+// classes (globals.css). Machine/OS/Editor rows are
 // the real thing (pulled from the dev machine via PowerShell) — swap them
 // if you switch rigs. Peripherals can't be detected from code, so those
 // are placeholder jokes; replace with your actual gear whenever.
@@ -298,15 +281,6 @@ export const PLACES: { name: string; note: string }[] = [
   { name: "New York", note: "To see if it's really as fast-paced as the memes say" },
   { name: "Bali", note: "Coding from a beach, at least once, for the plot" },
 ];
-
-export const MARQUEE_ITEMS = [
-  "MERN STACK",
-  "REACT · NODE.JS · EXPRESS · MONGODB",
-  "01001011 01010000 01010011",
-  "POSTGRESQL · REDIS · TAILWIND",
-  "BACKEND-LEANING FULL-STACK",
-  "BUILT IN HYDERABAD, INDIA",
-] as const;
 
 export const HERO_BINARY = "01001011 01010000 01010011 01000100 01000101 01010110";
 

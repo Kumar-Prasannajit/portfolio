@@ -13,8 +13,8 @@
   transition: color 0.15s, border-color 0.15s;
 }
 .back:hover {
-  color: var(--red);
-  border-color: var(--red);
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 .header {

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Archivo_Black, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { Archivo_Black, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { SOCIAL_LINKS } from "@/lib/data";
 import {
@@ -17,7 +17,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import HomeShell from "@/components/HomeShell";
 import IdentityPanel from "@/components/IdentityPanel";
-import Projects from "@/components/Projects";
+import RailThree from "@/components/RailThree";
 import CommandPalette from "@/components/CommandPalette";
 import { CommandPaletteProvider } from "@/components/CommandPaletteContext";
 import MotionProvider from "@/components/MotionProvider";
@@ -27,13 +27,6 @@ const archivoBlack = Archivo_Black({
   subsets: ["latin"],
   weight: "400",
   variable: "--font-archivo-black",
-  display: "swap",
-});
-
-const ibmPlexSans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-ibm-plex-sans",
   display: "swap",
 });
 
@@ -111,16 +104,40 @@ const PERSON_JSON_LD = {
   sameAs: [SOCIAL_LINKS.github, SOCIAL_LINKS.linkedin],
 };
 
-// Runs before paint to stamp the saved theme, avoiding a flash of the wrong
-// palette. The server can't know localStorage, so <html> below carries
-// suppressHydrationWarning: this attribute is the one intended difference
-// between server and client HTML (the same approach next-themes takes).
+// Runs before paint to stamp the three saved theme axes, avoiding a flash of
+// the wrong palette. The server can't know localStorage, so <html> below
+// carries suppressHydrationWarning: these attributes are the one intended
+// difference between server and client HTML (the same approach next-themes
+// takes).
+//
+// Three independent axes (see docs/redesign-spec.md phase 1):
+//   data-theme  zoro | luffy | news | shanks   (character palette, accent only)
+//   data-mode   light | dark                   (kept unset when there's no
+//               saved choice, so the prefers-color-scheme CSS fallback
+//               resolves it pre-JS with zero flash risk)
+//   data-ui     default | brutal
 const THEME_INIT_SCRIPT = `
 (function(){
   try{
-    var saved = localStorage.getItem('kps-theme');
-    if(saved === 'light' || saved === 'dark'){
-      document.documentElement.setAttribute('data-theme', saved);
+    var d = document.documentElement;
+    var theme = localStorage.getItem('kps-theme');
+    var mode = localStorage.getItem('kps-mode');
+    // The single-axis site stored light/dark under kps-theme. Move a returning
+    // visitor's choice to kps-mode once, so the key is free for the character.
+    if(theme === 'light' || theme === 'dark'){
+      if(mode !== 'light' && mode !== 'dark'){
+        mode = theme;
+        localStorage.setItem('kps-mode', mode);
+      }
+      localStorage.removeItem('kps-theme');
+    }
+    d.setAttribute('data-theme', (theme === 'zoro' || theme === 'luffy' || theme === 'news' || theme === 'shanks') ? theme : 'shanks');
+    if(mode === 'light' || mode === 'dark'){
+      d.setAttribute('data-mode', mode);
+    }
+    var ui = localStorage.getItem('kps-ui');
+    if(ui === 'brutal'){
+      d.setAttribute('data-ui', 'brutal');
     }
   }catch(e){}
 })();
@@ -151,8 +168,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-theme="shanks"
+      data-ui="default"
       suppressHydrationWarning
-      className={`${archivoBlack.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
+      className={`${archivoBlack.variable} ${ibmPlexMono.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
@@ -173,13 +192,9 @@ export default function RootLayout({
           <div className="site-frame" id="top">
             <Nav />
             {/* The side panels live here, not in the pages, so they stay
-                mounted (clock, viewers, the drifting project rail) while only
+                mounted (clock, viewers, rail 3's status shell) while only
                 the middle column changes between routes. */}
-            <HomeShell
-              left={<IdentityPanel />}
-              right={<Projects />}
-              rightClone={<Projects decorative />}
-            >
+            <HomeShell left={<IdentityPanel />} right={<RailThree />}>
               {children}
             </HomeShell>
             <Footer />

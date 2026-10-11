@@ -30,11 +30,11 @@ function prefersReducedMotion() {
   );
 }
 
-// The theme actually being rendered right now: an explicit data-theme
+// The mode actually being rendered right now: an explicit data-mode
 // stamp wins, otherwise it's whatever the prefers-color-scheme media
 // query is currently resolving the CSS variables to.
 export function effectiveTheme(): "light" | "dark" {
-  const stamped = document.documentElement.getAttribute("data-theme");
+  const stamped = document.documentElement.getAttribute("data-mode");
   if (stamped === "light" || stamped === "dark") return stamped;
   return systemPrefersDark() ? "dark" : "light";
 }
@@ -44,7 +44,7 @@ export function useTheme() {
   const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
-    // Syncs from the theme actually in effect — an explicit data-theme
+    // Syncs from the mode actually in effect — an explicit data-mode
     // stamp the pre-hydration inline script (see app/layout.tsx) may
     // have set from localStorage, or the system preference otherwise.
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -52,9 +52,9 @@ export function useTheme() {
   }, []);
 
   const applyTheme = useCallback((next: "light" | "dark") => {
-    document.documentElement.setAttribute("data-theme", next);
+    document.documentElement.setAttribute("data-mode", next);
     try {
-      localStorage.setItem("kps-theme", next);
+      localStorage.setItem("kps-mode", next);
     } catch {}
     setIsDark(next === "dark");
   }, []);

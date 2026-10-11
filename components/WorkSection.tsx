@@ -1,10 +1,23 @@
-import Link from "next/link";
+import WorkGrid from "./WorkGrid";
 import { PROJECTS } from "@/lib/data";
+import { projectsToFeed } from "@/lib/feed";
+import { pushedAt } from "@/lib/pushedAt";
+import { githubRepo } from "@/lib/stack";
 
 // The in-flow "Work" section: the real target of the nav's and ⌘K's /#work.
 // (The right-hand ticker is ambient — it loops and can't be scrolled to.)
-// Each card is one stretched link to that project's /work/[slug] page.
-export default function WorkSection() {
+// Phase 7: an editorial feed (WorkGrid) built from the same data as the Stack
+// section, with its own tag filter (the Stack tiles are read-only).
+export default async function WorkSection() {
+  const dates: Record<string, string | undefined> = {};
+  await Promise.all(
+    PROJECTS.map(async (project) => {
+      const source = project.links.find((l) => githubRepo(l.href));
+      const repo = source && githubRepo(source.href);
+      if (repo) dates[project.slug] = await pushedAt(repo);
+    }),
+  );
+
   return (
     <section className="section band alt" id="work">
       <div className="wrap">
@@ -13,32 +26,7 @@ export default function WorkSection() {
         </div>
         <h2 className="h2">Selected projects</h2>
         <div style={{ height: 28 }}></div>
-        <div className="work-grid">
-          {PROJECTS.map((project) => (
-            <article className="card work-card" key={project.slug}>
-              <div className="card-top">
-                <h3>{project.title}</h3>
-                <span className="tag">{project.badge}</span>
-              </div>
-              <p>{project.summary}</p>
-              <div className="card-tags">
-                {project.tags.map((tag) => (
-                  <span className="tag" key={tag}>
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              <Link
-                href={`/work/${project.slug}`}
-                className="work-card-link"
-                data-cursor="View"
-                aria-label={`${project.title}: view project`}
-              >
-                View project <span aria-hidden="true">→</span>
-              </Link>
-            </article>
-          ))}
-        </div>
+        <WorkGrid items={projectsToFeed(PROJECTS, dates)} />
       </div>
     </section>
   );

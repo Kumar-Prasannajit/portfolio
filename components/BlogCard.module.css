@@ -1,6 +1,6 @@
 /* Deliberately its own small set of rules rather than reusing the
    global .card class (see globals.css) — that class is built for a
-   <div> with independent inner <a> links (Projects.tsx); this card is
+   <div> with an independent inner <a> link (WorkSection.tsx); this card is
    itself a single <Link>, and nesting an anchor inside an anchor is
    invalid HTML. Values below intentionally mirror .card's look. */
 
@@ -17,7 +17,7 @@
   transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 .card:hover {
-  border-color: var(--red);
+  border-color: var(--accent);
   box-shadow: var(--shadow);
   transform: translateY(-4px);
 }
@@ -71,6 +71,6 @@
   transition: color 0.15s, border-color 0.15s;
 }
 .card:hover .readMore {
-  color: var(--red);
-  border-color: var(--red);
+  color: var(--accent);
+  border-color: var(--accent);
 }
