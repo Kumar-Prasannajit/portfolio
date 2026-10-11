@@ -11,7 +11,7 @@
 // fetched, and the allowlist check below is a second guard. ALLOWED_REPOS,
 // single repos the user built on other people's accounts, are fetched by name.
 //
-// Rate budget, unauthenticated (60/hr, shared with rail-stats' ~24/hr and the
+// Rate budget, unauthenticated (60/hr, shared with rail-stats' ~28/hr and the
 // 3 pushedAt calls): 2 repo lists + 3 named repos + at most REPO_LIMIT + 3
 // /languages = 23 per
 // revalidation. Public package.json comes from raw.githubusercontent.com, which

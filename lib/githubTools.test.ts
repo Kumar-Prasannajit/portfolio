@@ -5,6 +5,7 @@ import {
   ALLOWED_REPOS,
   isAllowedRepo,
   latestByTool,
+  newestCommit,
   pickRecentRepos,
   repoListUrl,
   toolsFromLanguages,
@@ -262,4 +263,22 @@ test("repoListUrl: own account with/without token, orgs", () => {
     "https://api.github.com/users/Kumar-Prasannajit/repos?sort=pushed&per_page=30");
   assert.equal(repoListUrl("salonjaa-digital-solution", true),
     "https://api.github.com/orgs/salonjaa-digital-solution/repos?sort=pushed&per_page=100");
+});
+
+test("newestCommit picks the newest first commit across repos and skips error bodies", () => {
+  const at = (date: string) => [{ commit: { committer: { date }, author: { date: "2000-01-01T00:00:00Z" } } }];
+  assert.deepEqual(
+    newestCommit([
+      { repo: "me/a", commits: at("2026-10-11T10:00:00Z") },
+      { repo: "org/b", commits: at("2026-10-11T12:00:00Z") },
+      { repo: "me/c", commits: { message: "API rate limit exceeded" } },
+      { repo: "me/d", commits: [] },
+    ]),
+    { repo: "org/b", committedAt: "2026-10-11T12:00:00Z" },
+  );
+  assert.deepEqual(
+    newestCommit([{ repo: "me/a", commits: [{ commit: { author: { date: "2026-10-01T00:00:00Z" } } }] }]),
+    { repo: "me/a", committedAt: "2026-10-01T00:00:00Z" },
+  );
+  assert.equal(newestCommit([{ repo: "me/a", commits: null }]), null);
 });

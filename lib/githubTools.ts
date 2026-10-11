@@ -221,3 +221,27 @@ export function latestByTool(
   }
   return latest;
 }
+
+/**
+ * Rail 3's LAST COMMIT: the newest of each repo's first commit, from GitHub's
+ * /commits responses (already filtered to the user with ?author=). Committer
+ * date, so a merge or rebase counts when it landed. Error bodies and empty
+ * lists are skipped; null when no repo has a commit.
+ */
+export function newestCommit(
+  perRepo: readonly { repo: string; commits: unknown }[],
+): { repo: string; committedAt: string } | null {
+  let newest: { repo: string; committedAt: string } | null = null;
+  for (const { repo, commits } of perRepo) {
+    const first = Array.isArray(commits) ? commits[0] : undefined;
+    const commit = isRecord(first) && isRecord(first.commit) ? first.commit : undefined;
+    const date =
+      (isRecord(commit?.committer) ? commit.committer.date : undefined) ??
+      (isRecord(commit?.author) ? commit.author.date : undefined);
+    if (typeof date !== "string") continue;
+    if (!newest || Date.parse(date) > Date.parse(newest.committedAt)) {
+      newest = { repo, committedAt: date };
+    }
+  }
+  return newest;
+}

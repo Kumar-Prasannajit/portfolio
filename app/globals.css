@@ -3142,13 +3142,15 @@ html.lenis {
   user-select: none;
 }
 
-/* Three fixed-height rows so a live value (an anime title, a repo name)
-   never shoves the layout — ScrambleText's value is truncated, not
-   wrapped, and the row itself never grows. */
+/* Fixed-height rows so a live value (an anime title, a repo name) never
+   shoves the layout — ScrambleText's value is truncated, not wrapped, and
+   the row itself never grows. Sized per rendered row, not a fixed three:
+   WATCHING is left out while AniList isn't configured, and a fixed third
+   track would sit empty. The ASCII block above (flex: 1) takes the space. */
 .rail3-stats {
   flex: none;
   display: grid;
-  grid-template-rows: repeat(3, 56px);
+  grid-auto-rows: 56px;
 }
 .rail3-stat {
   display: flex;
