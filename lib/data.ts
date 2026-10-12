@@ -323,8 +323,10 @@ export const PLACES: { name: string; note: string }[] = [
   { name: "Iceland", note: "Aurora borealis > any CSS gradient I've ever shipped" },
   { name: "Ladakh", note: "High altitude, low bandwidth, zero regrets" },
   { name: "Switzerland", note: "Mountains, trains on time, sanity briefly restored" },
-  { name: "New York", note: "To see if it's really as fast-paced as the memes say" },
   { name: "Bali", note: "Coding from a beach, at least once, for the plot" },
+  { name: "Kerala", note: "Backwaters, houseboats, and a network slower than my first PHP site" },
+  { name: "North East", note: "Seven states, endless hills, zero chance my phone has signal" },
+  { name: "Dubai", note: "To see a skyline that looks like it was built with infinite budget and no code review" },
 ];
 
 export const HERO_BINARY = "01001011 01010000 01010011 01000100 01000101 01010110";
