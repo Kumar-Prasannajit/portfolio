@@ -64,6 +64,13 @@ export const SOCIAL_LINKS = {
 //   TODO(content): name the tools currently being learned.
 export const LEARNING_NOW: readonly string[] = [];
 
+// Tools always on the Stack board, even when no showcased project ranks them
+// into the top ten: they're in daily use, mostly in backend and client code
+// the Work feed doesn't show. "Last used" for them is still only what GitHub
+// shows (lib/githubTools.ts reads pg, ioredis, bullmq and Docker files from
+// the allowed repos); with nothing found, the tile shows no date.
+export const PINNED_STACK: readonly string[] = ["PostgreSQL", "Redis", "BullMQ", "Docker"];
+
 export const EXPERIENCE = [
   {
     role: "Junior Software Engineer",
@@ -244,6 +251,36 @@ export const PROJECTS: readonly Project[] = [
       },
     ],
   },
+  {
+    slug: "rag-chatbot",
+    title: "Node.js RAG Chatbot",
+    badge: "OPEN SOURCE",
+    // No live deployment: the card is the app's own UI (public/index.html),
+    // captured in its empty state.
+    image: "/projects/rag-chatbot.jpg",
+    summary:
+      "Ask questions about your PDFs: pgvector search over Gemini embeddings, answers from Groq.",
+    description:
+      "A Retrieval-Augmented Generation chatbot in Node.js: upload a PDF and it's chunked, embedded with Gemini and stored in PostgreSQL with pgvector. Each question pulls the five closest chunks and Groq answers from those alone, streaming the reply with its sources and similarity score.",
+    tags: ["Node.js", "Express", "PostgreSQL", "pgvector", "Docker"],
+    links: [
+      {
+        label: "Source",
+        href: "https://github.com/Kumar-Prasannajit/nodejs_RAG_ChatBOT",
+      },
+    ],
+    role: "Solo developer",
+    context:
+      "A local RAG chatbot: upload PDF documents, then ask questions about them and get answers grounded in the uploaded text instead of the model's guesses. An Express server does ingestion and retrieval, and PostgreSQL with the pgvector extension, started from Docker Compose, is the vector store.",
+    built: [
+      "PDF ingestion: text extracted, split into 500-character chunks with a 50-character overlap, embedded with Gemini and stored in PostgreSQL",
+      "Vector search with pgvector: cosine distance over 3072-dimension embeddings, top five chunks per question",
+      "Grounded answers from Groq that decline when the documents don't cover the question",
+      "Streamed replies, questions scoped to one document, and sources with a similarity score in the UI",
+      "A REST API to ingest, list and delete documents and to chat",
+    ],
+    screenshots: [],
+  },
 ];
 
 // /specs page. Label + pill items, rendered with the .stack-group/.pill-row
@@ -286,8 +323,10 @@ export const PLACES: { name: string; note: string }[] = [
   { name: "Iceland", note: "Aurora borealis > any CSS gradient I've ever shipped" },
   { name: "Ladakh", note: "High altitude, low bandwidth, zero regrets" },
   { name: "Switzerland", note: "Mountains, trains on time, sanity briefly restored" },
-  { name: "New York", note: "To see if it's really as fast-paced as the memes say" },
   { name: "Bali", note: "Coding from a beach, at least once, for the plot" },
+  { name: "Kerala", note: "Backwaters, houseboats, and a network slower than my first PHP site" },
+  { name: "North East", note: "Seven states, endless hills, zero chance my phone has signal" },
+  { name: "Dubai", note: "To see a skyline that looks like it was built with infinite budget and no code review" },
 ];
 
 export const HERO_BINARY = "01001011 01010000 01010011 01000100 01000101 01010110";

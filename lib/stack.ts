@@ -40,12 +40,16 @@ function later(a: string | null | undefined, b: string | null | undefined) {
  * primary tools), then project order — deterministic. Recency is display-only:
  * ranking by it would sink every tool from a project with no known date (a
  * private repo) below the cut, which is a data gap, not a signal.
+ *
+ * `pinned` tools are always on the board, after the ranked ones, even when no
+ * project ranks them in or lists them at all (PINNED_STACK in lib/data.ts):
+ * their "last used" still comes from projects and activity, or is omitted.
  */
 export function computeStack(
   projects: readonly Project[],
   dates: Readonly<Record<string, string | undefined>>,
   activity: Readonly<Record<string, string | undefined>> = {},
-  size = STACK_SIZE,
+  { size = STACK_SIZE, pinned = [] }: { size?: number; pinned?: readonly string[] } = {},
 ): StackTool[] {
   const byName = new Map<
     string,
@@ -74,12 +78,21 @@ export function computeStack(
     )
     .slice(0, size);
 
+  const onBoard = new Set(ranked.map((t) => t.name));
+  const extra = pinned
+    .filter((name) => !onBoard.has(name))
+    .map((name) => ({
+      name,
+      count: byName.get(name)?.count ?? 0,
+      lastUsed: byName.get(name)?.lastUsed ?? null,
+    }));
+
   const max = Math.max(1, ...ranked.map((t) => t.count));
-  return ranked.map(({ name, count, lastUsed }) => ({
+  return [...ranked, ...extra].map(({ name, count, lastUsed }) => ({
     name,
     count,
     lastUsed: later(lastUsed, activity[name]),
-    weight: max === 1 ? 0 : (count - 1) / (max - 1),
+    weight: max === 1 ? 0 : Math.max(0, (count - 1) / (max - 1)),
   }));
 }
 

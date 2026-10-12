@@ -42,9 +42,9 @@ export default function GalleryPage() {
                   <Image
                     src={image.src}
                     alt={image.alt}
-                    fill
+                    width={image.width}
+                    height={image.height}
                     sizes="(max-width: 520px) 100vw, (max-width: 820px) 50vw, 33vw"
-                    style={{ objectFit: "cover" }}
                   />
                 </div>
               ))}
