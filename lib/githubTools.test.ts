@@ -5,11 +5,14 @@ import {
   ALLOWED_REPOS,
   isAllowedRepo,
   latestByTool,
+  manifestPaths,
   newestCommit,
   pickRecentRepos,
   repoListUrl,
   toolsFromLanguages,
   toolsFromPackageJson,
+  toolsFromTree,
+  treePaths,
   type RepoSummary,
 } from "./githubTools.ts";
 
@@ -281,4 +284,55 @@ test("newestCommit picks the newest first commit across repos and skips error bo
     { repo: "me/a", committedAt: "2026-10-01T00:00:00Z" },
   );
   assert.equal(newestCommit([{ repo: "me/a", commits: null }]), null);
+});
+
+test("backend deps map to PostgreSQL, Redis and BullMQ; a queue implies Redis", () => {
+  assert.deepEqual(
+    sorted(toolsFromPackageJson({ dependencies: { pg: "8", ioredis: "5", bullmq: "5" } })),
+    ["BullMQ", "PostgreSQL", "Redis"],
+  );
+  assert.deepEqual(sorted(toolsFromPackageJson({ dependencies: { bullmq: "5" } })), ["BullMQ", "Redis"]);
+  assert.deepEqual(sorted(toolsFromPackageJson({ dependencies: { postgres: "3" } })), ["PostgreSQL"]);
+});
+
+test("Docker is seen from Dockerfiles and Compose files anywhere in the tree", () => {
+  for (const path of [
+    "Dockerfile",
+    "apps/api/Dockerfile",
+    "Dockerfile.dev",
+    "api.Dockerfile",
+    "docker-compose.yml",
+    "docker-compose.dev.yml",
+    "infra/compose.yaml",
+  ]) {
+    assert.deepEqual([...toolsFromTree(["README.md", path])], ["Docker"], path);
+  }
+  assert.equal(toolsFromTree(["src/docker.ts", "infra/compose/app.ts"]).size, 0);
+  assert.equal(toolsFromTree(["node_modules/x/Dockerfile"]).size, 0);
+});
+
+test("manifestPaths finds workspace manifests, shallowest first, never node_modules", () => {
+  assert.deepEqual(
+    manifestPaths(
+      [
+        "packages/shared/package.json",
+        "apps/web/package.json",
+        "package.json",
+        "node_modules/pg/package.json",
+        "apps/api/package.json",
+        "apps/api/src/index.ts",
+      ],
+      3,
+    ),
+    ["package.json", "apps/api/package.json", "apps/web/package.json"],
+  );
+});
+
+test("treePaths keeps blob paths and tolerates error bodies", () => {
+  assert.deepEqual(
+    treePaths({ tree: [{ path: "a", type: "blob" }, { path: "src", type: "tree" }, { type: "blob" }] }),
+    ["a"],
+  );
+  assert.deepEqual(treePaths({ message: "Not Found" }), []);
+  assert.deepEqual(treePaths(null), []);
 });

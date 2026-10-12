@@ -64,6 +64,13 @@ export const SOCIAL_LINKS = {
 //   TODO(content): name the tools currently being learned.
 export const LEARNING_NOW: readonly string[] = [];
 
+// Tools always on the Stack board, even when no showcased project ranks them
+// into the top ten: they're in daily use, mostly in backend and client code
+// the Work feed doesn't show. "Last used" for them is still only what GitHub
+// shows (lib/githubTools.ts reads pg, ioredis, bullmq and Docker files from
+// the allowed repos); with nothing found, the tile shows no date.
+export const PINNED_STACK: readonly string[] = ["PostgreSQL", "Redis", "BullMQ", "Docker"];
+
 export const EXPERIENCE = [
   {
     role: "Junior Software Engineer",
@@ -243,6 +250,36 @@ export const PROJECTS: readonly Project[] = [
         caption: "The works grid.",
       },
     ],
+  },
+  {
+    slug: "rag-chatbot",
+    title: "Node.js RAG Chatbot",
+    badge: "OPEN SOURCE",
+    // No live deployment: the card is the app's own UI (public/index.html),
+    // captured in its empty state.
+    image: "/projects/rag-chatbot.jpg",
+    summary:
+      "Ask questions about your PDFs: pgvector search over Gemini embeddings, answers from Groq.",
+    description:
+      "A Retrieval-Augmented Generation chatbot in Node.js: upload a PDF and it's chunked, embedded with Gemini and stored in PostgreSQL with pgvector. Each question pulls the five closest chunks and Groq answers from those alone, streaming the reply with its sources and similarity score.",
+    tags: ["Node.js", "Express", "PostgreSQL", "pgvector", "Docker"],
+    links: [
+      {
+        label: "Source",
+        href: "https://github.com/Kumar-Prasannajit/nodejs_RAG_ChatBOT",
+      },
+    ],
+    role: "Solo developer",
+    context:
+      "A local RAG chatbot: upload PDF documents, then ask questions about them and get answers grounded in the uploaded text instead of the model's guesses. An Express server does ingestion and retrieval, and PostgreSQL with the pgvector extension, started from Docker Compose, is the vector store.",
+    built: [
+      "PDF ingestion: text extracted, split into 500-character chunks with a 50-character overlap, embedded with Gemini and stored in PostgreSQL",
+      "Vector search with pgvector: cosine distance over 3072-dimension embeddings, top five chunks per question",
+      "Grounded answers from Groq that decline when the documents don't cover the question",
+      "Streamed replies, questions scoped to one document, and sources with a similarity score in the UI",
+      "A REST API to ingest, list and delete documents and to chat",
+    ],
+    screenshots: [],
   },
 ];
 

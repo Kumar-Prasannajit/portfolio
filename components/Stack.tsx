@@ -1,5 +1,5 @@
 import StackBoard from "./StackBoard";
-import { LEARNING_NOW, PROJECTS } from "@/lib/data";
+import { LEARNING_NOW, PINNED_STACK, PROJECTS } from "@/lib/data";
 import { computeStack, githubRepo } from "@/lib/stack";
 import { pushedAt } from "@/lib/pushedAt";
 import { githubActivity } from "@/lib/githubActivity";
@@ -8,7 +8,8 @@ import { githubActivity } from "@/lib/githubActivity";
 // same data the Work cards render — not typed by hand, so counts and ranking
 // come only from the projects. "Last used" is broader: the newest of the owner's
 // recent pushes to any GitHub repo that uses the tool (githubActivity), each
-// project's own Source-repo push date and its `lastWorked` in lib/data.ts. A
+// project's own Source-repo push date and its `lastWorked` in lib/data.ts.
+// PINNED_STACK tools are on the board whatever the ranking says. A
 // GitHub outage or rate limit just drops back to whichever of those remain,
 // and to no "last used" segment when none do.
 
@@ -32,7 +33,7 @@ export default async function Stack() {
         <h2 className="h2">Tools I reach for</h2>
         <div style={{ height: 28 }}></div>
         <StackBoard
-          tools={computeStack(PROJECTS, dates, activity)}
+          tools={computeStack(PROJECTS, dates, activity, { pinned: PINNED_STACK })}
           learning={LEARNING_NOW}
         />
       </div>

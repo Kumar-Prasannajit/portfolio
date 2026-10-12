@@ -34,6 +34,10 @@ const DEPENDENCY_TOOLS: readonly {
   { tool: "Lenis", deps: ["lenis", "@studio-freight/lenis"] },
   { tool: "Swiper.js", deps: ["swiper"] },
   { tool: "Particle.js", deps: ["particles.js"], prefixes: ["tsparticles", "@tsparticles/"] },
+  { tool: "PostgreSQL", deps: ["pg", "postgres", "pg-promise", "@neondatabase/serverless"] },
+  // BullMQ and Bull only run on Redis, so a queue implies it.
+  { tool: "Redis", deps: ["redis", "ioredis", "@upstash/redis", "bullmq", "bull"] },
+  { tool: "BullMQ", deps: ["bullmq", "@nestjs/bullmq"] },
   // Frameworks that only exist to run a Node server. Not `next`: every Next app
   // runs on Node, which would make Node.js "used" whenever the portfolio is.
   {
@@ -110,6 +114,46 @@ export function toolsFromLanguages(languages: unknown): Set<string> {
     if (tool && n / total >= MIN_LANGUAGE_SHARE) tools.add(tool);
   }
   return tools;
+}
+
+/** File paths from a /git/trees?recursive=1 response; [] for anything else. Never throws. */
+export function treePaths(tree: unknown): string[] {
+  if (!isRecord(tree) || !Array.isArray(tree.tree)) return [];
+  return tree.tree.flatMap((entry) =>
+    isRecord(entry) && entry.type === "blob" && typeof entry.path === "string"
+      ? [entry.path]
+      : [],
+  );
+}
+
+/** A Dockerfile (Dockerfile, Dockerfile.dev, api.Dockerfile) or a Compose file anywhere in the repo. */
+const DOCKER_FILE =
+  /(^|\/)(Dockerfile(\.[\w-]+)?|[\w.-]+\.Dockerfile|(docker-)?compose(\.[\w-]+)?\.ya?ml)$/i;
+
+/**
+ * Tools implied by a repo's file paths (GitHub's recursive /git/trees). Docker
+ * has no npm dependency and its files are too small to clear
+ * MIN_LANGUAGE_SHARE, so it can only be seen here. Never throws.
+ */
+export function toolsFromTree(paths: readonly string[]): Set<string> {
+  const tools = new Set<string>();
+  if (paths.some((p) => !p.includes("node_modules/") && DOCKER_FILE.test(p))) {
+    tools.add("Docker");
+  }
+  return tools;
+}
+
+/**
+ * The repo's package.json files, shallowest first and at most `limit`: the root
+ * one plus a monorepo's workspaces (apps/api/package.json), whose dependencies
+ * the root manifest doesn't list. Never anything under node_modules.
+ */
+export function manifestPaths(paths: readonly string[], limit: number): string[] {
+  const depth = (p: string) => p.split("/").length;
+  return paths
+    .filter((p) => /(^|\/)package\.json$/.test(p) && !p.includes("node_modules/"))
+    .sort((a, b) => depth(a) - depth(b) || a.localeCompare(b))
+    .slice(0, limit);
 }
 
 /** Profile README repo ("owner/owner"): content, not a project. */

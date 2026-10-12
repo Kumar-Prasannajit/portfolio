@@ -90,3 +90,26 @@ test("ranking and counts ignore the activity map", () => {
   assert.deepEqual(strip(busy), strip(plain));
   assert.equal(plain[0].name, "React"); // 3 projects
 });
+
+test("pinned tools join the board even when no project lists them", () => {
+  const tools = computeStack(PROJECTS, DATES, { Redis: "2026-10-11T00:00:00Z" }, {
+    pinned: ["Redis", "Docker", "React"],
+  });
+  const names = tools.map((t) => t.name);
+  // After the ranked ones, in pinned order; React is already ranked, so not twice.
+  assert.deepEqual(names.slice(-2), ["Redis", "Docker"]);
+  assert.equal(names.filter((n) => n === "React").length, 1);
+  const by = byName(tools);
+  assert.equal(by.Redis.lastUsed, "2026-10-11T00:00:00Z");
+  assert.equal(by.Docker.lastUsed, null);
+  assert.equal(by.Docker.count, 0);
+  assert.equal(by.Docker.weight, 0);
+});
+
+test("a pinned tool cut by size keeps its project count and date", () => {
+  const tools = byName(
+    computeStack(PROJECTS, DATES, {}, { size: 1, pinned: ["Express"] }),
+  );
+  assert.equal(tools.Express.count, 1);
+  assert.equal(tools.Express.lastUsed, "2025-09-17T00:00:00Z");
+});

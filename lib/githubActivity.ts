@@ -15,22 +15,34 @@
 // 3 pushedAt calls): 2 repo lists + 3 named repos + at most REPO_LIMIT + 3
 // /languages = 23 per
 // revalidation. Public package.json comes from raw.githubusercontent.com, which
-// is not API-rate-limited; a private repo's goes through the contents API
-// (+ at most REPO_LIMIT, authenticated only).
+// is not API-rate-limited; a private repo's goes through the contents API.
+//
+// With a token for the repo's owner (5000/hr), each repo also gets one
+// recursive /git/trees call (+ at most REPO_LIMIT + 3): it finds Docker files
+// and a monorepo's workspace package.json files (apps/api/package.json), which
+// is where a backend's pg/ioredis/bullmq live. A private repo then reads up to
+// MANIFEST_LIMIT manifests through the contents API. Without a token the tree
+// call is skipped, so the budget above holds, and only the root package.json
+// is read, as before.
 
 import { githubHeaders } from "./githubHeaders";
 import {
   ALLOWED_OWNERS,
   ALLOWED_REPOS,
   latestByTool,
+  manifestPaths,
   pickRecentRepos,
   repoListUrl,
   toolsFromLanguages,
   toolsFromPackageJson,
+  toolsFromTree,
+  treePaths,
   type RepoSummary,
 } from "./githubTools";
 
 const REPO_LIMIT = 15;
+// Root + three workspaces covers a typical apps/api, apps/web, packages/shared.
+const MANIFEST_LIMIT = 4;
 const NEXT = { revalidate: 3600 };
 
 const ownerOf = (repo: RepoSummary) => repo.full_name.split("/")[0];
@@ -51,33 +63,46 @@ async function listRepos(owner: string): Promise<unknown[]> {
   return Array.isArray(list) ? list : [];
 }
 
-function packageJson(repo: RepoSummary) {
+function packageJson(repo: RepoSummary, file: string) {
   const { full_name: name, default_branch: branch } = repo;
+  const filePath = file.split("/").map(encodeURIComponent).join("/");
   if (repo.private) {
     // Only the contents API can read a private repo; ask for the raw file.
     return getJson(
-      `https://api.github.com/repos/${name}/contents/package.json?ref=${encodeURIComponent(branch)}`,
+      `https://api.github.com/repos/${name}/contents/${filePath}?ref=${encodeURIComponent(branch)}`,
       { ...githubHeaders(ownerOf(repo)), Accept: "application/vnd.github.raw+json" },
     );
   }
   // Public: raw host, no token, no API quota.
   return getJson(
-    `https://raw.githubusercontent.com/${name}/${encodeURIComponent(branch)}/package.json`,
+    `https://raw.githubusercontent.com/${name}/${encodeURIComponent(branch)}/${filePath}`,
     {},
   );
 }
 
 async function scan(repo: RepoSummary) {
-  const [languages, pkg] = await Promise.all([
-    getJson(
-      `https://api.github.com/repos/${repo.full_name}/languages`,
-      githubHeaders(ownerOf(repo)),
-    ),
-    packageJson(repo),
+  const headers = githubHeaders(ownerOf(repo));
+  const [languages, tree] = await Promise.all([
+    getJson(`https://api.github.com/repos/${repo.full_name}/languages`, headers),
+    // Only with a token: see the rate budget above.
+    headers.Authorization
+      ? getJson(
+          `https://api.github.com/repos/${repo.full_name}/git/trees/${encodeURIComponent(repo.default_branch)}?recursive=1`,
+          headers,
+        )
+      : null,
   ]);
+  const paths = treePaths(tree);
+  // No tree (no token, or the call failed): the root manifest, as before.
+  const manifests = paths.length > 0 ? manifestPaths(paths, MANIFEST_LIMIT) : ["package.json"];
+  const pkgs = await Promise.all(manifests.map((file) => packageJson(repo, file)));
   return {
     pushedAt: repo.pushed_at,
-    tools: new Set([...toolsFromLanguages(languages), ...toolsFromPackageJson(pkg)]),
+    tools: new Set([
+      ...toolsFromLanguages(languages),
+      ...toolsFromTree(paths),
+      ...pkgs.flatMap((pkg) => [...toolsFromPackageJson(pkg)]),
+    ]),
   };
 }
 
