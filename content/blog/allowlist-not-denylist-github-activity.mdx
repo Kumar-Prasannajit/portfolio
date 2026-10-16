@@ -1,0 +1,64 @@
+---
+title: "An allowlist, not a denylist, for a site that reads my GitHub"
+date: "2026-10-16"
+tags: ["security", "github", "nextjs"]
+excerpt: "The Stack section and the post-drafting routine both read my GitHub activity. Here is why they start from a short list of what is allowed instead of a list of what to hide."
+linkedin: |
+  A site that reads your GitHub account and prints the result has one job it can't get wrong: never show something you didn't mean to show.
+
+  My portfolio has a Stack section that works out when I last used each tool, and a routine that drafts posts from my commits. Both read GitHub. My first instinct was to exclude the things I don't want shown. I went the other way instead and wrote down the short list of what is allowed.
+
+  The list is two owners (my own account and the Salonjaa org) plus three single public repos I built on other people's accounts. Anything else is invisible, including an org I join next year, until I add it on purpose. A denylist fails open the day something new appears. An allowlist fails closed.
+
+  Then I found a second leak the allowlist didn't cover: private repos inside allowed owners. Their commit messages would have landed in a public pull request. So the collector now keeps only repos that explicitly say private is false, and a missing flag counts as private.
+
+  The write-up covers the per-owner tokens, the repo filter, and the tests that prove the collector never even asks about a repo outside the list.
+
+  #nextjs #security #github
+---
+
+This site reads my GitHub account in two places. The Stack section works out when I last used each tool, and the routine that drafts my weekly and blog posts reads my recent commits. Both print what they find on a public page. That makes the filter between "everything my token can see" and "what the site shows" the part I most want to get right.
+
+## Why not hide the bad ones
+
+The first idea was a denylist: skip the repos I don't want shown. It fails the way denylists always do. It is correct on the day I write it and wrong the day something new shows up. My account can see repos in more places than the ones I own, and an org I join later would appear on the site until I noticed and added it to the list.
+
+So I flipped it. `lib/githubTools.ts` holds two constants:
+
+- `ALLOWED_OWNERS`: my own account and the `salonjaa-digital-solution` org.
+- `ALLOWED_REPOS`: three single public repos I built that live on other people's accounts. They are named one by one so the rest of those accounts never counts.
+
+`isAllowedRepo` checks a repo's full name against both, case-insensitively. Anything that doesn't match is simply not there. A new org stays out until I add it, which is the behaviour I want.
+
+## Listing per owner
+
+Because of the allowlist, the code never asks GitHub for "all my repos". It lists each allowed owner on its own, `/user/repos?affiliation=owner` for my account and `/orgs/<org>/repos` for the org, and fetches the three named repos directly. The `affiliation=owner` part matters: it leaves out repos where I'm only a collaborator or an org member.
+
+A side effect is that the named repos are always scanned. Before this change they competed with everything else for the 15 most recent slots, and an older project could drop out of the Stack section for no good reason.
+
+## One token per owner
+
+A fine-grained GitHub token covers exactly one owner. So the org gets its own variable, `GITHUB_TOKEN_SALONJAA`, and everything else uses `GITHUB_TOKEN`. `githubHeaders(owner)` picks between them. Both are read-only.
+
+## The leak the allowlist didn't cover
+
+The allowlist answers "whose repos". It doesn't answer "which repos of theirs". The post-drafting collector reads commit messages, and those end up in a pull request body. If a private repo inside an allowed owner had a commit that day, its message would have landed in a public PR.
+
+The fix was a one-line filter in `scripts/collect-activity.mjs`:
+
+```js
+repo.private === false
+```
+
+It requires the flag to be explicitly `false`. A repo with no `private` field counts as private. I'd rather lose a public repo from a draft because of a malformed response than publish a private one for the same reason.
+
+## Testing the negative
+
+The tests run the collector against a stubbed GitHub (`scripts/fixtures/stub-github.mjs`) whose repo lists deliberately include a repo outside the allowlist and a few private ones. Two tests do the real work:
+
+- One asserts that nothing outside the allowlist is ever requested, by checking the stub's log of requested URLs. Filtering the output isn't enough; the collector shouldn't ask in the first place.
+- One asserts that private repos, and repos with no flag at all, are never requested and never show up in the output.
+
+## What I'd keep
+
+Write down what is allowed, make "unknown" mean "hidden", and test the requests rather than the results. The list is five entries long today. When I need a sixth, I'll add it deliberately, which is the whole point.
