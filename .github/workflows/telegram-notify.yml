@@ -1,0 +1,51 @@
+name: telegram-notify
+
+# The Telegram review bot's outgoing messages (docs/superpowers/specs/2026-10-29-telegram-review-bot-design.md).
+# Every event runs the default branch's scripts/notify-telegram.mjs; no PR code is
+# checked out, and the event reaches the script as a file, never inside a shell command.
+
+on:
+  deployment_status:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+  schedule:
+    - cron: "30 4 * * *" # 10:00 IST
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: write
+  deployments: read
+  statuses: read
+  checks: read
+
+jobs:
+  notify:
+    # Every other deployment is skipped by the script, not here.
+    if: >-
+      github.event_name == 'deployment_status' ||
+      github.event_name == 'schedule' ||
+      (github.event_name == 'issues' && contains(github.event.issue.labels.*.name, 'automation-log')) ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && startsWith(github.event.comment.body, 'Edit failed'))
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - if: github.event_name == 'deployment_status'
+        run: node scripts/notify-telegram.mjs deployment
+      - if: github.event_name == 'schedule'
+        run: node scripts/notify-telegram.mjs reminders
+      - if: github.event_name == 'issues'
+        run: node scripts/notify-telegram.mjs log-issue ${{ github.event.issue.number }}
+      - if: github.event_name == 'issue_comment'
+        run: node scripts/notify-telegram.mjs edit-failed
