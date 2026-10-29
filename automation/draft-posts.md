@@ -186,9 +186,12 @@ it still fails, **make no PR**: stop and log the full output.
 
 ## 8. The PR
 
-1. Branch `draft/weekly-<NNN of the first post>` or `draft/blog-<slug>`,
-   created from `main`. Commit the post or posts (and `content/ideas.md` in blog
-   mode), then push the branch.
+1. Branch `draft/weekly-<NNN of the first post>` or `draft/blog-<slug>`, created
+   from the current remote `main`: run `git fetch origin main`, then
+   `git switch -c <branch> origin/main`. The clone's own `main` can be out of date,
+   and a branch cut from an old base lacks `.github/workflows/telegram-notify.yml`,
+   so the Telegram bot never hears about the draft. Commit the post or posts (and
+   `content/ideas.md` in blog mode), then push the branch.
 2. Open a pull request against `main` (an ordinary one, not GitHub's "draft" state):
    - **Title:** `Draft: Weekly #<NNN> — <title>` for one post,
      `Draft: Weekly #<first NNN>–#<last NNN>` for several, or
