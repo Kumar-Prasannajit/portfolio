@@ -1,8 +1,12 @@
 name: telegram-notify
 
 # The Telegram review bot's outgoing messages (docs/superpowers/specs/2026-10-29-telegram-review-bot-design.md).
-# Every event runs the default branch's scripts/notify-telegram.mjs; no PR code is
-# checked out, and the event reaches the script as a file, never inside a shell command.
+# The job checks out the default branch, so the script that holds the bot token is
+# always main's copy, never a draft branch's. The event reaches the script as a file,
+# never inside a shell command. GitHub reads this workflow file itself from the
+# deployed commit for deployment_status, so a draft branch cut before this file
+# existed gets no messages (automation/draft-posts.md section 8 branches from
+# origin/main for that reason).
 
 on:
   deployment_status:
@@ -36,6 +40,8 @@ jobs:
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
       - uses: actions/setup-node@v4
         with:
           node-version: 24

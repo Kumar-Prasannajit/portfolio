@@ -581,8 +581,7 @@ Vercel preview, no employer reference). It was one 600-word post for four weeks,
 the per-week change; #6 is closed and the weekly routine re-run to produce #004–#007.
 
 ## Post automation (part b)
-Status: code done on branch `feat/telegram-review-bot` (not pushed). The owner's setup and the
-acceptance run are still to do; results go below when they are.
+Status: live (2026-10-29). Code in #22; first acceptance run the same day (below).
 Spec: `docs/superpowers/specs/2026-10-29-telegram-review-bot-design.md` ·
 Plan: `docs/superpowers/plans/2026-10-29-telegram-review-bot.md` ·
 Instructions: `automation/apply-edit.md`
@@ -618,7 +617,31 @@ Decisions:
   data (env var and `jq`), never in a shell command.
 Known limits: the `/fire` endpoint is a research preview and is untested here; a failed fire shows
 only as a red Actions run; a second photo with a different extension leaves the old cover file.
-Acceptance: pending.
+Acceptance (2026-10-29, on #21 and a blog draft, #23):
+1. Preview message: arrives with title, caption, preview link and buttons.
+2. Photo: "Cover added", one commit `Cover for #21` (the image and one frontmatter line), then an
+   "Updated" message.
+3. Edit: "Edit queued"; the `edit` job fired the routine (HTTP 200); the routine pushed
+   `Edit #21: …` after 78 s; then an "Updated" message.
+4. Publish: not run (no draft worth publishing); covered by unit tests only.
+5. Reject: #23 closed, branch deleted, `content/ideas.md` on `main` untouched.
+6. A blog run with a draft open: issue `blog run 2026-10-29: no PR` ("draft already open: #23")
+   forwarded to Telegram and closed.
+7. Reminder: pending the 10:00 IST run on 2026-10-30, with #21 left open.
+Findings:
+- GitHub runs a `deployment_status` workflow from the deployed commit. #21 and #23 were cut from a
+  `main` older than #22, so they had no `telegram-notify.yml` and no message arrived until
+  `main` was merged into each. The routine's clone had a stale `main` (the edit run's
+  `git fetch` moved it forward). Fixed: `draft-posts.md` section 8 fetches and branches from
+  `origin/main`; the workflow checks out the default branch, so the token-holding script is
+  `main`'s copy. A branch can still edit the workflow file itself; only people and routines with
+  push access can.
+- Actions secrets must be repository secrets. Environment secrets (`Preview`, `Production`) are
+  not readable by a job without `environment:`.
+- Windows PowerShell: `curl` is an alias of `Invoke-WebRequest`; use `curl.exe` or
+  `Invoke-RestMethod` for `setWebhook` and `getWebhookInfo`.
+- The edit routine's commits are authored `Claude <noreply@anthropic.com>`; the bot recognises
+  them by their message (`Edit #n: …`), not their author.
 
 ## Phase 10 — QA pass
 Status: not started
