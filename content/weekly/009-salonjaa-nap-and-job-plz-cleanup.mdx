@@ -1,0 +1,28 @@
+---
+title: "Salonjaa NAP fixes and a Job_Plz backend cleanup"
+date: "2026-10-25"
+summary: "Aligning Salonjaa's name, address and phone details with its Google Business Profile, and tidying the Job_Plz backend."
+cover: "09"
+linkedin: |
+  A quiet week, but two of the fixes were the kind that save you a bad evening later.
+
+  On the Salonjaa Digital Solutions site, I aligned the business name, address and phone details (NAP) with the Google Business Profile and strengthened the site-name signals. Search engines compare those details across the web, so a mismatch weakens them.
+
+  On the Job_Plz backend, the HTTP server now throws if it fails to listen, instead of carrying on as if nothing happened. I also removed a broken cron script and documented the full local setup, deleting some dead files along the way.
+
+  Small changes, but a server that fails loudly is easier to trust than one that fails quietly.
+
+  #buildinpublic #seo #nodejs
+---
+
+A short week: one SEO fix and one cleanup.
+
+## Salonjaa Digital Solutions
+
+I aligned the site's NAP (name, address, phone) with the Google Business Profile and strengthened the site-name signals. {/* CHECK: the commit message doesn't say which fields were mismatched or what changed in the markup. */}
+
+## Job_Plz_Backend
+
+- **Startup.** The HTTP server now throws when it fails to listen, so a failed start is visible.
+- **Scripts.** I removed a broken cron script.
+- **Docs.** The README now documents the full local setup, and I removed the dead files.
