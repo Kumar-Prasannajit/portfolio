@@ -1,0 +1,70 @@
+---
+title: "A Telegram bot to approve my drafts, with no database"
+date: "2026-10-29"
+tags: ["automation", "github", "nextjs"]
+excerpt: "My post-drafting routine stalled for eleven days because nobody told me a draft was waiting. The fix is a review bot that keeps no state: the pull request is the database."
+linkedin: |
+  My blog automation stopped for eleven days, and the only thing that broke it was me not noticing a pull request.
+
+  A routine drafts my weekly and blog posts into pull requests. It refuses to open a second draft while one is waiting, which is a sensible rule. But two drafts sat unmerged from 18 October, so every run after that did nothing, and nothing told me.
+
+  The fix was a Telegram bot. Each draft arrives on my phone with its preview link and three buttons: Publish, Edit and Reject. A photo reply becomes the post's cover. A run that makes no pull request sends a message too, so a quiet run is never silent.
+
+  The part I like most is that the bot stores nothing. Every message carries the PR number, and every button carries it too. GitHub is the database.
+
+  The write-up covers why GitHub Actions send and a Vercel route receives, and what Publish refuses to do.
+
+  #automation #github #nextjs
+---
+
+For eleven days my post-drafting routine did nothing, and I only found out by looking.
+
+The routine opens a pull request with a draft post. It also refuses to open a second one while a draft is waiting, so it never piles up work I haven't read. That rule is fine. The problem was that two drafts, #19 and #20, sat unmerged from 18 October, and every blog and weekly run after that quietly became a no-op. Nothing told me.
+
+So the goal for the next piece was narrow: no run is silent, and no open draft gets forgotten. The review loop moved to my phone as a side effect.
+
+## What it does
+
+When Vercel finishes the preview for a draft PR, I get one Telegram message with the title, the summary, the items the routine flagged for checking, the LinkedIn caption and the preview link. Under it are three buttons:
+
+- **Publish** merges the pull request.
+- **Edit** asks me what should change. My reply is posted on the PR as a comment starting `edit:`, and a second routine applies it and pushes.
+- **Reject** closes the PR and deletes its branch.
+
+If I send a photo, it is committed as the post's cover. A reminder arrives each morning at 10:00 IST for any draft open longer than 20 hours. And a routine run that makes no PR now opens a short issue, which the same workflow forwards to me and closes.
+
+## The pull request is the database
+
+I didn't want a store just to remember which message belongs to which draft. So the bot keeps none.
+
+Every message it sends carries `PR #<n>` in its text. When I reply to a message, the bot reads the PR number from the message I replied to. Button presses carry it in their callback data, as `pub:21`, `edit:21` and `rej:21`. Everything else the bot needs, such as the branch, the files, the labels and the check results, it asks GitHub for at the moment I tap.
+
+That has a nice consequence: an old message's buttons still work, and they act on the PR as it is now, not as it was when the message was sent. A repeated tap is harmless too. Merging a merged PR or closing a closed one just replies that it is already done.
+
+## Actions send, a route receives
+
+The two directions have different shapes, so I split them:
+
+- **Outgoing messages** come from a GitHub Actions workflow. Everything it reacts to is an event GitHub already sends: a deployment status, a new issue, a comment, a cron schedule.
+- **Incoming taps** go to a Vercel route, `/api/telegram`, set once as the bot's webhook.
+
+I rejected two alternatives. Doing everything in Vercel would have meant repository webhooks and more public routes, with no run history. An always-on bot polling Telegram would have meant another process on my server for a job that happens twice a week.
+
+The split also means nothing waits. Every step is started by an event, so no function sits there holding a connection open against a time limit.
+
+## What Publish refuses to do
+
+One tap that merges to production is the dangerous part, so the route is strict:
+
+- It acts only on my chat. A message from anywhere else gets an empty 200 and no reply.
+- It checks a secret header on every request.
+- It touches only pull requests labelled `draft-post` whose head branch starts with `draft/`. A forged `callback_data` naming any other PR does nothing.
+- Publish merges only when the content check and the Vercel preview are both green. A missing one counts as not green.
+
+Nothing publishes without me tapping the button, which is the same promise the drafting routine has always made.
+
+## Where it stands
+
+The code is merged and the unit and route tests pass. The acceptance run on a real draft is still to do, and one piece is untested: the edit routine is started through an API endpoint that is still a research preview. If starting it fails, it shows up only as a red Actions run. {/* CHECK: whether the acceptance run has happened by publish time, and the state of the /fire endpoint. */}
+
+The lesson I'm taking from the stall is about guards. A rule that makes a system stop is only safe if stopping makes noise.
