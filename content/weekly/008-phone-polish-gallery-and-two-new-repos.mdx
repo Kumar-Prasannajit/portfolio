@@ -1,0 +1,36 @@
+---
+title: "Phone polish, a real gallery and two new repos"
+date: "2026-10-18"
+summary: "Mobile fixes, a RAG chatbot on the Work page, real gallery photos, and two new repos: a CI/CD pipeline and the i-age web app."
+cover: "08"
+linkedin: |
+  Most of this week's work was fixing things that only break on a phone.
+
+  On my portfolio, the phone strip now shows the time and date without clipping. The word VIEWERS stays inside its tile in brutal mode at 320px wide, and the Stack section shows two tools per row. The phone menu lists Specs and Places. I also stopped the light and dark wave from lagging, and the rail stats now show only real data.
+
+  The content grew too. The gallery uses real photos as WebP, shown uncropped. The Work page has a new RAG chatbot project, and the Stack pins PostgreSQL, Redis, BullMQ and Docker. Places gained Kerala, North East and Dubai, and lost New York.
+
+  Outside the site, I set up CI/CD pipelines in a tutorial repo and hit Cloud Run's 63-character limit on revision suffixes. I also started a new web app, i-age, with a demo account you can log out of.
+
+  #buildinpublic #nextjs #webdev
+---
+
+Mostly phone fixes this week, plus new content and two new repos.
+
+## Portfolio
+
+- **Mobile.** The phone strip shows the time and date unclipped. "VIEWERS" stays inside its tile in brutal mode at 320px. The Stack section shows two tools per row, and the phone menu now lists Specs and Places.
+- **Theme and rails.** The light and dark wave no longer lags. Rail 3 shows only real data, and a show that is still airing no longer reads "/ ?".
+- **Stack.** The tiles show only "last used".
+- **Hero.** I dropped the `[ HYDERABAD, IN ]` chip.
+- **Gallery.** Real photos as WebP, shown uncropped.
+- **Work and Stack.** A RAG chatbot project, and PostgreSQL, Redis, BullMQ and Docker are pinned.
+- **Places.** Kerala, North East and Dubai are in, New York is out.
+
+## ci-cd-tutorial
+
+I set up CI/CD pipelines for the project. One fix followed: the Cloud Run revision suffix was too long, so I shortened it to fit the 63-character limit.
+
+## i-age
+
+A new web app. The first commit landed on Saturday, and the next added log out to the demo account. {/* CHECK: the commits don't say what i-age does. */}
