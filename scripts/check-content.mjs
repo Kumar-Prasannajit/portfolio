@@ -18,7 +18,6 @@ assertNode();
 // failure to load the .ts modules.
 const { default: matter } = await import("gray-matter");
 const { compile } = await import("@mdx-js/mdx");
-const { checkContent, mentionsEmployer } = await import("../lib/contentCheck.ts");
 
 const args = process.argv.slice(2);
 const rootFlag = args.indexOf("--root");
@@ -51,7 +50,17 @@ if (!foundDir) {
   process.exit(1);
 }
 
-const problems = [...parseProblems, ...checkContent(files)];
+// Loaded only now: on Windows, Node 24 can crash in process.exit() shortly after
+// importing a .ts module, so the early exit above must come first.
+const { checkContent, mentionsEmployer } = await import("../lib/contentCheck.ts");
+
+// Existing covers as URL paths, so a `coverImage` that names a missing file fails.
+const coversDir = path.join(root, "public", "covers");
+const publicPaths = new Set(
+  fs.existsSync(coversDir) ? fs.readdirSync(coversDir).map((name) => `/covers/${name}`) : [],
+);
+
+const problems = [...parseProblems, ...checkContent(files, publicPaths)];
 
 for (const file of files) {
   try {
@@ -72,6 +81,7 @@ if (fs.existsSync(ideasPath)) {
 
 if (problems.length > 0) {
   for (const { path: p, message } of problems) console.log(`${p}: ${message}`);
-  process.exit(1);
+  process.exitCode = 1;
+} else {
+  console.log(`content ok: ${files.length} files`);
 }
-console.log(`content ok: ${files.length} files`);

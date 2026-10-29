@@ -1,0 +1,1 @@
+{"update_id":1005,"callback_query":{"id":"cb-1","from":{"id":4242,"is_bot":false,"first_name":"Owner"},"message":{"message_id":500,"from":{"id":999,"is_bot":true,"first_name":"Review bot"},"chat":{"id":4242,"type":"private"},"date":1761690000,"text":"Weekly #009 · PR #21\nSalonjaa NAP fixes\n\nPreview: https://example.vercel.app"},"chat_instance":"ci-1","data":"pub:21"}}

@@ -57,3 +57,18 @@ test("mentionsEmployer", () => {
   assert.equal(mentionsEmployer("notes about AIdeas"), "aideas");
   assert.equal(mentionsEmployer("fine"), null);
 });
+
+const withCover = (coverImage: unknown) => blog({ data: { ...blog().data, coverImage } });
+const SHAPE = "`coverImage` must be /covers/<name>.jpg, .jpeg or .png";
+test("coverImage pointing at an existing cover passes", () => {
+  assert.deepEqual(checkContent([withCover("/covers/blog-a.jpg")], new Set(["/covers/blog-a.jpg"])), []);
+});
+test("coverImage must be a /covers/ jpg, jpeg or png", () => {
+  assert.deepEqual(messages([withCover("/images/a.jpg")]), [SHAPE]);
+  assert.deepEqual(messages([withCover("/covers/a.gif")]), [SHAPE]);
+  assert.deepEqual(messages([withCover(3)]), [SHAPE]);
+});
+test("coverImage naming a missing file fails when public paths are given", () => {
+  assert.deepEqual(checkContent([withCover("/covers/blog-a.jpg")], new Set()).map((p) => p.message),
+    ["`coverImage` file public/covers/blog-a.jpg does not exist"]);
+});

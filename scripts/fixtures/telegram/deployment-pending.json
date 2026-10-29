@@ -1,0 +1,1 @@
+{"action":"created","deployment_status":{"state":"pending","environment":"Preview","environment_url":null,"target_url":"https://vercel.com/example/deployments/dpl_1"},"deployment":{"sha":"0123456789abcdef0123456789abcdef01234567","environment":"Preview"}}
