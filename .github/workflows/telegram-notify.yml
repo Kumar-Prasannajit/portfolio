@@ -1,0 +1,83 @@
+name: telegram-notify
+
+# The Telegram review bot's outgoing messages (docs/superpowers/specs/2026-10-29-telegram-review-bot-design.md).
+# Every event runs the default branch's scripts/notify-telegram.mjs; no PR code is
+# checked out, and the event reaches the script as a file, never inside a shell command.
+
+on:
+  deployment_status:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+  schedule:
+    - cron: "30 4 * * *" # 10:00 IST
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: write
+  deployments: read
+  statuses: read
+  checks: read
+
+jobs:
+  notify:
+    # Every other deployment is skipped by the script, not here.
+    if: >-
+      github.event_name == 'deployment_status' ||
+      github.event_name == 'schedule' ||
+      (github.event_name == 'issues' && contains(github.event.issue.labels.*.name, 'automation-log')) ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && startsWith(github.event.comment.body, 'Edit failed'))
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - if: github.event_name == 'deployment_status'
+        run: node scripts/notify-telegram.mjs deployment
+      - if: github.event_name == 'schedule'
+        run: node scripts/notify-telegram.mjs reminders
+      - if: github.event_name == 'issues'
+        run: node scripts/notify-telegram.mjs log-issue ${{ github.event.issue.number }}
+      - if: github.event_name == 'issue_comment'
+        run: node scripts/notify-telegram.mjs edit-failed
+
+  # The owner's "edit: ..." comment on a draft PR starts the portfolio-draft-edit
+  # routine (automation/apply-edit.md). Routines have no comment trigger, so this
+  # job calls the routine's API trigger. The comment text reaches curl as a JSON
+  # file built by jq from an env var, never inside a shell command; the routine
+  # checks the comment again (apply-edit.md, step 1).
+  edit:
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      github.event.comment.user.login == 'Kumar-Prasannajit' &&
+      startsWith(github.event.comment.body, 'edit:') &&
+      contains(github.event.issue.labels.*.name, 'draft-post')
+    runs-on: ubuntu-latest
+    permissions: {}
+    env:
+      ROUTINE_TRIGGER_TOKEN: ${{ secrets.ROUTINE_TRIGGER_TOKEN }}
+      PR_NUMBER: ${{ github.event.issue.number }}
+      COMMENT_BODY: ${{ github.event.comment.body }}
+    steps:
+      - name: Fire the edit routine
+        run: |
+          jq -n --arg text "PR #${PR_NUMBER}"$'\n'"${COMMENT_BODY}" '{text: $text}' > body.json
+          status=$(curl -sS -o /dev/null -w '%{http_code}' -X POST \
+            "https://api.anthropic.com/v1/claude_code/routines/trig_011h8NXLfqLd8DqYDyT568Lc/fire" \
+            -H "Authorization: Bearer ${ROUTINE_TRIGGER_TOKEN}" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "anthropic-beta: experimental-cc-routine-2026-04-01" \
+            -H "Content-Type: application/json" \
+            --data @body.json)
+          echo "routine fire: HTTP ${status}"
+          case "$status" in 2*) ;; *) exit 1 ;; esac

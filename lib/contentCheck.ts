@@ -34,6 +34,7 @@ const REQUIRED: Record<ContentFile["kind"], readonly string[]> = {
 };
 
 const LINKEDIN_MAX = 3000;
+const COVER_SHAPE = /^\/covers\/[a-z0-9-]+\.(jpe?g|png)$/;
 
 const isMissing = (v: unknown) => v === undefined || v === null || v === "";
 
@@ -46,7 +47,7 @@ function isIsoDate(v: unknown): boolean {
 
 const slugOf = (filename: string) => filename.replace(/\.mdx?$/, "");
 
-function fileProblems(file: ContentFile): string[] {
+function fileProblems(file: ContentFile, publicPaths?: ReadonlySet<string>): string[] {
   const { data } = file;
   const out: string[] = [];
 
@@ -77,6 +78,15 @@ function fileProblems(file: ContentFile): string[] {
     out.push(`\`linkedin\` must be text of at most ${LINKEDIN_MAX} characters`);
   }
 
+  const cover = data.coverImage;
+  if (cover !== undefined) {
+    if (typeof cover !== "string" || !COVER_SHAPE.test(cover)) {
+      out.push("`coverImage` must be /covers/<name>.jpg, .jpeg or .png");
+    } else if (publicPaths && !publicPaths.has(cover)) {
+      out.push(`\`coverImage\` file public${cover} does not exist`);
+    }
+  }
+
   // next-mdx-remote (what the site renders with) drops `{…}` expressions, so
   // text in braces would silently vanish from the published post. Code and
   // {/* comments */} are fine.
@@ -95,13 +105,17 @@ function fileProblems(file: ContentFile): string[] {
   return out;
 }
 
-/** Every rule over every file; problems come back in file order. */
-export function checkContent(files: ContentFile[]): Problem[] {
+/**
+ * Every rule over every file; problems come back in file order. `publicPaths`
+ * holds the existing public/ files as URL paths ("/covers/x.jpg"); when it is
+ * omitted, a `coverImage` is checked for shape only.
+ */
+export function checkContent(files: ContentFile[], publicPaths?: ReadonlySet<string>): Problem[] {
   const problems: { file: number; path: string; message: string }[] = [];
   const add = (file: number, message: string) =>
     problems.push({ file, path: files[file].path, message });
 
-  files.forEach((file, i) => fileProblems(file).forEach((m) => add(i, m)));
+  files.forEach((file, i) => fileProblems(file, publicPaths).forEach((m) => add(i, m)));
 
   // Weekly numbers must match how lib/content.ts numbers entries: by date.
   const weekly = files
