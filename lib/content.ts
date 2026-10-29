@@ -79,6 +79,7 @@ export type BlogFrontmatter = {
   updated?: string; // optional ISO yyyy-mm-dd of the last edit
   tags: string[];
   excerpt: string;
+  coverImage?: string; // set by the Telegram bot; shown by part (d), used by part (c)
 };
 
 export type BlogPostSummary = {
@@ -151,6 +152,7 @@ export type WeeklyFrontmatter = {
   updated?: string;
   summary: string;
   cover?: string; // optional short label the CSS-drawn placeholder cover displays
+  coverImage?: string; // set by the Telegram bot; shown by part (d), used by part (c)
 };
 
 export type WeeklyEntrySummary = {

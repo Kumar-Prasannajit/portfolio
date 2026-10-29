@@ -212,5 +212,21 @@ it still fails, **make no PR**: stop and log the full output.
 
 ## 9. Finish
 
-End with one line of log: the PR link, or why no PR was made (any of the stop
-cases above). Then stop; leave the PR for the owner.
+A run that opens a PR opens no issue. End with one line of log: the PR link. Then
+stop; leave the PR for the owner.
+
+A run that makes **no PR** (any of the stop cases above, including "draft already
+open") reports it, so a quiet run is never silent:
+
+1. Open an issue labelled `automation-log`. Create the label first if it doesn't
+   exist (colour `808080`), and create the issue **with** the label in the same
+   call: the Telegram workflow reads the labels when the issue opens.
+2. **Title:** `<mode> run <IST date>: no PR` (for example
+   `weekly run 2026-11-01: no PR`). If the run stopped before step 1.4, work the
+   date out as there.
+3. **Body:** the one-line reason, the same line you log. The repo is public, so
+   no token, no stack trace and no full log; the reason follows the same
+   employer rule as the PR.
+
+End with one line of log: the issue link. Then stop. The Telegram workflow sends
+the issue to the owner and closes it.

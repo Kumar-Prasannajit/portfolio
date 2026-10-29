@@ -580,6 +580,46 @@ Acceptance: the first "Run now" opened #6 (`Draft: Weekly #004 — …`, green `
 Vercel preview, no employer reference). It was one 600-word post for four weeks, which led to
 the per-week change; #6 is closed and the weekly routine re-run to produce #004–#007.
 
+## Post automation (part b)
+Status: code done on branch `feat/telegram-review-bot` (not pushed). The owner's setup and the
+acceptance run are still to do; results go below when they are.
+Spec: `docs/superpowers/specs/2026-10-29-telegram-review-bot-design.md` ·
+Plan: `docs/superpowers/plans/2026-10-29-telegram-review-bot.md` ·
+Instructions: `automation/apply-edit.md`
+What it does: each draft PR from part (a) reaches the owner in Telegram with its Vercel preview.
+A photo reply sets the post's cover, an `edit: …` reply is applied by a routine, and the buttons
+publish (merge) or reject (close) the PR. A reminder arrives for a draft left open over 20 hours,
+and a run that makes no PR arrives as a message too.
+Pieces:
+- `app/api/telegram/route.ts`: the Telegram webhook. It checks the secret header, then
+  `lib/telegramBot.ts` runs the action. It always answers an empty 200.
+- `.github/workflows/telegram-notify.yml`: job `notify` sends the draft, "Updated", "Live:",
+  reminder (10:00 IST), log-issue and "Edit failed" messages through `scripts/notify-telegram.mjs`;
+  job `edit` starts the edit routine on an `edit:` comment.
+- Routine `portfolio-draft-edit` (`trig_011h8NXLfqLd8DqYDyT568Lc`, environment
+  `portfolio-routines`, model `claude-sonnet-5-5`, no schedule, **no connectors**). It was created
+  through the API with every connector attached; `clear_mcp_connections` removed them, as in part (a).
+- `automation/draft-posts.md` §9: a run that makes no PR opens an `automation-log` issue, which the
+  workflow forwards and closes.
+- `coverImage` is an optional frontmatter field (`/covers/<name>.jpg|jpeg|png`, the file must exist).
+  The site does not render it yet (part d); part (c) will use it.
+Env vars (`.env.example`): `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `TELEGRAM_CHAT_ID`,
+`GITHUB_WRITE_TOKEN` in Vercel; Actions secrets `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`,
+`ROUTINE_TRIGGER_TOKEN` (generated in the claude.ai UI for the edit routine).
+Decisions:
+- Routines have no comment trigger, so an Actions job filters the comment (PR, author, `edit:`,
+  label `draft-post`) and calls the routine's `/fire` endpoint. The routine checks it all again.
+- The bot only acts on the owner's chat and only on open PRs that are labelled `draft-post` and
+  come from a `draft/*` branch. A cover is one commit, so it builds one preview.
+- Publish merges only when the `check` run and the Vercel preview are both green.
+- A duplicate photo changes nothing ("Cover already on PR #n"). An old button on a merged or
+  closed PR gets a reply, never a second merge.
+- Telegram tokens never appear in logs, errors or commits. The comment text goes to the routine as
+  data (env var and `jq`), never in a shell command.
+Known limits: the `/fire` endpoint is a research preview and is untested here; a failed fire shows
+only as a red Actions run; a second photo with a different extension leaves the old cover file.
+Acceptance: pending.
+
 ## Phase 10 — QA pass
 Status: not started
 
