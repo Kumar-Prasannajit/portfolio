@@ -66,7 +66,7 @@ A spike: no product code. Its output is the **Decision** line below, used by Tas
 - [ ] **Step 3:** Otherwise: **Path B** — a job `edit` in `telegram-notify.yml` filters with `if:` and starts the routine through its API "run" endpoint, passing `PR #<n>` and the comment body as the run's message, authenticated by Actions secret `ROUTINE_TRIGGER_TOKEN`. Confirm the endpoint accepts a message and how it authenticates.
 - [ ] **Step 4:** Fill in and commit `docs(plan): record how edit comments start the edit routine`.
 
-**Decision:** _(Path A or B; the exact trigger fields or endpoint; what the run receives)_
+**Decision:** **Path B.** The routines docs (research preview) list no `issue_comment` GitHub trigger and no comment-body or comment-author filter, and say nothing about a GitHub event payload reaching the run. So the `edit` job in `telegram-notify.yml` does the filtering with `if:` (PR comment, body starts `edit:`, author `Kumar-Prasannajit`, PR labelled `draft-post`) and starts the routine with `POST https://api.anthropic.com/v1/claude_code/routines/<trig_…>/fire`. Headers: `Authorization: Bearer $ROUTINE_TRIGGER_TOKEN` (an `sk-ant-oat01-…` token scoped to that one routine, generated once in the claude.ai UI: routine, Edit, + on the Trigger row, API, Generate token), `anthropic-version: 2023-06-01`, `anthropic-beta: experimental-cc-routine-2026-04-01`, `Content-Type: application/json`. Body: `{"text": "PR #<n>\n<comment body>"}` (max 65,536 chars, freeform). The run receives that text inside an untrusted `<routine-fire-payload>` block, so the routine prompt says to act on that block. No idempotency; 30 fires an hour per routine. `ROUTINE_TRIGGER_TOKEN` is added to Task 9 step 3.
 
 ---
 
