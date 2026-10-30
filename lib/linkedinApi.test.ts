@@ -6,13 +6,13 @@ const CFG = { clientId: "cid", clientSecret: "csecret", redirectUri: "https://ww
 const TOKEN = "at-secret";
 const PERSON = "urn:li:person:abc";
 
-type Call = { url: string; method: string; headers: Headers; body: unknown };
+type Call = { url: string; method: string; headers: Headers; body: unknown; signal: unknown };
 
 /** A fetch that answers from `responses` in order (an Error is thrown) and records every request. */
 function fake(...responses: (Response | Error)[]) {
   const calls: Call[] = [];
   const impl: typeof fetch = async (url, init) => {
-    calls.push({ url: String(url), method: init?.method ?? "GET", headers: new Headers(init?.headers), body: init?.body });
+    calls.push({ url: String(url), method: init?.method ?? "GET", headers: new Headers(init?.headers), body: init?.body, signal: init?.signal });
     const next = responses.shift();
     if (next instanceof Error) throw next;
     return next ?? new Response(null, { status: 500 });
@@ -133,6 +133,23 @@ test("statuses map to auth, unavailable or rejected", async () => {
       `status ${status}`,
     );
   }
+});
+
+test("every LinkedIn call carries a timeout signal, so a hung call cannot hang the run", async () => {
+  const f = fake(
+    json({ access_token: "at1", expires_in: 1 }),
+    json({ sub: "abc" }),
+    json({ value: { uploadUrl: "https://www.linkedin.com/dms-uploads/x", image: "urn:li:image:I1" } }),
+    new Response(null, { status: 201 }),
+    new Response(null, { status: 201, headers: { "x-restli-id": "urn:li:share:1" } }),
+  );
+  const api = linkedinApi(CFG, f.impl);
+  await api.exchangeCode("c1");
+  await api.memberId(TOKEN);
+  await api.uploadImage({ accessToken: TOKEN, personUrn: PERSON, bytes: new Uint8Array(1) });
+  await api.createPost({ accessToken: TOKEN, personUrn: PERSON, commentary: "Hi", imageUrn: "urn:li:image:I1" });
+  assert.equal(f.calls.length, 5);
+  assert.ok(f.calls.every((c) => c.signal instanceof AbortSignal));
 });
 
 test("a thrown fetch is unavailable and its message is not repeated", async () => {

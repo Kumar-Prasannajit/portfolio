@@ -13,12 +13,17 @@ export type LinkedInStore = {
   setToken(t: TokenRecord): Promise<void>;
   getPosted(key: string): Promise<PostedRecord | null>; // key = "<kind>-<slug>"
   setPosted(key: string, r: PostedRecord): Promise<void>;
+  /** Takes the right to post `key` for 120 s; false when another run holds it (a double tap, a redelivered update). */
+  claimPost(key: string): Promise<boolean>;
+  releasePost(key: string): Promise<void>;
   createState(): Promise<string>; // 32 hex chars, stored for 900 s
   hasState(s: string): Promise<boolean>;
   burnState(s: string): Promise<boolean>; // true only if it existed
 };
 
 const STATE_TTL_SECONDS = 900;
+const CLAIM_TTL_SECONDS = 120; // longer than a run (the post route stops at 60 s)
+const REDIS_TIMEOUT_MS = 8_000;
 
 const isString = (v: unknown): v is string => typeof v === "string";
 
@@ -43,6 +48,7 @@ export function upstashStore(conn: { url: string; token: string }, fetchImpl: ty
         headers: { authorization: `Bearer ${conn.token}`, "content-type": "application/json" },
         body: JSON.stringify(command),
         cache: "no-store",
+        signal: AbortSignal.timeout(REDIS_TIMEOUT_MS),
       });
     } catch {
       throw new Error("Upstash request failed"); // the underlying error may quote the URL
@@ -54,6 +60,7 @@ export function upstashStore(conn: { url: string; token: string }, fetchImpl: ty
   }
 
   const posted = (key: string) => `linkedin:posted:${key}`;
+  const claim = (key: string) => `linkedin:claim:${key}`;
   const state = (s: string) => `linkedin:state:${s}`;
 
   return {
@@ -75,6 +82,14 @@ export function upstashStore(conn: { url: string; token: string }, fetchImpl: ty
 
     async setPosted(key, r) {
       await redis(["SET", posted(key), JSON.stringify(r)]);
+    },
+
+    async claimPost(key) {
+      return (await redis(["SET", claim(key), "1", "NX", "EX", String(CLAIM_TTL_SECONDS)])) === "OK";
+    },
+
+    async releasePost(key) {
+      await redis(["DEL", claim(key)]);
     },
 
     async createState() {

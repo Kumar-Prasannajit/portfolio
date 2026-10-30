@@ -5,6 +5,9 @@
 
 export const LINKEDIN_VERSION = "202610";
 
+// A hung call must fail (as "unavailable") well inside the post route's 60 s.
+const CALL_TIMEOUT_MS = 10_000;
+
 const OAUTH = "https://www.linkedin.com/oauth/v2";
 const API = "https://api.linkedin.com";
 
@@ -37,7 +40,7 @@ export function linkedinApi(
   async function call(name: string, url: string, init: RequestInit): Promise<Response> {
     let res: Response;
     try {
-      res = await fetchImpl(url, init);
+      res = await fetchImpl(url, { ...init, signal: AbortSignal.timeout(CALL_TIMEOUT_MS) });
     } catch {
       throw new LinkedInError(`LinkedIn ${name} failed`, "unavailable");
     }

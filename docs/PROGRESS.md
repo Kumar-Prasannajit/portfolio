@@ -683,6 +683,11 @@ Decisions:
 - Retry never posts a post twice: each created post is recorded at once under
   `linkedin:posted:<kind>-<slug>`; a recorded post is reported as "Already on LinkedIn", even after
   the token expired.
+- Only one run posts a given post at a time: it takes a Redis claim (`SET … NX EX 120`) before
+  uploading, so a double tap, a redelivered Telegram update, or the live step racing a Retry cannot
+  post it twice. A loser reports "already being posted by another run" with a Retry button. The claim
+  is released when the run ends (kept for its 120 s only when a post was created but not recorded).
+  Every LinkedIn, Redis and cover request has a 8-10 s timeout.
 - After a retryable failure the later posts are "not attempted", so LinkedIn never gets a later
   post before an earlier one. A permanent failure (empty or too long caption) does not stop the rest.
 - The upload URL LinkedIn returns must be https on `linkedin.com`, so the token is never sent

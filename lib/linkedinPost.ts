@@ -39,6 +39,8 @@ export const feedUrl = (urn: string) => `https://www.linkedin.com/feed/update/${
 const DAY_MS = 86_400_000;
 const REASON_MAX = 200;
 const NOT_ATTEMPTED = "not attempted after an earlier failure";
+const IN_PROGRESS = "already being posted by another run";
+const COVER_TIMEOUT_MS = 10_000;
 
 const firstLine = (e: unknown) => (e instanceof Error ? e.message : String(e)).split("\n")[0].slice(0, REASON_MAX);
 
@@ -86,29 +88,47 @@ export async function postToLinkedIn(posts: PostInput[], deps: PostDeps): Promis
       return failed(p, firstLine(e), { retry: false });
     }
 
-    let bytes: Uint8Array;
+    // Only one run may post a given post at a time: a double tap, a Telegram redelivery
+    // or the `post` route racing a Retry would otherwise both see "not posted yet".
+    let claimed: boolean;
     try {
-      bytes = await fetchCover(p.coverUrl);
+      claimed = await store.claimPost(p.key);
     } catch (e) {
-      const reason = firstLine(e);
-      return failed(p, reason.startsWith("cover") ? reason : `cover: ${reason}`, { retry: true });
+      return failed(p, firstLine(e), { retry: true });
     }
+    if (!claimed) return failed(p, IN_PROGRESS, { retry: true });
 
-    let postUrn: string;
+    // The claim is released when the run ends, except when the post exists on LinkedIn
+    // but could not be recorded: then it stays until it expires, so a quick Retry waits.
+    let keepClaim = false;
     try {
-      const imageUrn = await api.uploadImage({ accessToken: token.accessToken, personUrn: token.personUrn, bytes });
-      postUrn = await api.createPost({ accessToken: token.accessToken, personUrn: token.personUrn, commentary, imageUrn });
-    } catch (e) {
-      return failed(p, firstLine(e), classify(e));
-    }
+      let bytes: Uint8Array;
+      try {
+        bytes = await fetchCover(p.coverUrl);
+      } catch (e) {
+        const reason = firstLine(e);
+        return failed(p, reason.startsWith("cover") ? reason : `cover: ${reason}`, { retry: true });
+      }
 
-    const url = feedUrl(postUrn);
-    try {
-      await store.setPosted(p.key, { postUrn, url, at: now.toISOString() });
-    } catch {
-      return failed(p, "posted but not recorded", { retry: true });
+      let postUrn: string;
+      try {
+        const imageUrn = await api.uploadImage({ accessToken: token.accessToken, personUrn: token.personUrn, bytes });
+        postUrn = await api.createPost({ accessToken: token.accessToken, personUrn: token.personUrn, commentary, imageUrn });
+      } catch (e) {
+        return failed(p, firstLine(e), classify(e));
+      }
+
+      const url = feedUrl(postUrn);
+      try {
+        await store.setPosted(p.key, { postUrn, url, at: now.toISOString() });
+      } catch {
+        keepClaim = true;
+        return failed(p, "posted but not recorded", { retry: true });
+      }
+      return { key: p.key, label: p.label, siteUrl: p.siteUrl, status: "posted", linkedinUrl: url, reason: null, retry: false, reconnect: false };
+    } finally {
+      if (!keepClaim) await store.releasePost(p.key).catch(() => {}); // it expires by itself if this fails
     }
-    return { key: p.key, label: p.label, siteUrl: p.siteUrl, status: "posted", linkedinUrl: url, reason: null, retry: false, reconnect: false };
   }
 
   const results: PostResult[] = [];
@@ -154,7 +174,7 @@ export async function tokenStatus(store: Pick<LinkedInStore, "getToken">, now: D
 export async function fetchCoverBytes(url: string, fetchImpl: typeof fetch = fetch): Promise<Uint8Array> {
   let res: Response;
   try {
-    res = await fetchImpl(url);
+    res = await fetchImpl(url, { signal: AbortSignal.timeout(COVER_TIMEOUT_MS) });
   } catch {
     throw new Error("cover request failed");
   }

@@ -16,12 +16,18 @@ export const TOKEN_RECORD: TokenRecord = {
 const unexpected = async (): Promise<never> => { throw new Error("unexpected"); };
 
 export function memoryStore(token: TokenRecord | null = TOKEN_RECORD) {
-  const state = { token, posted: new Map<string, PostedRecord>(), states: new Set<string>(), made: 0 };
+  const state = { token, posted: new Map<string, PostedRecord>(), states: new Set<string>(), claims: new Set<string>(), made: 0 };
   const store: LinkedInStore = {
     getToken: async () => state.token,
     setToken: async (t) => { state.token = t; },
     getPosted: async (key) => state.posted.get(key) ?? null,
     setPosted: async (key, r) => { state.posted.set(key, r); },
+    claimPost: async (key) => {
+      if (state.claims.has(key)) return false;
+      state.claims.add(key);
+      return true;
+    },
+    releasePost: async (key) => { state.claims.delete(key); },
     createState: async () => {
       state.made += 1;
       const s = String(state.made).padStart(32, "0");

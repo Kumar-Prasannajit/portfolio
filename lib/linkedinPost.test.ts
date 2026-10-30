@@ -23,12 +23,14 @@ type Opts = {
   createFails?: Record<number, Error>; // by 1-based createPost call
   coverFails?: Error;
   failSetPosted?: boolean;
+  preClaimed?: string[]; // keys another run is already posting
 };
 
 function setup(opts: Opts = {}) {
   const calls: { name: string; arg?: any }[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
   const posted = new Map<string, PostedRecord>();
   let created = 0;
+  const claims = new Set<string>(opts.preClaimed ?? []);
   const token = "token" in opts ? opts.token : TOKEN;
   const unexpected = async () => { throw new Error("unexpected"); };
 
@@ -41,6 +43,12 @@ function setup(opts: Opts = {}) {
       calls.push({ name: "setPosted", arg: key });
       posted.set(key, r);
     },
+    claimPost: async (key) => {
+      if (claims.has(key)) return false;
+      claims.add(key);
+      return true;
+    },
+    releasePost: async (key) => { claims.delete(key); },
     createState: unexpected, hasState: unexpected, burnState: unexpected,
   };
   const api: LinkedInApi = {
@@ -63,7 +71,7 @@ function setup(opts: Opts = {}) {
   };
   const deps = { api, store, fetchCover, now: NOW };
   const names = () => calls.map((c) => c.name);
-  return { deps, calls, posted, covers, names };
+  return { deps, calls, posted, covers, names, claims };
 }
 
 const commentaries = (calls: { name: string; arg?: any }[]) => // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -187,6 +195,42 @@ test("running the same posts twice creates each once; the replay is all skipped"
   assert.equal(commentaries(t.calls).length, 2);
 });
 
+test("a post another run is already posting is not posted again", async () => {
+  const t = setup({ preClaimed: [A] });
+  const [r] = await postToLinkedIn([post(A)], t.deps);
+  assert.equal(r.status, "failed");
+  assert.equal(r.reason, "already being posted by another run");
+  assert.equal(r.retry, true);
+  assert.deepEqual(t.names(), []);
+  assert.deepEqual(t.covers, []);
+  assert.ok(t.claims.has(A), "the other run's claim is not released by this one");
+});
+
+test("two overlapping runs of the same post create it once (a double tap, or a slow Telegram retry)", async () => {
+  const t = setup();
+  const [one, two] = await Promise.all([postToLinkedIn([post(A)], t.deps), postToLinkedIn([post(A)], t.deps)]);
+  assert.equal(t.calls.filter((c) => c.name === "createPost").length, 1);
+  assert.deepEqual([one[0].status, two[0].status].sort(), ["failed", "posted"]);
+});
+
+test("a post that fails releases its claim, so Retry can post it straight away", async () => {
+  const t = setup({ createFails: { 1: new LinkedInError("LinkedIn createPost → 503", "unavailable") } });
+  const [first] = await postToLinkedIn([post(A)], t.deps);
+  assert.equal(first.status, "failed");
+  assert.ok(!t.claims.has(A));
+  const [second] = await postToLinkedIn([post(A)], t.deps);
+  assert.equal(second.status, "posted");
+});
+
+test("a posted post releases its claim; one created but not recorded keeps it until it expires", async () => {
+  const ok = setup();
+  await postToLinkedIn([post(A)], ok.deps);
+  assert.ok(!ok.claims.has(A));
+  const lost = setup({ failSetPosted: true });
+  await postToLinkedIn([post(A)], lost.deps);
+  assert.ok(lost.claims.has(A));
+});
+
 test("a replay after the token expired still reports the recorded posts as on LinkedIn", async () => {
   const t = setup();
   await postToLinkedIn([post(A)], t.deps);
@@ -210,6 +254,16 @@ test("tokenStatus: none, expired, and the days left rounded up", async () => {
 test("fetchCoverBytes returns the bytes of a png or jpeg", async () => {
   const f: typeof fetch = async () => new Response(new Uint8Array([1, 2, 3]), { status: 200, headers: { "content-type": "image/png" } });
   assert.deepEqual(await fetchCoverBytes("https://x/y.png", f), new Uint8Array([1, 2, 3]));
+});
+
+test("fetchCoverBytes carries a timeout signal, so a slow site cannot hang the run", async () => {
+  let signal: unknown;
+  const f: typeof fetch = async (_url, init) => {
+    signal = init?.signal;
+    return new Response(new Uint8Array([1]), { status: 200, headers: { "content-type": "image/png" } });
+  };
+  await fetchCoverBytes("https://x/y.png", f);
+  assert.ok(signal instanceof AbortSignal);
 });
 
 test("fetchCoverBytes refuses a missing file and a page that is not an image", async () => {

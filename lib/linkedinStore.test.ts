@@ -8,10 +8,10 @@ const POSTED = { postUrn: "urn:li:share:1", url: "https://www.linkedin.com/feed/
 
 /** A fetch that answers `{ result }` from `results`, in order, and records every request. */
 function fake(results: unknown[] = [], status = 200) {
-  const requests: { url: string; method?: string; auth: string | null; command: unknown[] }[] = [];
+  const requests: { url: string; method?: string; auth: string | null; command: unknown[]; signal: unknown }[] = [];
   const impl: typeof fetch = async (url, init) => {
     const headers = new Headers(init?.headers);
-    requests.push({ url: String(url), method: init?.method, auth: headers.get("authorization"), command: JSON.parse(String(init?.body)) });
+    requests.push({ url: String(url), method: init?.method, auth: headers.get("authorization"), command: JSON.parse(String(init?.body)), signal: init?.signal });
     return new Response(JSON.stringify({ result: results.length ? results.shift() : null }), { status });
   };
   return { impl, requests };
@@ -64,6 +64,25 @@ test("hasState and burnState answer from EXISTS and DEL", async () => {
   assert.deepEqual(f.requests.map((r) => r.command), [
     ["EXISTS", "linkedin:state:s1"], ["EXISTS", "linkedin:state:s1"], ["DEL", "linkedin:state:s1"], ["DEL", "linkedin:state:s1"],
   ]);
+});
+
+test("claimPost takes a 120-second NX claim and says whether it won; releasePost deletes it", async () => {
+  const f = fake(["OK", null, 1]);
+  const store = upstashStore(CONN, f.impl);
+  assert.equal(await store.claimPost("weekly-009-a"), true);
+  assert.equal(await store.claimPost("weekly-009-a"), false);
+  await store.releasePost("weekly-009-a");
+  assert.deepEqual(f.requests.map((r) => r.command), [
+    ["SET", "linkedin:claim:weekly-009-a", "1", "NX", "EX", "120"],
+    ["SET", "linkedin:claim:weekly-009-a", "1", "NX", "EX", "120"],
+    ["DEL", "linkedin:claim:weekly-009-a"],
+  ]);
+});
+
+test("every Redis request carries a timeout signal, so a hung Redis cannot hang the run", async () => {
+  const f = fake();
+  await upstashStore(CONN, f.impl).getToken();
+  assert.ok(f.requests[0].signal instanceof AbortSignal);
 });
 
 test("every request is a bearer POST to the base URL without its trailing slash", async () => {
