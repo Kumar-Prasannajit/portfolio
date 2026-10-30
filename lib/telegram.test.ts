@@ -2,10 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
-  REPLY, TELEGRAM_MAX, draftKeyboard, draftMessage, escapeHtml, parseUpdate, prFromText,
-  reminderMessage,
+  REPLY, TELEGRAM_MAX, draftKeyboard, draftMessage, escapeHtml, linkedinMessage, parseUpdate, prFromText,
+  reminderMessage, retryKeyboard,
 } from "./telegram.ts";
 import type { DraftPr, PostDraft } from "./draftPost.ts";
+import type { PostResult } from "./linkedinPost.ts";
 
 const CHAT = "4242";
 const fixture = (name: string) =>
@@ -170,4 +171,79 @@ test("REPLY holds the exact message copy", () => {
 });
 test("REPLY escapes values it inserts", () => {
   assert.equal(REPLY.failed("a <b> & c"), "Failed: a &lt;b&gt; &amp; c");
+});
+
+// ---- LinkedIn (part c) ----
+
+test("a li: button press carries the PR, and li:x is ignored", () => {
+  const button = fixture("button-pub");
+  button.callback_query.data = "li:21";
+  assert.deepEqual(parseUpdate(button, CHAT), { kind: "button", action: "li", pr: 21, callbackId: "cb-1" });
+  button.callback_query.data = "li:x";
+  assert.deepEqual(parseUpdate(button, CHAT), { kind: "ignore" });
+});
+test("the word linkedin on its own, in any case, is the linkedin intent", () => {
+  const update = fixture("text-plain");
+  update.message.text = "  LinkedIn ";
+  assert.deepEqual(parseUpdate(update, CHAT), { kind: "linkedin" });
+  update.message.text = "linkedin please";
+  assert.deepEqual(parseUpdate(update, CHAT), { kind: "help" });
+});
+test("linkedin as a reply to a draft message is still an edit instruction", () => {
+  const update = fixture("edit-reply");
+  update.message.text = "linkedin";
+  assert.deepEqual(parseUpdate(update, CHAT), { kind: "editText", pr: 21, text: "linkedin" });
+});
+test("retryKeyboard is one Retry LinkedIn button naming the PR", () => {
+  assert.deepEqual(retryKeyboard(21), { inline_keyboard: [[{ text: "Retry LinkedIn", callback_data: "li:21" }]] });
+});
+
+const LI_URL = "https://www.linkedin.com/feed/update/urn:li:share:1/";
+const result = (over: Partial<PostResult> = {}): PostResult => ({
+  key: "weekly-009-a", label: "Salonjaa NAP fixes", siteUrl: "https://www.kumarp.in/weekly/009-a",
+  status: "posted", linkedinUrl: LI_URL, reason: null, retry: false, reconnect: false, ...over,
+});
+const failedResult = (over: Partial<PostResult> = {}) =>
+  result({ status: "failed", linkedinUrl: null, reason: "LinkedIn token expired", retry: true, reconnect: true, ...over });
+
+test("linkedinMessage: a posted post shows both links when live", () => {
+  assert.equal(linkedinMessage([result()], null, { withLive: true }),
+    `Live: https://www.kumarp.in/weekly/009-a\nOn LinkedIn: ${LI_URL}`);
+});
+test("linkedinMessage: a skipped post is already on LinkedIn, and withLive false drops the live line", () => {
+  assert.equal(linkedinMessage([result({ status: "skipped" })], null, { withLive: false }),
+    `Already on LinkedIn: ${LI_URL}`);
+});
+test("linkedinMessage: a failure names the post and reason, then the reconnect link", () => {
+  assert.equal(
+    linkedinMessage([failedResult()], "https://www.kumarp.in/api/linkedin/connect?state=ab", { withLive: true }),
+    'Live: https://www.kumarp.in/weekly/009-a\nLinkedIn failed for "Salonjaa NAP fixes": LinkedIn token expired' +
+      "\n\nReconnect LinkedIn: https://www.kumarp.in/api/linkedin/connect?state=ab",
+  );
+});
+test("linkedinMessage: several results are separated by a blank line and values are escaped", () => {
+  const text = linkedinMessage([result(), failedResult({ label: "a <b>", reason: "x & y" })], null, { withLive: false });
+  assert.equal(text, `On LinkedIn: ${LI_URL}\n\nLinkedIn failed for "a &lt;b&gt;": x &amp; y`);
+});
+test("linkedinMessage stays within Telegram's limit", () => {
+  const many = Array.from({ length: 40 }, (_, i) => failedResult({ key: `k${i}`, label: "L".repeat(200), reason: "R".repeat(300) }));
+  const text = linkedinMessage(many, "https://www.kumarp.in/api/linkedin/connect?state=ab", { withLive: true });
+  assert.ok(text.length <= TELEGRAM_MAX, String(text.length));
+});
+
+test("REPLY holds the LinkedIn copy", () => {
+  assert.equal(REPLY.linkedinOff, "LinkedIn is not set up on the site yet.");
+  assert.equal(REPLY.linkedinNotMerged(21), "PR #21 is not merged yet.");
+  assert.equal(REPLY.linkedinConnected("2026-12-28"), "LinkedIn connected until 2026-12-28.");
+  assert.equal(REPLY.linkedinDifferentAccount,
+    "That is a different LinkedIn account from the one already connected. Nothing was changed.");
+  assert.equal(REPLY.linkedinStatus({ state: "none" }, "https://u"), "LinkedIn: not connected.\nConnect LinkedIn: https://u");
+  assert.equal(REPLY.linkedinStatus({ state: "expired" }, "https://u"), "LinkedIn: token expired.\nConnect LinkedIn: https://u");
+  assert.equal(
+    REPLY.linkedinStatus({ state: "ok", expiresAt: new Date("2026-12-28T10:00:00Z"), daysLeft: 59 }, "https://u"),
+    "LinkedIn: connected until 2026-12-28.\nConnect LinkedIn: https://u",
+  );
+  assert.equal(REPLY.linkedinReminder(3, "https://u"), "LinkedIn token expires in 3 days.\nReconnect LinkedIn: https://u");
+  assert.equal(REPLY.linkedinReminder(1, "https://u"), "LinkedIn token expires in 1 day.\nReconnect LinkedIn: https://u");
+  assert.equal(REPLY.linkedinExpired("https://u"), "LinkedIn token expired.\nReconnect LinkedIn: https://u");
 });

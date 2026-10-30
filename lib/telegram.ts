@@ -4,15 +4,17 @@
 // imports, so `node --test` and scripts/*.mjs can load it.
 
 import type { DraftPr } from "./draftPost.ts";
+import type { PostResult, TokenStatus } from "./linkedinPost.ts";
 
 export const TELEGRAM_MAX = 4096;
 
-export type Action = "pub" | "edit" | "rej";
+export type Action = "pub" | "edit" | "rej" | "li";
 
 export type Intent =
   | { kind: "photo"; pr: number | null; fileId: string; ext: "jpg" | "png" | null; size: number | null }
   | { kind: "button"; action: Action; pr: number; callbackId: string }
   | { kind: "editText"; pr: number; text: string }
+  | { kind: "linkedin" }
   | { kind: "help" }
   | { kind: "ignore" };
 
@@ -50,7 +52,7 @@ export function parseUpdate(update: unknown, chatId: string): Intent {
     if (idOf(cb.from) !== chatId) return IGNORE;
     const chat = rec(cb.message)?.chat;
     if (chat !== undefined && idOf(chat) !== chatId) return IGNORE;
-    const m = /^(pub|edit|rej):(\d+)$/.exec(typeof cb.data === "string" ? cb.data : "");
+    const m = /^(pub|edit|rej|li):(\d+)$/.exec(typeof cb.data === "string" ? cb.data : "");
     if (!m || typeof cb.id !== "string") return IGNORE;
     return { kind: "button", action: m[1] as Action, pr: Number(m[2]), callbackId: cb.id };
   }
@@ -81,6 +83,7 @@ export function parseUpdate(update: unknown, chatId: string): Intent {
   if (typeof msg.text === "string" && replyPr !== null && msg.text.trim() !== "") {
     return { kind: "editText", pr: replyPr, text: msg.text.trim() };
   }
+  if (typeof msg.text === "string" && msg.text.trim().toLowerCase() === "linkedin") return { kind: "linkedin" };
   return { kind: "help" };
 }
 
@@ -92,6 +95,11 @@ export function draftKeyboard(pr: number): Keyboard {
       { text: "Reject", callback_data: `rej:${pr}` },
     ]],
   };
+}
+
+/** The one button under a LinkedIn failure; its callback names the merged PR. */
+export function retryKeyboard(pr: number): Keyboard {
+  return { inline_keyboard: [[{ text: "Retry LinkedIn", callback_data: `li:${pr}` }]] };
 }
 
 /** "Weekly #009", "Weekly #009–#010" or "Blog". */
@@ -186,6 +194,25 @@ export function reminderMessage(d: DraftPr, previewUrl: string | null, now: Date
   return lines.join("\n");
 }
 
+/**
+ * What happened to each post on LinkedIn, with `Live:` lines when the message is the
+ * site-is-live one. A reconnect link, when given, always survives the length cut.
+ */
+export function linkedinMessage(results: PostResult[], connectUrl: string | null, opts: { withLive: boolean }): string {
+  const blocks = results.map((r) => {
+    const live = opts.withLive ? `Live: ${escapeHtml(r.siteUrl)}\n` : "";
+    if (r.status === "posted") return `${live}On LinkedIn: ${escapeHtml(r.linkedinUrl ?? "")}`;
+    if (r.status === "skipped") return `${live}Already on LinkedIn: ${escapeHtml(r.linkedinUrl ?? "")}`;
+    return `${live}LinkedIn failed for "${escapeHtml(clip(r.label, 80))}": ${escapeHtml(clip(r.reason ?? "unknown error", 200))}`;
+  });
+  const reconnect = connectUrl ? `\n\nReconnect LinkedIn: ${escapeHtml(connectUrl)}` : "";
+  const head = blocks.join("\n\n");
+  const room = TELEGRAM_MAX - reconnect.length;
+  if (head.length <= room) return head + reconnect;
+  const cut = head.lastIndexOf("\n", room);
+  return head.slice(0, cut > 0 ? cut : room) + reconnect;
+}
+
 /** Every fixed reply, exact copy. Telegram HTML: values passed in are escaped. */
 export const REPLY = {
   coverAdded: (pr: number) => `Cover added to PR #${pr}, preview rebuilding.`,
@@ -205,4 +232,20 @@ export const REPLY = {
   previewFailed: (pr: number, url: string) => `Preview failed for PR #${pr}: ${escapeHtml(url)}`,
   live: (url: string) => `Live: ${escapeHtml(url)}`,
   editFailed: (pr: number, commentBody: string) => `PR #${pr}: ${escapeHtml(commentBody)}`,
+  linkedinOff: "LinkedIn is not set up on the site yet.",
+  linkedinNotMerged: (pr: number) => `PR #${pr} is not merged yet.`,
+  linkedinConnected: (until: string) => `LinkedIn connected until ${escapeHtml(until)}.`,
+  linkedinDifferentAccount: "That is a different LinkedIn account from the one already connected. Nothing was changed.",
+  linkedinStatus: (s: TokenStatus, connectUrl: string) => {
+    const state =
+      s.state === "none"
+        ? "not connected."
+        : s.state === "expired"
+          ? "token expired."
+          : `connected until ${s.expiresAt.toISOString().slice(0, 10)}.`;
+    return `LinkedIn: ${state}\nConnect LinkedIn: ${escapeHtml(connectUrl)}`;
+  },
+  linkedinReminder: (daysLeft: number, connectUrl: string) =>
+    `LinkedIn token expires in ${daysLeft} day${daysLeft === 1 ? "" : "s"}.\nReconnect LinkedIn: ${escapeHtml(connectUrl)}`,
+  linkedinExpired: (connectUrl: string) => `LinkedIn token expired.\nReconnect LinkedIn: ${escapeHtml(connectUrl)}`,
 };
