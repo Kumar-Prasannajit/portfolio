@@ -1,0 +1,67 @@
+---
+title: "Claim it before you post it: keeping LinkedIn from getting a post twice"
+date: "2026-10-30"
+tags: ["backend", "redis", "automation"]
+excerpt: "A check that says 'not posted yet' is not enough when two runs can ask at once. How a short Redis claim, and a timeout on every outbound call, keep my LinkedIn poster from double-posting."
+linkedin: |
+  The first version of my LinkedIn poster would have been safe, right up until two things asked it to post at the same time.
+
+  When I merge a draft, my site posts it to LinkedIn. If that fails, a Retry button in Telegram tries again. The poster already records each post once it exists, and checks that record first. The gap is the moment between the check and the record: a double tap, a redelivered Telegram update, or the live step racing a Retry can all see "not posted yet".
+
+  I closed it with a claim. Before uploading anything, a run does a Redis SET with NX and a 120 second expiry. Only one run gets it. The others report "already being posted by another run" and offer a Retry. I also put a timeout on every outbound call, so a hung request fails well inside the route's 60 seconds.
+
+  The write-up walks through the order of operations and the one case where I deliberately keep the claim.
+
+  #backend #redis #automation
+---
+
+When I merge a draft pull request, my site posts the draft's caption and cover image to LinkedIn. If that fails, a Retry LinkedIn button in Telegram tries again. A post that lands on LinkedIn twice is the kind of mistake I can't take back, so most of the design is about making that impossible.
+
+## The check that wasn't enough
+
+The first version already had a guard. Each post that gets created is recorded at once under `linkedin:posted:<kind>-<slug>`, and a run looks for that record first. If it's there, the post is reported as "Already on LinkedIn" and nothing is sent.
+
+That is the same shape as the double-tap bug in my [payments post](/blog/idempotent-payments-lessons): the check is fine, the gap is between the check and the write. Two runs can both read "not posted yet" before either has written anything. Three things can make that happen here:
+
+- A double tap on Retry.
+- Telegram delivering the same update again.
+- The live step after a merge racing a Retry someone tapped.
+
+## A claim in front of the upload
+
+The fix is a claim taken before any upload. In `lib/linkedinStore.ts` it is a single Redis command:
+
+```ts
+await redis(["SET", claim(key), "1", "NX", "EX", "120"])
+```
+
+`NX` means the write only happens if the key doesn't exist yet, so exactly one run gets `"OK"`. A run that doesn't get it stops and reports "already being posted by another run", with a Retry button. Nothing is uploaded and nothing is posted.
+
+The 120 seconds is deliberate. The post route has a `maxDuration` of 60 seconds, so the claim outlives any run that is still going, and it expires by itself if a run dies without cleaning up.
+
+## Releasing it
+
+The claim is released in a `finally` block when the run ends, whether it posted, failed or threw. A failed run shouldn't make the next Retry wait two minutes.
+
+There is one case where I keep it on purpose. If the post was created on LinkedIn but writing the record failed, the run reports "posted but not recorded" and leaves the claim in place until it expires. The record is what stops a repeat post, and it's missing. Letting an instant Retry through at that moment is exactly how a duplicate would happen. Making it wait is a small cost.
+
+If the release itself fails, the error is swallowed. The claim expires anyway.
+
+## Timeouts are part of the same fix
+
+A claim only helps if runs end. A hung request would hold the claim, and could push the route past its limit, which makes Telegram deliver the update again. That is the redelivery I was trying to guard against.
+
+So every outbound call now has a timeout:
+
+- Calls to LinkedIn: 10 seconds, so a hang fails as "unavailable" well inside the route's 60.
+- The cover image download: 10 seconds.
+- Redis requests: 8 seconds.
+
+Each is an `AbortSignal.timeout(...)` on the request. I also set `maxDuration = 60` on the Telegram route, because a Retry tap posts from there and the default limit could cut it short.
+
+## What I'd keep
+
+- Recording the result isn't a guard on its own. Something has to stop two runs from reaching the write together.
+- Give a lock an expiry longer than the work it protects, and shorter than anyone will wait.
+- Decide what a failed release means before you need it. Here it's harmless in one case and deliberate in the other.
+- Put a timeout on everything that leaves the process, since a lock is only as good as the run that holds it.
