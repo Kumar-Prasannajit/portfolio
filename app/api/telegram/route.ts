@@ -1,4 +1,5 @@
 import { githubRepo } from "@/lib/githubWrite";
+import { linkedinFromEnv } from "@/lib/linkedinEnv";
 import { handleUpdate, secretMatches } from "@/lib/telegramBot";
 import { telegramApi } from "@/lib/telegramApi";
 
@@ -27,6 +28,7 @@ export async function POST(request: Request) {
       gh: githubRepo(writeToken),
       tg: telegramApi(botToken),
       chatId,
+      linkedin: linkedinFromEnv()?.core, // undefined until LinkedIn is set up (part c)
     });
   } catch (err) {
     console.error("telegram webhook:", err instanceof Error ? err.message : "unknown error");

@@ -7,10 +7,14 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { coverPath, loadDraft, requiredChecksGreen, withCoverImage } from "./draftPost.ts";
 import type { DraftPr, PrInfo } from "./draftPost.ts";
 import type { GitHubRepo } from "./githubWrite.ts";
-import { REPLY, parseUpdate } from "./telegram.ts";
+import { connectUrl, postMergedDraft } from "./linkedinDraft.ts";
+import type { LinkedInCore } from "./linkedinDraft.ts";
+import { tokenStatus } from "./linkedinPost.ts";
+import { REPLY, linkedinMessage, parseUpdate, retryKeyboard } from "./telegram.ts";
 import type { TelegramApi } from "./telegramApi.ts";
 
-export type BotDeps = { gh: GitHubRepo; tg: TelegramApi; chatId: string };
+/** `linkedin` is absent when LinkedIn is not set up on the site (part c). */
+export type BotDeps = { gh: GitHubRepo; tg: TelegramApi; chatId: string; linkedin?: LinkedInCore };
 
 const MAX_COVER_BYTES = 5_000_000;
 
@@ -51,11 +55,35 @@ export async function handleUpdate(update: unknown, deps: BotDeps): Promise<void
     return loaded;
   }
 
+  /** Posts a merged draft's posts to LinkedIn (again): recorded posts are skipped, so only what failed is retried. */
+  async function retryLinkedIn(n: number): Promise<void> {
+    const core = deps.linkedin;
+    if (!core) return void (await say(REPLY.linkedinOff));
+    // A merged draft's posts are read at its merge commit; the branch is gone by then.
+    const pr = await gh.getPr(n);
+    const loaded = await loadDraft(gh, n, pr.mergeSha ?? undefined);
+    if (!loaded) return void (await say(REPLY.notOpen(n)));
+    if (!loaded.pr.merged) return void (await say(REPLY.linkedinNotMerged(n)));
+    const { results, connectUrl: link } = await postMergedDraft(loaded, core);
+    await say(
+      linkedinMessage(results, link, { withLive: false }),
+      results.some((r) => r.retry) ? { keyboard: retryKeyboard(n) } : undefined,
+    );
+  }
+
   try {
     switch (intent.kind) {
       case "help":
         await say(REPLY.help);
         return;
+
+      case "linkedin": {
+        const core = deps.linkedin;
+        if (!core) return void (await say(REPLY.linkedinOff));
+        const status = await tokenStatus(core.store, core.now());
+        await say(REPLY.linkedinStatus(status, connectUrl(await core.store.createState())));
+        return;
+      }
 
       case "photo": {
         let n = intent.pr;
@@ -90,6 +118,7 @@ export async function handleUpdate(update: unknown, deps: BotDeps): Promise<void
 
       case "button": {
         await tg.answerCallback(intent.callbackId);
+        if (intent.action === "li") return void (await retryLinkedIn(intent.pr));
         const loaded = await openDraft(intent.pr);
         if (!loaded) return;
         const { pr } = loaded;
