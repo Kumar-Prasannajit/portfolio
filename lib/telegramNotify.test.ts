@@ -4,7 +4,9 @@ import {
   notifyDeployment, notifyEditFailed, notifyLogIssue, notifyReminders,
   type DeploymentEvent, type NotifyDeps,
 } from "./telegramNotify.ts";
-import { REPLY, draftKeyboard } from "./telegram.ts";
+import { REPLY, draftKeyboard, retryKeyboard } from "./telegram.ts";
+import type { LinkedInClient } from "./linkedinClient.ts";
+import type { PostResult } from "./linkedinPost.ts";
 import type { PrInfo } from "./draftPost.ts";
 import type { GitHubRepo } from "./githubWrite.ts";
 import type { TelegramApi } from "./telegramApi.ts";
@@ -187,6 +189,111 @@ test("a draft open for 5 hours gets no reminder", async () => {
   const t = setup({ prs: [pr({ createdAt: hoursAgo(5) })] });
   await notifyReminders(t.deps);
   assert.deepEqual(t.sent, []);
+});
+
+// ---- LinkedIn (part c) ----
+
+const LI_URL = (n: number) => `https://www.linkedin.com/feed/update/urn:li:share:${n}/`;
+const liResult = (key: string, label: string, siteUrl: string, over: Partial<PostResult> = {}): PostResult => ({
+  key, label, siteUrl, status: "posted", linkedinUrl: LI_URL(1), reason: null, retry: false, reconnect: false, ...over,
+});
+const SITE_9 = "https://www.kumarp.in/weekly/009-salonjaa-nap";
+const SITE_10 = "https://www.kumarp.in/weekly/010-brand-name";
+const KEY_9 = "weekly-009-salonjaa-nap";
+const KEY_10 = "weekly-010-brand-name";
+
+function fakeClient(over: Partial<LinkedInClient> = {}) {
+  const posted: [number, string][] = [];
+  const client: LinkedInClient = {
+    post: async (n, sha) => {
+      posted.push([n, sha]);
+      return { results: [liResult(KEY_9, "Post 009", SITE_9), liResult(KEY_10, "Post 010", SITE_10, { linkedinUrl: LI_URL(2) })], connectUrl: null };
+    },
+    remind: async () => "not connected",
+    ...over,
+  };
+  return { client, posted };
+}
+const liWorld = () => setup({ prs: [mergedPr()], forSha: { merge21: [21] }, files: { [PATH_9]: post("009"), [PATH_10]: post("010") } });
+
+test("with LinkedIn set up, the live message shows both links per post and the log line counts them", async () => {
+  const t = liWorld();
+  const li = fakeClient();
+  const line = await notifyDeployment(production(), { ...t.deps, linkedin: li.client });
+  assert.deepEqual(t.sent.map((s) => s.text), [
+    `Live: ${SITE_9}\nOn LinkedIn: ${LI_URL(1)}\n\nLive: ${SITE_10}\nOn LinkedIn: ${LI_URL(2)}`,
+  ]);
+  assert.equal(t.sent[0].opts, undefined);
+  assert.deepEqual(li.posted, [[21, "merge21"]]);
+  assert.equal(line, "sent: live PR #21 (LinkedIn: 2 posted, 0 skipped, 0 failed)");
+});
+
+test("a failed LinkedIn post is reported with the reconnect link and a Retry button", async () => {
+  const t = liWorld();
+  const li = fakeClient({
+    post: async () => ({
+      results: [
+        liResult(KEY_9, "Post 009", SITE_9),
+        liResult(KEY_10, "Post 010", SITE_10, { status: "failed", linkedinUrl: null, reason: "LinkedIn token expired", retry: true, reconnect: true }),
+      ],
+      connectUrl: "https://www.kumarp.in/api/linkedin/connect?state=ab",
+    }),
+  });
+  const line = await notifyDeployment(production(), { ...t.deps, linkedin: li.client });
+  assert.equal(t.sent[0].text,
+    `Live: ${SITE_9}\nOn LinkedIn: ${LI_URL(1)}\n\nLive: ${SITE_10}\nLinkedIn failed for "Post 010": LinkedIn token expired` +
+    "\n\nReconnect LinkedIn: https://www.kumarp.in/api/linkedin/connect?state=ab");
+  assert.deepEqual(t.sent[0].opts, { keyboard: retryKeyboard(21) });
+  assert.equal(line, "sent: live PR #21 (LinkedIn: 1 posted, 0 skipped, 1 failed)");
+});
+
+test("a replayed Publish says the posts are already on LinkedIn (Review Focus 2)", async () => {
+  const t = liWorld();
+  const li = fakeClient({
+    post: async () => ({
+      results: [
+        liResult(KEY_9, "Post 009", SITE_9, { status: "skipped" }),
+        liResult(KEY_10, "Post 010", SITE_10, { status: "skipped", linkedinUrl: LI_URL(2) }),
+      ],
+      connectUrl: null,
+    }),
+  });
+  await notifyDeployment(production(), { ...t.deps, linkedin: li.client });
+  assert.equal(t.sent[0].text,
+    `Live: ${SITE_9}\nAlready on LinkedIn: ${LI_URL(1)}\n\nLive: ${SITE_10}\nAlready on LinkedIn: ${LI_URL(2)}`);
+  assert.equal(t.sent[0].opts, undefined);
+});
+
+test("when the LinkedIn route cannot be reached the live message still goes out, with a Retry button", async () => {
+  const t = liWorld();
+  const li = fakeClient({ post: async () => { throw new Error("LinkedIn post route → 503"); } });
+  await notifyDeployment(production(), { ...t.deps, linkedin: li.client });
+  assert.ok(t.sent[0].text.startsWith(`Live: ${SITE_9}\nLinkedIn failed for "Post 009": LinkedIn request failed`));
+  assert.ok(t.sent[0].text.includes(`Live: ${SITE_10}\nLinkedIn failed for "Post 010"`));
+  assert.deepEqual(t.sent[0].opts, { keyboard: retryKeyboard(21) });
+});
+
+test("without a LinkedIn client the live message is the plain one", async () => {
+  const t = liWorld();
+  await notifyDeployment(production(), t.deps);
+  assert.equal(t.sent[0].text, `Live: ${SITE_9}\nLive: ${SITE_10}`);
+});
+
+test("the daily reminders also ask the LinkedIn route, and report its note in the log line", async () => {
+  const t = setup({ prs: [pr({ createdAt: hoursAgo(21) })], previewUrl: "https://p-21.vercel.app" });
+  const line = await notifyReminders({ ...t.deps, linkedin: fakeClient().client });
+  assert.equal(t.sent.length, 1);
+  assert.equal(line, "sent: reminders for PR #21; LinkedIn: not connected");
+  const none = setup({ prs: [pr({ createdAt: hoursAgo(5) })] });
+  assert.equal(await notifyReminders({ ...none.deps, linkedin: fakeClient().client }), "skip: no draft waiting; LinkedIn: not connected");
+});
+
+test("a failing LinkedIn reminder call never costs the draft reminders", async () => {
+  const t = setup({ prs: [pr({ createdAt: hoursAgo(21) })], previewUrl: "https://p-21.vercel.app" });
+  const li = fakeClient({ remind: async () => { throw new Error("LinkedIn remind route → 500"); } });
+  const line = await notifyReminders({ ...t.deps, linkedin: li.client });
+  assert.equal(t.sent.length, 1);
+  assert.equal(line, "sent: reminders for PR #21; LinkedIn remind failed: LinkedIn remind route → 500");
 });
 
 test("a log issue is sent as an escaped bold title and body, then closed", async () => {

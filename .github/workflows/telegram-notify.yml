@@ -38,6 +38,10 @@ jobs:
       GITHUB_TOKEN: ${{ github.token }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      # Only lets the script ask the site to post a merged draft or check the token
+      # (docs/superpowers/specs/2026-10-29-linkedin-posting-design.md); the LinkedIn
+      # token itself never leaves Vercel. Unset, the bot sends the plain Live message.
+      LINKEDIN_POST_SECRET: ${{ secrets.LINKEDIN_POST_SECRET }}
     steps:
       - uses: actions/checkout@v4
         with:

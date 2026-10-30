@@ -2,7 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { handleUpdate, secretMatches } from "./telegramBot.ts";
-import { REPLY } from "./telegram.ts";
+import { REPLY, retryKeyboard } from "./telegram.ts";
+import { LinkedInError } from "./linkedinApi.ts";
+import { connectUrl } from "./linkedinDraft.ts";
+import type { LinkedInCore } from "./linkedinDraft.ts";
+import { NOW, TOKEN_RECORD, fakeApi, memoryStore } from "./linkedinFakes.testutil.ts";
 import type { PrInfo } from "./draftPost.ts";
 import type { GitHubRepo } from "./githubWrite.ts";
 import type { TelegramApi } from "./telegramApi.ts";
@@ -267,4 +271,105 @@ test("Failed carries only the first line of the error", async () => {
   const t = setup({ mergeError: new Error("first line\nsecond line") });
   await handleUpdate(button("pub:21"), t.deps);
   assert.deepEqual(t.texts(), ["Failed: first line"]);
+});
+
+// ---- LinkedIn (part c) ----
+
+const merged = () => pr({ state: "closed", merged: true, mergeSha: "abc1234" });
+
+function linkedin(opts: { token?: Parameters<typeof memoryStore>[0]; api?: Parameters<typeof fakeApi>[0] } = {}) {
+  const m = "token" in opts ? memoryStore(opts.token) : memoryStore();
+  const a = fakeApi(opts.api);
+  const core: LinkedInCore = { api: a.api, store: m.store, fetchCover: async () => new Uint8Array([1]), now: () => NOW };
+  return { core, m, a };
+}
+const withLi = (t: ReturnType<typeof setup>, li: ReturnType<typeof linkedin>) => ({ ...t.deps, linkedin: li.core });
+const textMsg = (text: string) => {
+  const u = fixture("text-plain");
+  u.message.text = text;
+  return u;
+};
+const FEED = (n: number) => `https://www.linkedin.com/feed/update/urn:li:share:${n}/`;
+
+test("Retry LinkedIn on a merged draft posts what failed, never twice what succeeded", async () => {
+  const t = setup({ prs: [merged()] });
+  const li = linkedin({ api: { createFails: { 1: new LinkedInError("LinkedIn createPost → 503", "unavailable") } } });
+  await handleUpdate(button("li:21"), withLi(t, li));
+  await handleUpdate(button("li:21"), withLi(t, li));
+  await handleUpdate(button("li:21"), withLi(t, li));
+  assert.deepEqual(t.texts(), [
+    'LinkedIn failed for "Salonjaa NAP fixes": LinkedIn createPost → 503',
+    `On LinkedIn: ${FEED(2)}`,
+    `Already on LinkedIn: ${FEED(2)}`,
+  ]);
+  assert.deepEqual(t.sent[0].opts, { keyboard: retryKeyboard(21) });
+  assert.equal(t.sent[1].opts, undefined);
+  assert.equal(li.a.created(), 2);
+  assert.deepEqual(t.answered, ["cb-1", "cb-1", "cb-1"]);
+});
+
+test("Retry LinkedIn with a missing token attaches a reconnect link and the Retry button", async () => {
+  const t = setup({ prs: [merged()] });
+  const li = linkedin({ token: null });
+  await handleUpdate(button("li:21"), withLi(t, li));
+  assert.equal(t.sent[0].text,
+    'LinkedIn failed for "Salonjaa NAP fixes": LinkedIn is not connected\n\n' +
+    `Reconnect LinkedIn: ${connectUrl("0".repeat(31) + "1")}`);
+  assert.deepEqual(t.sent[0].opts, { keyboard: retryKeyboard(21) });
+  assert.equal(li.a.created(), 0);
+});
+
+test("Retry LinkedIn on a PR that is not merged says so and calls nothing", async () => {
+  const t = setup();
+  const li = linkedin();
+  await handleUpdate(button("li:21"), withLi(t, li));
+  assert.deepEqual(t.texts(), [REPLY.linkedinNotMerged(21)]);
+  assert.deepEqual(li.a.calls, []);
+});
+
+test("Retry LinkedIn on a PR that is not a draft is refused", async () => {
+  const t = setup({ prs: [{ ...merged(), labels: [] }] });
+  const li = linkedin();
+  await handleUpdate(button("li:21"), withLi(t, li));
+  assert.deepEqual(t.texts(), [REPLY.notOpen(21)]);
+  assert.deepEqual(li.a.calls, []);
+});
+
+test("Retry LinkedIn without LinkedIn configured says it is not set up", async () => {
+  const t = setup({ prs: [merged()] });
+  await handleUpdate(button("li:21"), t.deps);
+  assert.deepEqual(t.texts(), [REPLY.linkedinOff]);
+  assert.deepEqual(t.calls, []);
+});
+
+test("Retry LinkedIn with a GitHub failure ends in a Failed reply", async () => {
+  const t = setup({ prs: [] });
+  await handleUpdate(button("li:21"), withLi(t, linkedin()));
+  assert.deepEqual(t.texts(), ["Failed: GitHub GET /pulls/21 → 404"]);
+});
+
+test("the word linkedin replies with the token status and a one-use connect link", async () => {
+  const t = setup();
+  const li = linkedin();
+  await handleUpdate(textMsg("linkedin"), withLi(t, li));
+  const state = "0".repeat(31) + "1";
+  assert.deepEqual(t.texts(), [`LinkedIn: connected until ${TOKEN_RECORD.expiresAt.slice(0, 10)}.\nConnect LinkedIn: ${connectUrl(state)}`]);
+  assert.ok(li.m.state.states.has(state));
+});
+
+test("the word linkedin says not connected when there is no token, and not set up without LinkedIn", async () => {
+  const t = setup();
+  await handleUpdate(textMsg("LinkedIn"), withLi(t, linkedin({ token: null })));
+  assert.match(t.texts()[0], /^LinkedIn: not connected\.\nConnect LinkedIn: /);
+  const bare = setup();
+  await handleUpdate(textMsg("linkedin"), bare.deps);
+  assert.deepEqual(bare.texts(), [REPLY.linkedinOff]);
+});
+
+test("linkedin as a reply to a draft message is still an edit instruction", async () => {
+  const t = setup();
+  const update = fixture("edit-reply");
+  update.message.text = "linkedin";
+  await handleUpdate(update, withLi(t, linkedin()));
+  assert.deepEqual(t.of("comment").map((c) => c.args), [[21, "edit: linkedin"]]);
 });

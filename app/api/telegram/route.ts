@@ -1,4 +1,5 @@
 import { githubRepo } from "@/lib/githubWrite";
+import { linkedinFromEnv } from "@/lib/linkedinEnv";
 import { handleUpdate, secretMatches } from "@/lib/telegramBot";
 import { telegramApi } from "@/lib/telegramApi";
 
@@ -8,6 +9,9 @@ import { telegramApi } from "@/lib/telegramApi";
 // no reply (lib/telegramBot.ts). Nothing here logs a token or a Telegram file URL.
 
 export const dynamic = "force-dynamic";
+// A Retry LinkedIn tap posts to LinkedIn from here (an image upload and a post per draft
+// post); the default limit could end it early and make Telegram deliver the update again.
+export const maxDuration = 60;
 
 const OK = () => new Response(null, { status: 200 });
 
@@ -27,6 +31,7 @@ export async function POST(request: Request) {
       gh: githubRepo(writeToken),
       tg: telegramApi(botToken),
       chatId,
+      linkedin: linkedinFromEnv()?.core, // undefined until LinkedIn is set up (part c)
     });
   } catch (err) {
     console.error("telegram webhook:", err instanceof Error ? err.message : "unknown error");

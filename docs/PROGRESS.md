@@ -643,6 +643,70 @@ Findings:
 - The edit routine's commits are authored `Claude <noreply@anthropic.com>`; the bot recognises
   them by their message (`Edit #n: …`), not their author.
 
+## Post automation (part c)
+Status: built (2026-10-30), not live: it needs the LinkedIn app, the env vars and the acceptance run below.
+Spec: `docs/superpowers/specs/2026-10-29-linkedin-posting-design.md` ·
+Plan: `docs/superpowers/plans/2026-10-30-linkedin-posting.md`
+What it does: when Publish makes a draft live, each of its posts goes to the owner's personal
+LinkedIn profile as an image post: the post's `linkedin` caption, its cover (`coverImage`, else the
+generated OG image) and the post link as the last line. Several posts in one PR are posted one by
+one, oldest first. A failure reaches Telegram with a **Retry LinkedIn** button. The access token
+lasts 60 days and a self-serve app cannot refresh it, so the bot sends a one-tap reconnect link
+daily from 10 days before it ends (and the word `linkedin` to the bot shows the status and a link).
+Pieces (all LinkedIn calls, the token and Redis run on Vercel; Actions only holds a shared secret):
+- `lib/linkedinCaption.ts` escapes the caption for LinkedIn's "little" text (a live `#hashtag`
+  stays; an empty caption or over 3,000 characters is refused, never cut).
+- `lib/linkedinStore.ts` (Upstash REST: token, per-post "posted" records, one-time OAuth state),
+  `lib/linkedinApi.ts` (OAuth, Images API upload, `POST /rest/posts`, version `202610`),
+  `lib/linkedinPost.ts` (`postToLinkedIn`, `tokenStatus`), `lib/linkedinDraft.ts` (a merged draft
+  to posts), `lib/linkedinHandlers.ts` (the logic of the four routes), `lib/linkedinEnv.ts`.
+- `app/api/linkedin/{connect,callback,post,remind}/route.ts`. `post` and `remind` need the header
+  `x-linkedin-post-secret`; `post` re-checks that the PR is a merged `draft-post` whose merge sha
+  is the deployed sha.
+- `lib/linkedinClient.ts` + `lib/telegramNotify.ts` + `scripts/notify-telegram.mjs`: the `live`
+  step calls `post` and the 10:00 IST job calls `remind`. Without `LINKEDIN_POST_SECRET` the bot
+  sends the plain "Live:" message as before.
+- `lib/telegramBot.ts`: the `li:<pr>` Retry button and the `linkedin` text.
+Env vars (`.env.example`): `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET`, `LINKEDIN_POST_SECRET`
+in Vercel (Redis is the existing `UPSTASH_REDIS_REST_*`); Actions secret `LINKEDIN_POST_SECRET`
+(same value), added as a **repository** secret.
+Setup (once, by the owner): create a LinkedIn developer app, add the products **Share on LinkedIn**
+and **Sign In with LinkedIn using OpenID Connect**, add the redirect URL
+`https://www.kumarp.in/api/linkedin/callback`; set the env vars and redeploy; send the bot
+`linkedin`, tap the link, approve.
+Confirmed against LinkedIn's docs (2026-10-30): `Linkedin-Version: 202610` (202511 sunsets
+2026-11-16); the reserved characters of the little text format are `| { } @ [ ] ( ) < > # \ * _ ~`;
+the image goes up with `POST /rest/images?action=initializeUpload` and a `PUT` of the bytes;
+`GET /rest/images` is refused for a token with only `w_member_social`, so a bad image shows up as
+the post call failing, not as a status check.
+Decisions:
+- Retry never posts a post twice: each created post is recorded at once under
+  `linkedin:posted:<kind>-<slug>`; a recorded post is reported as "Already on LinkedIn", even after
+  the token expired.
+- Only one run posts a given post at a time: it takes a Redis claim (`SET … NX EX 120`) before
+  uploading, so a double tap, a redelivered Telegram update, or the live step racing a Retry cannot
+  post it twice. A loser reports "already being posted by another run" with a Retry button. The claim
+  is released when the run ends (kept for its 120 s only when a post was created but not recorded).
+  Every LinkedIn, Redis and cover request has a 8-10 s timeout.
+- After a retryable failure the later posts are "not attempted", so LinkedIn never gets a later
+  post before an earlier one. A permanent failure (empty or too long caption) does not stop the rest.
+- The upload URL LinkedIn returns must be https on `linkedin.com`, so the token is never sent
+  anywhere else.
+Known limits: if a post is created but the Redis write fails, a Retry can duplicate that one post;
+a branch author can read the Actions secrets (`LINKEDIN_POST_SECRET` included, known from part b),
+which is why no token that posts as the owner lives there.
+Acceptance (needs the owner's LinkedIn app; the first real post is the owner's call):
+1. Connect: send the bot `linkedin`, approve, see "LinkedIn connected until …". Note whether the app
+   needed a Company Page, whether a consent screen appeared, and that `/v2/userinfo` returned `sub`.
+2. Publish a throwaway draft with a cover: the Telegram message shows the site and LinkedIn links;
+   the profile shows the image, the caption (hashtag live) and the link. Note whether the image
+   `PUT` needed a content type.
+3. Re-run the `deployment_status` job: "Already on LinkedIn", no duplicate on the profile.
+4. Make the token look expired (edit `expiresAt` in Redis): the failure message and reconnect link
+   arrive; reconnect; tap **Retry LinkedIn**; exactly one post results.
+5. Reminder: set `expiresAt` 9 days ahead, wait for the 10:00 IST job (the schedule trigger is
+   still unconfirmed from part b, item 7), read the reminder text.
+
 ## Phase 10 — QA pass
 Status: not started
 

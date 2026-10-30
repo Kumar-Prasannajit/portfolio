@@ -17,6 +17,7 @@ export type PostDraft = {
   title: string;
   summary: string; // a weekly's `summary`, a blog's `excerpt`
   linkedin: string;
+  coverImage: string | null; // "/covers/<kind>-<slug>.jpg" once a cover is set
 };
 
 export type DraftPr = {
@@ -68,6 +69,7 @@ export function postDraft(path: string, source: string): PostDraft {
     title: text(data.title),
     summary: text(kind === "blog" ? data.excerpt : data.summary),
     linkedin: text(data.linkedin).trim(),
+    coverImage: text(data.coverImage) || null,
   };
 }
 

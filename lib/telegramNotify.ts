@@ -7,10 +7,16 @@
 import { isBotCommit, isDraftPr, loadDraft, postUrl } from "./draftPost.ts";
 import type { PrInfo } from "./draftPost.ts";
 import type { GitHubRepo } from "./githubWrite.ts";
-import { REPLY, TELEGRAM_MAX, draftKeyboard, draftMessage, escapeHtml, reminderMessage } from "./telegram.ts";
+import type { LinkedInClient } from "./linkedinClient.ts";
+import { postInputs } from "./linkedinDraft.ts";
+import type { PostResult } from "./linkedinPost.ts";
+import {
+  REPLY, TELEGRAM_MAX, draftKeyboard, draftMessage, escapeHtml, linkedinMessage, reminderMessage, retryKeyboard,
+} from "./telegram.ts";
 import type { TelegramApi } from "./telegramApi.ts";
 
-export type NotifyDeps = { gh: GitHubRepo; tg: TelegramApi; chatId: string; now: Date };
+/** `linkedin` is absent until LINKEDIN_POST_SECRET is set (part c): the bot then sends the plain Live message. */
+export type NotifyDeps = { gh: GitHubRepo; tg: TelegramApi; chatId: string; now: Date; linkedin?: LinkedInClient };
 
 export type DeploymentEvent = {
   environment: string;
@@ -57,8 +63,32 @@ export async function notifyDeployment(e: DeploymentEvent, deps: NotifyDeps): Pr
     if (!pr) return `skip: no merged draft PR at ${short(e.sha)}`;
     const loaded = await loadDraft(gh, pr.number, e.sha);
     if (!loaded) return `skip: PR #${pr.number} is not a draft`;
-    await tg.sendMessage(chatId, loaded.draft.posts.map((p) => REPLY.live(postUrl(p))).join("\n"));
-    return `sent: live PR #${pr.number}`;
+    if (!deps.linkedin) {
+      await tg.sendMessage(chatId, loaded.draft.posts.map((p) => REPLY.live(postUrl(p))).join("\n"));
+      return `sent: live PR #${pr.number}`;
+    }
+
+    // The site is live whatever LinkedIn says, so a failed request still sends the Live lines.
+    let outcome: { results: PostResult[]; connectUrl: string | null };
+    try {
+      outcome = await deps.linkedin.post(pr.number, e.sha);
+    } catch {
+      outcome = {
+        results: postInputs(loaded.draft).map((p) => ({
+          key: p.key, label: p.label, siteUrl: p.siteUrl, status: "failed" as const, linkedinUrl: null,
+          reason: "LinkedIn request failed", retry: true, reconnect: false,
+        })),
+        connectUrl: null,
+      };
+    }
+    const { results, connectUrl } = outcome;
+    await tg.sendMessage(
+      chatId,
+      linkedinMessage(results, connectUrl, { withLive: true }),
+      results.some((r) => r.retry) ? { keyboard: retryKeyboard(pr.number) } : undefined,
+    );
+    const count = (status: PostResult["status"]) => results.filter((r) => r.status === status).length;
+    return `sent: live PR #${pr.number} (LinkedIn: ${count("posted")} posted, ${count("skipped")} skipped, ${count("failed")} failed)`;
   }
 
   return `skip: environment ${e.environment}`;
@@ -75,7 +105,16 @@ export async function notifyReminders(deps: NotifyDeps): Promise<string> {
     await tg.sendMessage(chatId, reminderMessage(loaded.draft, url, now), { keyboard: draftKeyboard(pr.number) });
     reminded.push(pr.number);
   }
-  return reminded.length ? `sent: reminders for ${reminded.map((n) => `PR #${n}`).join(", ")}` : "skip: no draft waiting";
+  let line = reminded.length ? `sent: reminders for ${reminded.map((n) => `PR #${n}`).join(", ")}` : "skip: no draft waiting";
+  if (deps.linkedin) {
+    // The LinkedIn token check never costs the draft reminders above.
+    try {
+      line += `; LinkedIn: ${await deps.linkedin.remind()}`;
+    } catch (err) {
+      line += `; LinkedIn remind failed: ${(err instanceof Error ? err.message : String(err)).split("\n")[0]}`;
+    }
+  }
+  return line;
 }
 
 export async function notifyLogIssue(issue: number, deps: NotifyDeps): Promise<string> {
