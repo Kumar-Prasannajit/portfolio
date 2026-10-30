@@ -81,7 +81,7 @@ test("escapeHtml escapes the three characters Telegram HTML cares about", () => 
 
 const post = (over: Partial<PostDraft> = {}): PostDraft => ({
   kind: "weekly", path: "content/weekly/009-x.mdx", slug: "009-x", number: "009",
-  title: "Salonjaa NAP fixes", summary: "A quiet week.", linkedin: "Caption one.", ...over,
+  title: "Salonjaa NAP fixes", summary: "A quiet week.", linkedin: "Caption one.", coverImage: null, ...over,
 });
 const draft = (over: Partial<DraftPr> = {}): DraftPr => ({
   number: 21, branch: "draft/weekly-009", headSha: "abc", createdAt: "2026-10-27T00:00:00Z",

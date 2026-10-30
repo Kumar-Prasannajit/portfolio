@@ -74,7 +74,13 @@ test("postDraft reads a weekly's fields from its file", () => {
     kind: "weekly", path: WEEKLY_PATH, slug: "009-salonjaa-nap", number: "009",
     title: "Salonjaa NAP fixes", summary: "A quiet week.",
     linkedin: "A quiet week, but two fixes saved a bad evening.\n\n#buildinpublic",
+    coverImage: null,
   });
+});
+
+test("postDraft reads coverImage from the frontmatter when there is one", () => {
+  const src = WEEKLY_SRC.replace('cover: "09"\n', 'cover: "09"\ncoverImage: "/covers/weekly-009-salonjaa-nap.jpg"\n');
+  assert.equal(postDraft(WEEKLY_PATH, src).coverImage, "/covers/weekly-009-salonjaa-nap.jpg");
 });
 
 test("postDraft takes a blog's summary from excerpt and has no number", () => {
