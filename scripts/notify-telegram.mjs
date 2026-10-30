@@ -5,7 +5,10 @@
 //   node scripts/notify-telegram.mjs deployment | reminders | log-issue <n> | edit-failed
 //
 // Env: GITHUB_TOKEN, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, and GITHUB_EVENT_PATH
-// for `deployment` and `edit-failed`. Nothing here prints a token.
+// for `deployment` and `edit-failed`. LINKEDIN_POST_SECRET is optional: when set,
+// `deployment` asks the site to post the live draft to LinkedIn and `reminders`
+// also checks the LinkedIn token; without it the bot behaves as before.
+// Nothing here prints a token.
 
 import fs from "node:fs";
 import { assertNode } from "./nodeVersion.mjs";
@@ -36,12 +39,14 @@ async function main() {
   const { githubRepo } = await import("../lib/githubWrite.ts");
   const { telegramApi } = await import("../lib/telegramApi.ts");
   const notify = await import("../lib/telegramNotify.ts");
+  const { linkedinClient } = await import("../lib/linkedinClient.ts");
 
   const deps = {
     gh: githubRepo(process.env.GITHUB_TOKEN),
     tg: telegramApi(process.env.TELEGRAM_BOT_TOKEN),
     chatId: process.env.TELEGRAM_CHAT_ID,
     now: new Date(),
+    linkedin: process.env.LINKEDIN_POST_SECRET ? linkedinClient(process.env.LINKEDIN_POST_SECRET) : undefined,
   };
   const event = () => JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, "utf8"));
 
