@@ -1,0 +1,48 @@
+---
+title: "A Telegram review bot and LinkedIn posting"
+date: "2026-11-01"
+summary: "The drafting automation grew a Telegram review bot and a LinkedIn poster, plus three more SEO fixes for a Salonjaa site."
+cover: "10"
+linkedin: |
+  I built the part of my posting pipeline where a merged draft goes to LinkedIn by itself.
+
+  This week the automation behind my portfolio grew two pieces. First, a Telegram review bot: it parses draft pull requests, handles updates at an API route, sends draft, reminder and log messages from GitHub Actions, and applies edit comments. Empty runs are now reported as issues so a quiet week is never silent.
+
+  Second, LinkedIn posting. It has a caption and escaping layer, a Redis store for the token and posted records, a REST and OAuth adapter, connect and callback routes, a Retry button in Telegram, and a daily token check. Late in the week I added a claim before posting and a timeout on every outbound call, so a post can't go out twice.
+
+  Posts can also carry an optional cover image now.
+
+  Separately, three SEO commits on a Salonjaa client site: the homepage title now leads with the full brand name, a Bing Webmaster verification file was added, and the site links to its Facebook, Instagram and Google Business Profile.
+
+  #buildinpublic #automation #nextjs
+---
+
+Most of the week went into the post automation. Two threads, plus some SEO.
+
+## Telegram review bot
+
+I wrote a spec and a plan first, then built it in small steps:
+
+- It parses draft pull requests and their posts.
+- It handles Telegram updates at `/api/telegram`.
+- GitHub Actions send the draft, reminder and log messages.
+- Edit comments are applied, and empty runs are reported as issues.
+- Drafts now branch from `origin/main`, and the notify job checks out `main`.
+
+Posts can also carry an optional `coverImage` now.
+
+## LinkedIn posting
+
+Same approach: a spec, a plan, then the parts.
+
+- Caption text and escaping for LinkedIn's commentary field.
+- A Redis store for the token, the posted records and the OAuth state.
+- A REST and OAuth adapter, with connect, callback, post and remind routes.
+- A Retry LinkedIn button in Telegram.
+- A daily token check, and posting from the live step after a merge.
+
+On Friday I made it claim a post before sending it and put a timeout on every outbound call. I wrote about that separately in [Claim it before you post it](/blog/claim-before-you-post).
+
+## Salonjaa
+
+Three SEO commits: the homepage title leads with the full brand name, a Bing Webmaster Tools verification file is added, and the site links to Facebook, Instagram and the Google Business Profile.

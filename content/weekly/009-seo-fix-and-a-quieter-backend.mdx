@@ -1,0 +1,32 @@
+---
+title: "An SEO fix and a quieter backend"
+date: "2026-10-25"
+summary: "Aligning a Salonjaa site with its Google Business Profile, and a cleanup pass on Job_Plz_Backend."
+cover: "09"
+linkedin: |
+  A server that fails to start and says nothing is worse than one that crashes.
+
+  This week I fixed exactly that in Job_Plz_Backend: if the HTTP server fails to listen, it now throws instead of carrying on. In the same pass I removed a cron script that never worked and wrote up the full local setup in the docs, deleting dead files along the way.
+
+  The other change was SEO work on a Salonjaa client site. I aligned its name, address and phone details with the Google Business Profile and strengthened the signals that tell search engines what the site is called. When those details disagree between places, search results get muddy, so making them match was the point.
+
+  It was a small week, mostly cleanup. Removing things that don't work felt as useful as adding things that do.
+
+  #buildinpublic #backend #seo
+---
+
+A small week: one SEO fix and some cleanup.
+
+## Salonjaa
+
+One commit on the Salonjaa site. I aligned the business details on the site with the Google Business Profile and strengthened the signals that say what the site is called. {/* CHECK: the commit message says NAP (name, address, phone); confirm that is what changed. */}
+
+## Job_Plz_Backend
+
+Three commits, all about making the project honest:
+
+- **Startup.** If the HTTP server fails to listen, it now throws. Before, that failure could pass without anything stopping.
+- **Scripts.** I removed a cron script that was broken.
+- **Docs.** The README now documents the full local setup, and I removed dead files.
+
+Nothing flashy, but a backend that fails loudly and a setup guide that works are the kind of thing I want in place before I add more to it.
