@@ -1,0 +1,66 @@
+---
+title: "The workflow that never ran: a stale branch and deployment_status"
+date: "2026-11-06"
+tags: ["automation", "github-actions", "debugging"]
+excerpt: "My Telegram review bot stayed silent for two draft PRs. The workflow file existed on main, but GitHub ran deployment_status from the deployed commit. What I changed so a draft always carries it."
+linkedin: |
+  My review bot said nothing, and every part of it was working.
+
+  I had just built a Telegram bot that tells me when a drafted post has a preview ready. The first two real drafts arrived and no message came. The workflow file was on main. The secrets were set. The code had unit tests.
+
+  The cause was a rule I didn't know: for a deployment_status event, GitHub reads the workflow file from the commit that was deployed, not from main. My two drafts had been cut from a clone whose main was older than the pull request that added the workflow. Their commits simply didn't contain the file.
+
+  The fix has two halves. The drafting routine now fetches and branches from origin/main instead of trusting its local copy. And the notify job checks out the default branch, so the script holding the bot token is always main's copy, never a draft's.
+
+  The post covers what I saw, how I found it, and what each half of the fix protects.
+
+  #githubactions #automation #debugging
+---
+
+I built a Telegram bot that tells me when a drafted post is ready to review. It sends the title, the caption, a preview link and a few buttons. The first two real drafts arrived and I got nothing.
+
+## What I checked first
+
+The obvious suspects were all fine:
+
+- `telegram-notify.yml` was on `main`.
+- The bot token and chat id were set as secrets.
+- The message-building code had unit tests, and they passed.
+- The Vercel preview for each draft had deployed.
+
+One of the setup findings turned out to be a real problem, but a different one: Actions secrets have to be repository secrets. Environment secrets such as the ones under `Preview` and `Production` aren't readable by a job that doesn't declare an `environment:`. I fixed that and still saw no messages for those two drafts.
+
+## The rule I didn't know
+
+The preview message is sent by a workflow triggered by `deployment_status`. For that event, GitHub runs the workflow file from the deployed commit, not from the default branch.
+
+So the file has to exist in the draft's own history. Both drafts, #21 and #23, had been cut from a `main` older than the pull request that added the workflow (#22). Their commits had no `telegram-notify.yml`. Nothing failed. There was simply no workflow to run, so there was no red run to look at either.
+
+Merging `main` into each draft made the messages start, which confirmed it.
+
+## Why my branches were old
+
+The drafting routine works in a fresh clone, and its local `main` can lag behind the remote. The routine's instructions said "create the branch from `main`", which in a clone means the local copy. The edit run's `git fetch` happened to move it forward later, which is why this only showed up on the first two drafts.
+
+## The fix has two halves
+
+**Branch from the remote.** Step 8 of the routine's instructions now says to run `git fetch origin main` and then `git switch -c <branch> origin/main`. A draft always starts from whatever `main` is at that moment, and so always contains the workflow file.
+
+**Check out the default branch in the job.** This one is about the token, not the missing file. The notify job runs `scripts/notify-telegram.mjs` with the bot token in its environment. Without a `ref`, the checkout is the event's commit, which for a deployment is a draft branch. A draft branch could change that script. With this in the workflow:
+
+```yaml
+- uses: actions/checkout@v4
+  with:
+    ref: ${{ github.event.repository.default_branch }}
+```
+
+the script that sees the token is always the one on `main`.
+
+I should be honest about the limit. GitHub still reads the workflow file itself from the deployed commit, so a branch can edit the workflow. Only people and routines with push access to the repository can create such a branch, so I treat that as acceptable here. {/* CHECK: confirm only the owner and routines can push branches to this repo */} It's written down in the repo's progress notes rather than hidden.
+
+## What I'd keep
+
+- A silent failure is the expensive kind. Here nothing was wrong enough to turn red.
+- "Branch from main" is ambiguous in a clone. Say `origin/main`, and fetch first.
+- Know which commit a trigger reads its workflow from. It differs between events.
+- When a job holds a secret, decide which code it runs. Don't let the event decide for you.
