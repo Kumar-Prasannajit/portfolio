@@ -1,0 +1,30 @@
+---
+title: "Hardening the job pipeline"
+date: "2026-11-22"
+summary: "One big commit on Job_Plz_Backend: tests, deduplication and expiry for the canonical job pipeline."
+cover: "12"
+linkedin: |
+  Most of the work in a data pipeline is making it behave when the data is messy.
+
+  This week I put one large commit into Job_Plz_Backend, the backend I keep working on. It hardens the canonical job pipeline in three ways: tests, deduplication and expiry.
+
+  Tests mean I can change the pipeline without guessing what I broke. Deduplication handles the same job showing up more than once, so the list doesn't fill with copies. Expiry handles the opposite problem: a job that has gone stale should stop showing up.
+
+  None of these are exciting, and none of them show in a demo. But a job list that repeats itself or keeps old listings is a job list people stop trusting, so I wanted them in before adding more sources.
+
+  It was a quiet week, one commit, but it was the right one.
+
+  #buildinpublic #backend #testing
+---
+
+One commit this week, and it was a big one.
+
+## Job_Plz_Backend
+
+The commit is `feat(jobs): harden canonical job pipeline with tests, dedup and expiry`. It does three things to the canonical job pipeline:
+
+- **Tests.** The pipeline now has tests, so I can change it without guessing what I broke. {/* CHECK: what the tests cover. */}
+- **Dedup.** The same job arriving more than once no longer ends up as separate entries. {/* CHECK: how duplicates are detected. */}
+- **Expiry.** Jobs that have gone stale expire. {/* CHECK: what counts as expired and what happens to expired jobs. */}
+
+None of this shows in a demo. But a list that repeats itself or keeps old listings is one people stop trusting, so I wanted these in before adding more to the pipeline.
