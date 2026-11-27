@@ -1,0 +1,92 @@
+---
+title: "Pin your CDN URLs: how @latest can break production with no deploy"
+date: "2026-11-27"
+tags: ["frontend", "dependencies", "performance"]
+excerpt: "A lockfile pins your npm packages, but it can't see a version that only lives inside a URL string. What the MediaPipe web example teaches about @latest, and how to serve the files yourself."
+linkedin: |
+  Your lockfile can't see every dependency you have, and one of the gaps is a plain URL string.
+
+  The official MediaPipe Face Landmarker web example loads its WebAssembly runtime from a CDN path that ends in @latest. The JavaScript wrapper comes from npm at the version locked in package.json. The WASM binary comes from whatever version the CDN calls latest that day. When a new release ships, the two can stop matching, and the feature can fail in production with no commit and no deploy to point at.
+
+  Nothing broke for me. I'm writing it as a lesson, not an incident. The same pattern has two smaller costs: a CDN outage or a firewall that blocks the CDN (common on campus and office networks) takes the feature down, and every user sends a request to a third party.
+
+  The fix is boring on purpose. Copy the wasm folder out of node_modules into public with a postinstall script, serve the model file yourself, add long immutable cache headers, and load the library with a dynamic import so the big download only happens on the page that needs it.
+
+  The post ends with a one-line check you can run on your own codebase today.
+
+  #webdev #javascript #frontend
+---
+
+Some dependencies never appear in `package.json`. They live inside a string, in a URL, and no lockfile has ever heard of them. This post is about one of those, and about the one search that finds the rest.
+
+Nothing broke for me. I'm writing this as a lesson, not an incident.
+
+## The example
+
+The official MediaPipe Face Landmarker web example sets up its runtime like this:
+
+```js
+const vision = await FilesetResolver.forVisionTasks(
+  "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+);
+```
+
+It looks harmless, and as a quick demo it is fine. The problem is in how the pieces get versioned.
+
+## Two sources, one feature
+
+The feature has two halves that have to match:
+
+- **The JavaScript wrapper** comes from npm. Its version is whatever `package.json` and the lockfile say.
+- **The WebAssembly runtime** comes from the CDN, at whatever version the CDN calls `latest` on the day a user opens the page.
+
+On the day you install, they agree. Later, a new release ships. Your wrapper is still the old one, because the lockfile says so. The WASM binary is now the new one, because the URL says so. The two were built as a pair, and now they are not a pair.
+
+If they stop being compatible, the feature fails in production. There is no commit to blame and no deploy to roll back, because you didn't change anything. The version moved on the CDN's side.
+
+## Why the lockfile can't help
+
+A lockfile records packages that npm installs. A version written inside a URL string is invisible to it. Dependabot won't open a pull request for it, `npm audit` won't flag it, and `npm ls` won't list it. It is a real dependency with no record anywhere.
+
+## Two smaller costs of the same habit
+
+Even when versions never drift, loading runtime files from a third-party CDN has costs:
+
+- **Availability.** A CDN outage takes the feature down. So does a network that blocks the CDN, which is common on campus and office networks. The feature then works on your machine and nowhere you can't see.
+- **Every user talks to a third party.** Each visitor sends a request to a host you don't run, before your own code gets a say.
+
+## The fix
+
+The fix is to serve the files yourself, so they always come from the same place as the wrapper:
+
+1. **Copy the wasm folder out of `node_modules` into `public/` with a `postinstall` script.** The files then always match the installed package. When the version in `package.json` changes, the next install copies the matching runtime.
+2. **Download the model file once and serve it yourself.** It is a static file, so it belongs next to the rest of your static files.
+3. **Add long immutable cache headers for those files.** They only change when the package version changes, so browsers can keep them. If the file names don't carry a version, include one in the path so a new release gets a new URL.
+4. **Load the library with a dynamic import.** The runtime is several megabytes. With `import()` inside the code that needs it, that download only happens on the page that uses the feature, and every other page stays light.
+
+The `postinstall` script can be very small:
+
+```js
+import { cpSync } from "node:fs";
+
+cpSync(
+  "node_modules/@mediapipe/tasks-vision/wasm",
+  "public/mediapipe/wasm",
+  { recursive: true }
+);
+```
+
+Then the resolver points at your own path, for example `/mediapipe/wasm`, instead of the CDN.
+
+{/* CHECK: the post gives no first-hand setup of my own; confirm whether to add where I applied this myself, or leave it as a pure lesson. */}
+
+## The rule to take away
+
+Search your codebase for `@latest` and for unversioned CDN URLs. A plain search is enough:
+
+```bash
+grep -rn "@latest" src public
+grep -rn "cdn.jsdelivr.net\|unpkg.com\|cdnjs" src public
+```
+
+Each hit is a dependency your lockfile does not know about. For each one, either pin it to an exact version or serve it yourself.
